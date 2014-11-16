@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html data-ng-app="loginApp" >
+
+<head>
+	<title>Székely termelők</title>
+	<meta charset="utf-8">
+	<script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script src="lib/jquery-1.11.1.js"></script>
+	<script src="controllers.js"></script>
+</head>
+
+<body>
+
+	<header>
+	</header>
+
+	<div id="mainDiv01" data-ng-controller="loginSwitchDivController">
+
+		<nav id="navigationStrip01">
+			<ul id="navigationStripUl01">
+				<button data-ng-click="navigationStrip01_Clicked('kezdolap')"> Kezdőlap </button>
+				<button data-ng-click="navigationStrip01_Clicked('projekt')"> A projektről </button>
+				<button data-ng-click="navigationStrip01_Clicked('linkek')"> Hasznos linkek </button>
+				<button data-ng-click="navigationStrip01_Clicked('regisztracio')"> Regisztráció </button>
+				<button data-ng-click="navigationStrip01_Clicked('bejelentkezes')"> Bejelentkezés </button>
+			</ul>
+		</nav>
+
+		<div id="mainContentDiv01">
+			<div data-ng-show="navigationOptionSelected=='kezdolap'">
+				<h1>Kezdőlap</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected=='projekt'">
+				<h1>A projektről</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected=='linkek'">
+				<h1>Hasznos linkek</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected=='regisztracio'">
+				
+				<h1>Regisztráció</h1>
+				
+				<div data-ng-controller="regisztracioController">
+				<form name="regisztracio" >
+					<table>
+						<tr>
+							<td>Név: </td>
+							<td><input type="text" name="nev" data-ng-model="adatok.nev" id="nev" placeholder="Név" required>
+							<span style="color:red" data-ng-show="regisztracio.nev.$dirty && regisztracio.nev.$invalid">
+							<span data-ng-show="regisztracio.nev.$error.required"> *A név megadása kötelező.</span>
+							</span></td>
+						</tr>
+						<tr> 
+							<td>Cím: </td>
+							<td><input type="text" name="cim" data-ng-model="adatok.cim" id="cim" placeholder="Cím" required>
+							<span style="color:red" data-ng-show="regisztracio.cim.$dirty && regisztracio.cim.$invalid">
+							<span data-ng-show="regisztracio.cim.$error.required"> *A cím megadása kötelező.</span>
+							</span></td>
+						</tr>
+						<tr> 
+							<td>Telefonszám: </td>
+							<td><input type="text" name="tel" data-ng-model="adatok.tel" id="tel" placeholder="Telefonszám" required>
+							<span style="color:red" data-ng-show="regisztracio.tel.$dirty && regisztracio.tel.$invalid">
+							<span data-ng-show="regisztracio.tel.$error.required"> *A telefonszám megadása kötelező.</span>
+							</span></td>
+						</tr>
+						<tr> 
+							<td>E-mail cím: </td>
+							<td><input type="email" name="email" data-ng-model="adatok.email" id="mail" placeholder="E-mail cím" required>
+							<span style="color:red" data-ng-show="regisztracio.email.$dirty && regisztracio.email.$invalid">
+							<span data-ng-show="regisztracio.email.$error.required"> *Az e-mail cím megadása kötelező.</span>
+							<span data-ng-show="regisztracio.email.$error.email"> *Érvénytelen e-mail cím!</span>
+							</span></td>
+						</tr>
+						<tr>
+							<td>Felhasználó típusa: </td>
+							<td>
+							<input type="radio" id="radio1" name="tipus" value="Termelo" data-ng-model="adatok.tipus" required> Termelő
+							<input type="radio" id="radio2" name="tipus" value="Megrendelo" data-ng-model="adatok.tipus"> Megrendelő
+ 							<span style="color:red" data-ng-show="regisztracio.tipus.$error.required">
+							*A típus megadása kötelező.	</span></td>
+						</tr>
+						<tr> 
+							<td>Jelszó: </td>
+							<td><input type="password" name="pass1" data-ng-model="adatok.pass1" data-ng-change="testPasswords()" id="pass1" placeholder="Jelszó"  required>
+							<span style="color:red" data-ng-show="regisztracio.pass1.$dirty && regisztracio.pass1.$invalid">
+							<span data-ng-show="regisztracio.pass1.$error.required"> *A jelszó megadása kötelező.</span>
+							</span></td>
+						</tr>
+						<tr> 
+							<td>Jelszó megerősítése: </td>
+							<td><input type="password" name="pass2" data-ng-model="adatok.pass2" data-ng-change="testPasswords()" id="pass2" placeholder="Jelszó megerősítése"  required>
+							<span style="color:red" data-ng-show="regisztracio.pass2.$dirty && regisztracio.pass2.$invalid">
+							<span data-ng-show="regisztracio.pass2.$error.required"> *A jelszó megerősítése kötelező.</span>
+							</span>
+							<span style="color:red" data-ng-show="regisztracio.pass2.$dirty && passError && !regisztracio.pass2.$invalid"> *A két jelszó nem egyezik meg.</span>
+							</td>
+						</tr>
+						<tr> 
+							<td>Logó: </td>
+							<td><input type="file" id="logo"/></td>
+						</tr>
+					</table>
+					<!--<input type="submit" name="submit" data-ng-disabled="regisztracio.$invalid || passError || radioError" value="Regisztráció">
+					-->
+					<button data-ng-disabled="regisztracio.$invalid || passError" ng-click="submit()">Regisztráció</button>
+				</form>
+				</div>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected=='regisztracioSuccess'">
+				<h1>Sikeres regisztráció. A bejelentkezéshez kattintson a Bejelentkezés menüpontra.</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected=='bejelentkezes'">
+				<h1>Bejelentkezés</h1>
+				
+				<div data-ng-controller="bejelentkezesController">
+				<form method="POST" id="bejelentkezesForm" >
+				<table>
+						<tr>
+							<td>E-mail cím: </td>
+							<td><input type="email" name="loginEmail" data-ng-model="log.loginEmail" id="loginEmail" placeholder="E-mail cím" required>
+							<span style="color:red" data-ng-show="bejelentkezesForm.loginEmail.$dirty && bejelentkezesForm.loginEmail.$invalid">
+							<span data-ng-show="bejelentkezesForm.loginEmail.$error.required"> *Az e-mail cím megadása kötelező.</span>
+							<span data-ng-show="bejelentkezesForm.loginEmail.$error.email"> *Érvénytelen e-mail cím!</span>
+						</tr>
+						<tr> 
+							<td>Jelszó: </td>
+							<td><input type="password" name="loginPass" data-ng-model="log.loginPass" id="loginPass" placeholder="Jelszó"  required>
+							<span style="color:red" data-ng-show="bejelentkezesForm.loginPass.$dirty && bejelentkezesForm.loginPass.$invalid">
+							<span data-ng-show="bejelentkezesForm.loginPass.$error.required"> *A jelszó megadása kötelező.</span>
+							</span></td>
+						</tr>
+						<tr>
+							<td>Felhasználó típusa: </td>
+							<td>
+							<input type="radio" id="loginRadio1" name="loginStatus" value="Termelo" data-ng-model="log.loginStatus" required> Termelő
+							<input type="radio" id="loginRadio2" name="loginStatus" value="Megrendelo" data-ng-model="log.loginStatus"> Megrendelő
+ 							<span style="color:red" data-ng-show="bejelentkezesForm.loginStatus.$error.required">
+							*A típus megadása kötelező.	</span></td>
+						</tr>
+				</table>
+				<button ng-click="login()">Bejelentkezés</button>
+				</form>
+				</div> 
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected=='bejelentkezesSuccess'">
+				<h1>Sikeres bejelentkezés.</h1>
+				<p id = "userUdvDiv">  </p>
+			</div>
+			
+		</div>
+			
+
+	</div>
+	
+	<footer id="footer01" ></footer>
+	
+	<script src="script.js"></script>
+
+</body>
+</html>
