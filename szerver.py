@@ -20,15 +20,19 @@ def register():
 	logging.warning(adatok)
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
 	cursor = cnx.cursor()
-	
-	add_termelo = ("INSERT INTO Termelok "
+	table = ''
+	if adatok['tipus'] == 'Termelo':
+		table = 'Termelok'
+	else:
+		table = 'Vasarlok'
+	add_user = ("INSERT INTO " + table + " "
 				   "(Nev, Cim, Tel, Email, Jelszo)"
 				   "VALUES (%s, %s, %s, %s, %s)")
 
-	data_termelo = (adatok['nev'], adatok['cim'], adatok['tel'], adatok['email'], adatok['pass1'])
+	data_user = (adatok['nev'], adatok['cim'], adatok['tel'], adatok['email'], adatok['pass1'])
 
 	# Insert new user
-	cursor.execute(add_termelo, data_termelo)
+	cursor.execute(add_user, data_user)
 	emp_no = cursor.lastrowid
 
 	# Make sure data is committed to the database
