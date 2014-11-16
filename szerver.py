@@ -54,7 +54,7 @@ def login():
 		select_megrendelo = ("SELECT V_ID, Nev, Jelszo FROM Vasarlok WHERE Email like %s")
 		data_megrendelo = adat['loginEmail']
 		
-		cursor.execute("SELECT V_ID, Nev, Jelszo FROM Vasarlok WHERE Email = %s", (adat['loginEmail']))
+		cursor.execute("SELECT V_ID, Nev, Jelszo FROM Vasarlok WHERE Email = %s", [adat['loginEmail']])
 		emp_no = cursor.lastrowid
 		
 		if emp_no == 0 :
@@ -64,11 +64,11 @@ def login():
 			return jsonify({'loginSuccess': False})
 		else:
 			user = cursor.fetchone()
-			if user['Jelszo'] == adat['loginPass'] :
+			if user[2] == adat['loginPass'] :
 				cnx.commit()
 				cursor.close()
 				cnx.close()
-				return jsonify(user)
+				return jsonify({'user':user, 'loginSuccess': True})
 			else:
 				cnx.commit()
 				cursor.close()
