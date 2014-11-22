@@ -7,18 +7,36 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 CREATE DATABASE IF NOT EXISTS `szekelytermelok`;
 USE `szekelytermelok`;
 
--- Termelok(T_ID, Nev, Cim, Tel, Email, Jelszo, Logo, Kiszallitasi_dij, Min_vasarloi_kosar)
-CREATE TABLE IF NOT EXISTS `Termelok`(
-	`T_ID` int(11) NOT NULL AUTO_INCREMENT,
+--
+-- Jeloles: KK = kulso kulcs
+--
+
+--
+-- Table structures
+--
+
+-- Szemelyek(SZ_ID, Nev, Cim, Tel, Email, Jelszo, Admin, Termelo, Megrendelo)
+CREATE TABLE IF NOT EXISTS `Szemelyek`(
+	`SZ_ID` int(11) NOT NULL AUTO_INCREMENT,
 	`Nev` varchar(50) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Cim` varchar(100) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Tel` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Email` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Jelszo` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Logo` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci,
+	`Admin` int(11) NOT NULL,
+	`Termelo` int(11) NOT NULL,
+	`Megrendelo` int(11) NOT NULL,
+	PRIMARY KEY (`SZ_ID`)
+) ;
+
+-- Termelok(SZ_ID[KK], Nev, Cim, Tel, Email, Jelszo, Kep, Kiszallitasi_dij, Min_vasarloi_kosar, R_ID[KK]) ; Termelok -> "az_egy" -> Szemelyek
+CREATE TABLE IF NOT EXISTS `Termelok`(
+	`SZ_ID` int references Szemelyek(SZ_ID),
+	`Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci,
 	`Kiszallitasi_dij` int,
 	`Min_vasarloi_kosar` int,
-	PRIMARY KEY (`T_ID`)
+	`R_ID` int references Rendszeresseg(R_ID),
+	PRIMARY KEY (`SZ_ID`)
 ) ;
 
 -- Napok(N_ID, Nev)
@@ -35,18 +53,18 @@ CREATE TABLE IF NOT EXISTS `Telepulesek`(
 	PRIMARY KEY (`Telep_ID`)
 );
 
--- Kiszallitasi_napok(T_ID, N_ID)
+-- Kiszallitasi_napok(KiszallNap_ID, SZ_ID[KK], N_ID[KK])
 CREATE TABLE IF NOT EXISTS `Kiszallitasi_napok`(
 	`KiszallNap_ID` int(11) NOT NULL AUTO_INCREMENT,
-	`T_ID` int references Termelok(T_ID),
+	`SZ_ID` int references Szemelyek(SZ_ID),
 	`N_ID` int references Napok(N_ID),
 	PRIMARY KEY (`KiszallNap_ID`)
 );
 
--- Kiszallitasi_helyek(T_ID, Telep_ID)
+-- Kiszallitasi_helyek(KiszallHely_ID, SZ_ID[KK], Telep_ID[KK])
 CREATE TABLE IF NOT EXISTS `Kiszallitasi_helyek`(
 	`KiszallHely_ID` int(11) NOT NULL AUTO_INCREMENT,
-	`T_ID` int references Termelok(T_ID),
+	`SZ_ID` int references Szemelyek(SZ_ID),
 	`Telep_ID` int references Telepulesek(Telep_ID),
 	PRIMARY KEY(`KiszallHely_ID`)
 );
@@ -55,11 +73,10 @@ CREATE TABLE IF NOT EXISTS `Kiszallitasi_helyek`(
 CREATE TABLE IF NOT EXISTS `Rendszeresseg`(
 	`R_ID` int(11) NOT NULL AUTO_INCREMENT,
 	`Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`T_ID` int references Termelok(T_ID),
 	PRIMARY KEY(`R_ID`)
 );
 
--- Mertekegysegek(ME_ID,Nev)
+-- Mertekegysegek(ME_ID, Nev)
 CREATE TABLE IF NOT EXISTS `Mertekegysegek`(
 	`ME_ID` int(11) NOT NULL AUTO_INCREMENT,
 	`Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
@@ -73,59 +90,90 @@ CREATE TABLE IF NOT EXISTS Kategoriak(
 	PRIMARY KEY(`K_ID`)
 );
 
--- Termekek(T_ID, Nev, Leiras, Ar, Min_rendelesi_menny, Foto, Keszlet_menny)
+-- Penznemek(P_ID,Nev)
+CREATE TABLE IF NOT EXISTS `Penznemek`(
+	`P_ID` int(11) NOT NULL AUTO_INCREMENT,
+	`Penznem` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+	PRIMARY KEY(`P_ID`)
+);
+
+-- Termekek(T_ID, Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, ME_ID[KK], K_ID[KK], P_ID[KK], SZ_ID[KK])
 CREATE TABLE IF NOT EXISTS `Termekek`(
-	`Termek_ID` int(11) NOT NULL AUTO_INCREMENT,
+	`T_ID` int(11) NOT NULL AUTO_INCREMENT,
 	`Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Leiras` varchar(300) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Ar` int NOT NULL,
 	`Min_rendelesi_menny` int NOT NULL,
-	`Foto` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+	`Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Keszlet_menny` int(11) NOT NULL,
 	`ME_ID` int references Mertekegysegek(ME_ID),
 	`K_ID` int references Kategoriak(K_ID),
-	`T_ID` int references Termelok(T_ID),
-	PRIMARY KEY(`Termek_ID`)
+	`P_ID` int references Penznemek(P_ID),
+	`SZ_ID` int references Szemelyek(SZ_ID),
+	PRIMARY KEY(`T_ID`)
 );
 
--- Vasarlok(V_ID, Nev, Cim, Szall_cim, Tel, Email
+-- Vasarlok(SZ_ID[KK], Nev, Cim, Tel, Email, Jelszo, Szall_cim) ; Vasarlok -> "az_egy" -> Szemelyek
 CREATE TABLE IF NOT EXISTS `Vasarlok`(
-	`V_ID` int(11) NOT NULL AUTO_INCREMENT,
-	`Nev` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Cim` varchar(60) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+	`SZ_ID` int references Szemelyek(SZ_ID),
 	`Szall_cim` varchar(60) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Tel` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Email` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Jelszo` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	PRIMARY KEY(`V_ID`)
+	PRIMARY KEY(`SZ_ID`)
 );
 
--- Uzenetek(U_ID, Szoveg, Datum)
+-- Uzenetek(U_ID, Szoveg, Datum, Felado_ID[KK], Cimzett_ID[KK])
 CREATE TABLE IF NOT EXISTS `Uzenetek`(
 	`U_ID` int(11) NOT NULL AUTO_INCREMENT,
 	`Szoveg` varchar(1000) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Datum` date,
-	`T_ID` int references Termelok(T_ID),
-	`V_ID` int references Vasarlok(V_ID),
+	`Felado_ID` int references Szemelyek(SZ_ID),
+	`Cimzett_ID` int references Szemelyek(SZ_ID),
 	PRIMARY KEY(`U_ID`)
 );
 
--- Megrendelesek(M_ID, Mennyiseg, Szall_cim, Statusz, Datum)
+-- Megrendelesek(M_ID, Mennyiseg, Szall_cim, Statusz, Datum, T_ID[KK], Rendelo_ID[KK])
 CREATE TABLE IF NOT EXISTS `Megrendelesek`(
 	`M_ID` int(11) NOT NULL AUTO_INCREMENT,
 	`Mennyiseg` int(11) NOT NULL,
 	`Szall_cim` varchar(100) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Statusz` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Datum` date,
-	`Termek_ID` int references Termekek(Termek_ID),
-	`V_ID` int references Vasarlok(V_ID),
+	`T_ID` int references Termekek(T_ID),
+	`Rendelo_ID` int references Szemelyek(SZ_ID),
 	PRIMARY KEY(`M_ID`)
 );
 
--- Promociok(Termek_ID (kulso kulcs), Ar, Periodus_k, Periodus_v)
+-- Promociok(T_ID[KK], Ar, Periodus_k, Periodus_v)
 CREATE TABLE IF NOT EXISTS `Promociok`(
-	`Termek_ID` int references Termekek(Termek_ID),
+	`T_ID` int references Termekek(T_ID),
 	`Ar` int NOT NULL,
 	`Periodus_k` date,
-	`Periodus_v` date
+	`Periodus_v` date,
+	PRIMARY KEY(`T_ID`)
 );
+
+
+--
+-- Dumping datas for tables
+--
+
+INSERT INTO `Szemelyek` (`SZ_ID`, `Nev`, `Cim`, `Tel`, `Email`, `Jelszo`, `Admin`, `Termelo`, `Megrendelo`) VALUES
+(1, 'Toth Pal', 'Kezdiszentlelek, Patko utca 5.', '0722568945', 'tothpali@gmail.com', 'pali', 0, 0, 1),
+(2, 'Sarga Maria', 'Szekelykeresztur, Teto utca 45', '0745035255', 'marineni@gmail.com', '123', 0, 1, 0),
+(3, 'Szeles Sara', 'Csikszereda, Sugarut 19', '0748569854', 'sarineni@gmail.com', '1', 0, 1, 1);
+
+INSERT INTO `Mertekegysegek` (`ME_ID`, `Nev`) VALUES
+(1, 'g'),
+(2, 'db'),
+(3, 'csomag');
+
+INSERT INTO `Kategoriak` (`K_ID`, `Nev`) VALUES
+(1, 'tejtermek'),
+(2, 'laska');
+
+INSERT INTO `Penznemek` (`P_ID`, `Penznem`) VALUES
+(1, 'RON'),
+(2, 'EURO');
+
+INSERT INTO `Termekek` (`T_ID`, `Nev`, `Leiras`, `Ar`, `Min_rendelesi_menny`, `Kep`, `Keszlet_menny`, `ME_ID`, `K_ID`, `P_ID`, `SZ_ID`) VALUES
+(1, 'Hazi szeles laska', '3 tojasos', 5, 1, '', 10, 3, 2, 1, 2),
+(2, 'Juhturo', 'Fiss es finom', 12, 1, '', 20, 2, 1, 1, 3);
