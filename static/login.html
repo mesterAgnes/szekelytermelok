@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html data-ng-app="loginApp" >
+<html data-ng-app="loginApp" >   
 
 <head>
 	<title>Székely termelők</title>
 	<meta charset="utf-8">
-	<script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+	<script src= "lib/angular.min.js"></script>
 	<script src="lib/jquery-1.11.1.js"></script>
-	<script src="controllers.js"></script>
+	<script src="lib/md5.js"></script>
+	<script src="scripts/loginController.js"></script>
 </head>
 
 <body>
@@ -14,9 +15,9 @@
 	<header>
 	</header>
 
-	<div id="mainDiv01" data-ng-controller="loginSwitchDivController">
+	<div id="mainDiv01" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
 
-		<nav id="navigationStrip01">
+		<nav id="navigationStrip01">   <!-- menu -->
 			<ul id="navigationStripUl01">
 				<button data-ng-click="navigationStrip01_Clicked('kezdolap')"> Kezdőlap </button>
 				<button data-ng-click="navigationStrip01_Clicked('projekt')"> A projektről </button>
@@ -78,10 +79,10 @@
 						<tr>
 							<td>Felhasználó típusa: </td>
 							<td>
-							<input type="radio" id="radio1" name="tipus" value="Termelo" data-ng-model="adatok.tipus" required> Termelő
-							<input type="radio" id="radio2" name="tipus" value="Megrendelo" data-ng-model="adatok.tipus"> Megrendelő
- 							<span style="color:red" data-ng-show="regisztracio.tipus.$error.required">
-							*A típus megadása kötelező.	</span></td>
+							<input type="checkbox" id="tipus1CB" name="tipus" value="Termelo" data-ng-model="adatok.tipus1CB"> Termelő
+							<input type="checkbox" id="tipus2CB" name="tipus" value="Megrendelo" data-ng-model="adatok.tipus2CB"> Megrendelő
+ 							<span style="color:red" data-ng-show="checkboxError">
+							*Minimum egy típus megadása kötelező.	</span></td>
 						</tr>
 						<tr> 
 							<td>Jelszó: </td>
@@ -106,7 +107,7 @@
 					</table>
 					<!--<input type="submit" name="submit" data-ng-disabled="regisztracio.$invalid || passError || radioError" value="Regisztráció">
 					-->
-					<button data-ng-disabled="regisztracio.$invalid || passError" ng-click="submit()">Regisztráció</button>
+					<button data-ng-disabled="regisztracio.$invalid || passError || checkboxError" ng-click="submit()">Regisztráció</button>
 				</form>
 				</div>
 			</div>
@@ -135,14 +136,6 @@
 							<span data-ng-show="bejelentkezesForm.loginPass.$error.required"> *A jelszó megadása kötelező.</span>
 							</span></td>
 						</tr>
-						<tr>
-							<td>Felhasználó típusa: </td>
-							<td>
-							<input type="radio" id="loginRadio1" name="loginStatus" value="Termelo" data-ng-model="log.loginStatus" required> Termelő
-							<input type="radio" id="loginRadio2" name="loginStatus" value="Megrendelo" data-ng-model="log.loginStatus"> Megrendelő
- 							<span style="color:red" data-ng-show="bejelentkezesForm.loginStatus.$error.required">
-							*A típus megadása kötelező.	</span></td>
-						</tr>
 				</table>
 				<button ng-click="login()">Bejelentkezés</button>
 				</form>
@@ -152,6 +145,7 @@
 			<div data-ng-show="navigationOptionSelected=='bejelentkezesSuccess'">
 				<h1>Sikeres bejelentkezés.</h1>
 				<p id = "userUdvDiv">  </p>
+				
 			</div>
 			
 		</div>
@@ -161,7 +155,7 @@
 	
 	<footer id="footer01" ></footer>
 	
-	<script src="script.js"></script>
+	<script src="scripts/script.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html data-ng-app="megrendeloApp" >   
+
+<head>
+	<title>Székely termelok</title>
+	<meta charset="utf-8">
+	<script src= "lib/angular.min.js"></script>
+	<script src="lib/jquery-1.11.1.js"></script>
+	<script src="scripts/rendeloController.js"></script>
+	<link rel="stylesheet" type="text/css" href="megrendelo_fooldal.css">
+</head>
+
+<body>
+
+	<header>
+	</header>
+
+	<div id="mainDiv01" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
+
+		<nav id="navigationStrip01">   <!-- menu -->
+			<ul id="navigationStripUl01">
+				<button data-ng-click="navigationStrip01_Clicked('kezdolap')"> Kezdolap </button>
+				<button data-ng-click="navigationStrip01_Clicked('projekt')"> A projektrol </button>
+				<button data-ng-click="navigationStrip01_Clicked('linkek')"> Hasznos linkek </button>
+				<button data-ng-click="logout()"> Kijelentkezés </button>
+				<button data-ng-click="navigationStrip01_Clicked('kosar')"> Kosár </button>
+				<button data-ng-show="termelo == 1" data-ng-click="termeloOldal()">Termelő oldal</button>
+			</ul>
+		</nav>
+		
+		<div id="mainContentDiv01">
+			<div data-ng-show="navigationOptionSelected01=='kezdolap'">
+				<h1>{{nev}}</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected01=='projekt'">
+				<h1>A projektrol</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected01=='linkek'">
+				<h1>Hasznos linkek</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected01=='kosar'">
+				<h1>Itt megjelenik a kosar tartalma</h1>
+			</div>
+			
+		</div>
+		<div id="bodyDiv01">
+		<nav id="navigationStrip03">   <!-- oldalsomenu -->
+			<ul id="navigationStripUl03">
+				<button data-ng-click="termekekBetoltes()"> Termekek </button> <br>
+				<button data-ng-click="navigationStrip03_Clicked('m_promocios_termekek')"> Promóciós termékek </button> <br>
+			</ul>
+		</nav>
+		
+		<div id="mainContentDiv02">
+		
+			<div data-ng-show="navigationOptionSelected03=='m_termekek'">
+				<h1>Termekek</h1>
+				<div id="termekek_lista" data-ng-repeat="termek in termekadatok">
+					{{termek}}
+				</div>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected03=='m_promocios_termekek'">
+				<h1>Promocios termekek</h1>
+				<div id="promocios_termekek_lista">
+					
+				</div>
+			</div>
+				
+		</div>
+		</div>
+
+	</div>
+	
+	<footer id="footer01" ></footer>
+	
+	<script src="scripts/script.js"></script>
+
+</body>
+</html>

@@ -1,7 +1,8 @@
 var loginApp = angular.module('loginApp', []); 
 
+
 loginApp.controller('loginSwitchDivController', [              
-    '$scope',                              
+    '$scope', '$http',                             
 	function loginSwitchDivController($scope, $http) {
 
 		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
@@ -13,13 +14,12 @@ loginApp.controller('loginSwitchDivController', [
 
 ]);  
 
-
 loginApp.controller('regisztracioController', [              
 	'$http','$scope', 
 	function regisztracioController($http, $scope) {
 	
 		$scope.passError = false;
-		$scope.radioError = false;
+		$scope.checkboxError = false;
 		
 		$scope.testPasswords = function() {
 			$scope.passError = $scope.adatok.pass1 !== $scope.adatok.pass2;
@@ -28,23 +28,12 @@ loginApp.controller('regisztracioController', [
 		$scope.adatok = {};
 		$scope.success = "";
 		
-		// ezt itt meg at kell irni, mert igy mindig a Termelok-be szur be
-		
 		$scope.submit = function() {
 			$scope.success = true;
+			document.getElementById("pass1").value = document.getElementById("pass1").value;
 			
-			if( $('input[name=tipus]:checked').val() == "Termelo") {
-				$scope.radioError = false;
-				$http.post('/register/', $scope.adatok)
-				.success(function(data, status, headers, config) {
-					$scope.success = data.success;
-					$scope.adatok = {};
-					$scope.regisztracio.$setPristine();
-					$scope.navigationStrip01_Clicked('regisztracioSuccess');
-				});
-			}
-			else if( $('input[name="tipus"]:checked').val() == "Megrendelo") {
-				$scope.radioError = false;
+			if( $("#tipus1CB").is(':checked') || $("#tipus2CB").is(':checked')) {
+				$scope.checkboxError = false;
 				$http.post('/register/', $scope.adatok)
 				.success(function(data, status, headers, config) {
 					$scope.success = data.success;
@@ -54,7 +43,7 @@ loginApp.controller('regisztracioController', [
 				});
 			}
 			else {
-				$scope.radioError = true;
+				$scope.checkboxError = true;
 			}
 		};
 
@@ -69,18 +58,17 @@ function writeOutUserName( pID ){
 }
 
 function loginStoreSession( user ) {
-	localStorage.ID = user[0]; 	// passes the value of the userID to the local storage object
-	localStorage.Nev = user[1];
-	localStorage.Jelszo = user[2];
-	
+	localStorage.setItem('ID', user[0]);
+	localStorage.setItem('Nev', user[1]);
+	localStorage.setItem('Jelszo', user[2]);
+	localStorage.setItem('Termelo', user[3]);
+	localStorage.setItem('Megrendelo', user[4]);
 	writeOutUserName( "userUdvDiv" );
 }
 
-
-
 loginApp.controller('bejelentkezesController', [              
-	'$http','$scope', 
-	function bejelentkezesController($http, $scope) {
+	'$http','$scope', '$window',
+	function bejelentkezesController($http, $scope, $window) {
 		
 		$scope.log={};
 		$scope.login = function() {
@@ -89,13 +77,15 @@ loginApp.controller('bejelentkezesController', [
 					$scope.bejelentkezes.loginSuccess = data.loginSuccess;
 					$scope.bejelentkezes.loggedinUser = data.user;
 					$scope.log = {};
+					localStorage.setItem('test', 'marineni');
 					loginStoreSession( $scope.bejelentkezes.loggedinUser );
-				//	$scope.bejelentkezesForm.$setPristine();
-					$scope.navigationStrip01_Clicked('bejelentkezesSuccess');
+					if(data.user[3] == 1)
+						$window.location.href = '/termelo';
+					else if(data.user[4] == 1)
+						$window.location.href = '/megrendelo';
 				});
 		
 		};
 
 	}
 ]);  
-

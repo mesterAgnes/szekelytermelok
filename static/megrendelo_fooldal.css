@@ -1,0 +1,8 @@
+div {
+	margin:20px;
+}
+
+div#bodyDiv01 {
+	display: flex;
+	flex-direction: row ;
+}

@@ -8,11 +8,12 @@ import logging
 import mysql.connector
 
 app = Flask(__name__, static_url_path='')
+app.secret_key = 'development key'
 
 		
 @app.route('/')
 def index():
-	return app.send_static_file('index.html')
+	return app.send_static_file('login.html')
 
 @app.route('/register/', methods = ['POST'])
 def register():
@@ -21,15 +22,21 @@ def register():
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
 	cursor = cnx.cursor()
 	table = ''
-	if adatok['tipus'] == 'Termelo':
-		table = 'Termelok'
+	
+	if adatok['tipus1CB'] == True:
+		termelo = 1
 	else:
-		table = 'Vasarlok'
-	add_user = ("INSERT INTO " + table + " "
-				   "(Nev, Cim, Tel, Email, Jelszo)"
-				   "VALUES (%s, %s, %s, %s, %s)")
+		termelo = 0
+	if adatok['tipus2CB'] == True:
+		megrendelo = 1
+	else:
+		megrendelo = 0	
+		
+	add_user = ("INSERT INTO Szemelyek "
+				   "(Nev, Cim, Tel, Email, Jelszo, Admin, Termelo, Megrendelo)"
+				   "VALUES (%s, %s, %s, %s, %s, 0, %s, %s)")
 
-	data_user = (adatok['nev'], adatok['cim'], adatok['tel'], adatok['email'], adatok['pass1'])
+	data_user = (adatok['nev'], adatok['cim'], adatok['tel'], adatok['email'], adatok['pass1'], termelo, megrendelo)
 
 	# Insert new user
 	cursor.execute(add_user, data_user)
@@ -42,6 +49,200 @@ def register():
 	
 	return jsonify({'success': True})
 
+
+@app.route('/termekfeltoltes/', methods = ['POST'])
+def termekfeltoltes():
+	adatok = json.loads(request.data)
+	logging.warning(adatok)
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cursor = cnx.cursor()
+	str = ("INSERT INTO Termekek "
+				   "(Nev, Leiras, Ar, Kep, Min_rendelesi_menny, Keszlet_menny, SZ_ID)"
+				   "VALUES (%s, %s, %s, %s, %s, %s, %s)")
+
+	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], 'foto.jpg', adatok['rend_menny'], adatok['keszlet_menny'], session['SZ_ID'])
+
+	# Insert new user
+	cursor.execute(str, datas)
+	emp_no = cursor.lastrowid
+
+	# Make sure data is committed to the database
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({'success': True})
+
+@app.route('/termekbetoltes/', methods = ['POST'])	
+def termekbetoltes():
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+
+	select_termekek = ("SELECT T_ID, Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny FROM Termekek WHERE SZ_ID = %s")
+	select_penznemek = ("SELECT * FROM Penznemek")
+	select_mertekegysegek = ("SELECT * FROM Mertekegysegek")
+	select_kategoriak = ("SELECT * FROM Kategoriak")
+	
+	cursor.execute(select_termekek, [session['SZ_ID']])
+	cnx.commit()
+	termekek = cursor.fetchall()
+	logging.warning(termekek)
+	
+	cursor.execute(select_penznemek)
+	cnx.commit()
+	ertekek = cursor.fetchall()
+	penznemek = []
+	for x in ertekek:		
+		penznemek.append({'value':x[0], 'text':x[1]})
+	logging.warning(penznemek)
+	
+	cursor.execute(select_mertekegysegek)
+	cnx.commit()
+	ertekek2 = cursor.fetchall()
+	mertekegysegek = []
+	for r in ertekek2:
+		mertekegysegek.append({'value':r[0], 'text':r[1]})
+	logging.warning(mertekegysegek)
+	
+	cursor.execute(select_kategoriak)
+	cnx.commit()
+	ertekek3 = cursor.fetchall()
+	kategoriak = []
+	for r in ertekek3:
+		kategoriak.append({'value':r[0], 'text':r[1]})
+	logging.warning(kategoriak)
+	
+	cursor.close()
+	cnx.close()
+	return jsonify({'termekek':termekek, 'penznemek':penznemek, 'mertekegysegek':mertekegysegek, 'kategoriak':kategoriak})
+	
+
+@app.route('/mindentermek/', methods = ['POST'])	
+def mindentermek():
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+
+	select_termekek = ("SELECT T_ID, Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny FROM Termekek")
+	
+	cursor.execute(select_termekek)
+	cnx.commit()
+	termekek = cursor.fetchall()
+	logging.warning(termekek)
+	cursor.close()
+	cnx.close()
+	return jsonify({'termekek':termekek})
+
+
+@app.route('/termekmodositas/', methods = ['POST'])
+def termekmodositas():
+	adatok = json.loads(request.data)
+	logging.warning(adatok)
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cursor = cnx.cursor()
+	str = ("UPDATE Termekek SET "
+				"Nev = %s, Leiras = %s, Ar = %s, Min_rendelesi_menny = %s, Kep = %s, Keszlet_menny = %s, SZ_ID = %s "
+				"WHERE T_ID = %s")
+	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], 'foto.jpg', adatok['keszlet_menny'], adatok['id'], session['SZ_ID'])
+
+	try:
+		cursor.execute(str, datas)
+		cnx.commit()
+	except:
+		cnx.rollback()
+		
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({'success': True})
+
+	
+@app.route('/termektorles/', methods = ['POST'])	
+def termektorles():
+	adatok = json.loads(request.data)
+	logging.warning(adatok)
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+
+	string = ("DELETE FROM Termekek WHERE T_ID = %s")
+	cursor.execute(string, [adatok])
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+	return jsonify({'success': True})
+
+
+
+@app.route('/profilombetoltes/', methods = ['POST'])	
+def profilombetoltes():
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+
+	select_profilom = ("SELECT SZ_ID, Nev, Cim, Tel, Email FROM Szemelyek WHERE SZ_ID = %s")
+	select_penznemek = ("SELECT P_ID, Penznem FROM Penznemek")
+	select_rendszeresseg = ("SELECT R_ID, Nev FROM Rendszeresseg")
+	
+	cursor.execute(select_profilom, [session['SZ_ID']])
+	cnx.commit()
+	profilom = cursor.fetchone()
+	logging.warning(profilom)
+	
+	cursor.execute(select_penznemek)
+	cnx.commit()
+	ertekek = cursor.fetchall()
+	penznemek = []
+	for x in ertekek:		
+		penznemek.append({'value':x[0], 'text':x[1]})
+	logging.warning(penznemek)
+	
+	cursor.execute(select_rendszeresseg)
+	cnx.commit()
+	ertekek2 = cursor.fetchall()
+	rendszeresseg = []
+	for r in ertekek2:
+		rendszeresseg.append({'value':r[0], 'text':r[1]})
+	logging.warning(rendszeresseg)
+	
+	cursor.close()
+	cnx.close()
+	return jsonify({'profilom':profilom, 'penznemek':penznemek, 'rendszeresseg':rendszeresseg})	
+
+@app.route('/profilommodositas/', methods = ['POST'])
+def profilommodositas():
+	adatok = json.loads(request.data)
+	logging.warning(adatok)
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cursor = cnx.cursor()
+	
+	str_teszt = ("SELECT SZ_ID FROM Termelok WHERE SZ_ID = %s")	
+	cursor.execute(str_teszt, [session['SZ_ID']])
+	cnx.commit()
+	teszt_eredmeny = cursor.lastrowid
+	logging.warning(teszt_eredmeny)
+	
+	if teszt_eredmeny == 0 :
+		insert_profilom = ("INSERT INTO Termelok "
+							"(SZ_ID, Kep, Kiszallitasi_dij, Min_vasarloi_kosar, R_ID)"
+							"VALUES (%s, %s, %s, %s, %s) ")
+		datas = (session['SZ_ID'], adatok['kep'], adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'])
+		logging.warning(datas)
+		try:
+			cursor.execute(insert_profilom, datas)
+			cnx.commit()
+		except:
+			cnx.rollback()
+		
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({'success': True})
+	
+	
+@app.route('/uzenetkuldes/', methods = ['POST'])	
+def uzenetkuldes():	
+	return jsonify({'succes': True})	
+		
+	
+	
 @app.route('/login/', methods = ['POST'])	
 def login():
 	adat = json.loads(request.data)
@@ -50,58 +251,73 @@ def login():
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
 	cursor = cnx.cursor()
 
-	if adat['loginStatus'] == "Megrendelo":
-		select_megrendelo = ("SELECT V_ID, Nev, Jelszo FROM Vasarlok WHERE Email like %s")
-		data_megrendelo = adat['loginEmail']
-		
-		cursor.execute("SELECT V_ID, Nev, Jelszo FROM Vasarlok WHERE Email = %s", [adat['loginEmail']])
-		emp_no = cursor.lastrowid
-		
-		if emp_no == 0 :
+	cursor.execute("SELECT SZ_ID, Nev, Jelszo, Termelo, Megrendelo FROM Szemelyek WHERE Email = %s", [adat['loginEmail']])
+	emp_no = cursor.lastrowid
+	
+	if emp_no == 0 :
+		cnx.commit()
+		cursor.close()
+		cnx.close()
+		return jsonify({'loginSuccess': False})
+	else:
+		user = cursor.fetchone()
+		logging.warning(user)
+		if user[2] == adat['loginPass']:
+			cnx.commit()
+			cursor.close()
+			cnx.close()
+			session['SZ_ID'] = user[0]
+			return jsonify({'user':user, 'loginSuccess': True})
+		else:
 			cnx.commit()
 			cursor.close()
 			cnx.close()
 			return jsonify({'loginSuccess': False})
+
+			
+@app.route('/logout')
+def logout():
+	if 'SZ_ID' in session:
+		session.pop('SZ_ID', None)
+	return redirect(url_for('index'))
+	
+
+@app.route('/termelo')
+def termelo():
+	if 'SZ_ID' in session:
+		cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+		cursor = cnx.cursor()
+		cursor.execute("SELECT Termelo FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
+		result = cursor.fetchone()
+		cursor.close()
+		cnx.close()
+		if result[0] == 1:
+			return app.send_static_file('termelo_fooldal.html')
 		else:
-			user = cursor.fetchone()
-			if user[2] == adat['loginPass'] :
-				cnx.commit()
-				cursor.close()
-				cnx.close()
-				return jsonify({'user':user, 'loginSuccess': True})
-			else:
-				cnx.commit()
-				cursor.close()
-				cnx.close()
-				return jsonify({'loginSuccess': False})
+			return redirect(url_for('index'))
+	else:
+		return redirect(url_for('index'))
 				
-	if adat['loginStatus'] == "Termelo":
-		select_termelo = ("SELECT T_ID, Nev, Jelszo FROM Termelok WHERE Email like %s")
-		data_termelo = adat['loginEmail']
 		
-		cursor.execute("SELECT T_ID, Nev, Jelszo FROM Termelok WHERE Email = %s", [adat['loginEmail']])
-		emp_no = cursor.lastrowid
-		
-		if emp_no == 0 :
-			cnx.commit()
-			cursor.close()
-			cnx.close()
-			return jsonify({'loginSuccess': False})
+@app.route('/megrendelo')
+def megrendelo():
+	if 'SZ_ID' in session:
+		cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+		cursor = cnx.cursor()
+		cursor.execute("SELECT Megrendelo FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
+		result = cursor.fetchone()
+		cursor.close()
+		cnx.close()
+		if result[0] == 1:
+			return app.send_static_file('megrendelo_fooldal.html')
 		else:
-			user = cursor.fetchone()
-			logging.warning(user)
-			if user[2] == adat['loginPass'] :
-				cnx.commit()
-				cursor.close()
-				cnx.close()
-				return jsonify({'user': user, 'loginSuccess': True})
-			else:
-				cnx.commit()
-				cursor.close()
-				cnx.close()
-				return jsonify({'loginSuccess': False})	
-		
+			return redirect(url_for('index'))
+	else:
+		return redirect(url_for('index'))
+	
+	
 app.debug = True;
+
 
 if __name__ == '__main__':
     app.run()

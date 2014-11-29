@@ -177,3 +177,9 @@ INSERT INTO `Penznemek` (`P_ID`, `Penznem`) VALUES
 INSERT INTO `Termekek` (`T_ID`, `Nev`, `Leiras`, `Ar`, `Min_rendelesi_menny`, `Kep`, `Keszlet_menny`, `ME_ID`, `K_ID`, `P_ID`, `SZ_ID`) VALUES
 (1, 'Hazi szeles laska', '3 tojasos', 5, 1, '', 10, 3, 2, 1, 2),
 (2, 'Juhturo', 'Fiss es finom', 12, 1, '', 20, 2, 1, 1, 3);
+
+INSERT INTO `Rendszeresseg` (`R_ID`, `Nev`) VALUES
+(1, 'Hetente'),
+(2, 'Kéthetente'),
+(3, 'Háromhetente'),
+(4, 'Havonta');

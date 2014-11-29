@@ -1,0 +1,381 @@
+﻿<!DOCTYPE html>
+<html data-ng-app="termeloApp" >   
+
+<head>
+	<title>Székely termelők</title>
+	<meta charset="utf-8">
+	
+	<!-- Angular.js -->
+	<script src= "lib/angular.min.js"></script>
+	
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="lib/bootstrap.min.css">
+	
+	<!-- JQuery.js -->
+	<script src="lib/jquery-1.11.1.js"></script>
+	
+	<!-- Angular-xeditable -->
+    <link href="lib/angular-xeditable/css/xeditable.css" rel="stylesheet">
+    <script src="lib/angular-xeditable/js/xeditable.js"></script>
+    
+	<!-- controllers.js -->
+	<script src="scripts/termeloController.js"></script>
+	<link rel="stylesheet" type="text/css" href="termelo_fooldal.css">
+	
+	<!-- checklist-model -->
+	<script src="scripts/checklist-model.js"></script>
+
+</head>
+
+<body>
+
+	<header>
+	</header>
+
+	<div id="mainDiv01" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
+
+		<nav id="navigationStrip01">   <!-- menu -->
+			<ul id="navigationStripUl01">
+				<button data-ng-click="navigationStrip01_Clicked('kezdolap')"> Kezdőlap </button>
+				<button data-ng-click="navigationStrip01_Clicked('projekt')"> A projektről </button>
+				<button data-ng-click="navigationStrip01_Clicked('linkek')"> Hasznos linkek </button>
+				<button data-ng-click="logout()"> Kijelentkezés </button>
+				<button data-ng-show="megrendelo == 1" data-ng-click="megrendeloOldal()">Megrendelő oldal</button>
+			</ul>
+		</nav>
+		
+		<div id="mainContentDiv01">
+			<div data-ng-show="navigationOptionSelected01=='kezdolap'">
+				<h1>{{nev}}</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected01=='projekt'">
+				<h1>A projektről</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected01=='linkek'">
+				<h1>Hasznos linkek</h1>
+			</div>
+			
+		</div>
+		<div id="bodyDiv01">
+		<nav id="navigationStrip02">   <!-- oldalso menu -->
+			<ul id="navigationStripUl02">
+				<div>Logó</div>
+				<button data-ng-click="navigationStrip02_Clicked('profilom')"> Profilom </button> <br>
+				<button data-ng-click="navigationStrip02_Clicked('termekek')"> Termékek </button> <br>
+				<button data-ng-click="navigationStrip02_Clicked('promocios_termekek')"> Promóciós termékek </button> <br>
+				<button data-ng-click="navigationStrip02_Clicked('megrendelesek')"> Megrendelések </button> <br>
+				<button data-ng-click="navigationStrip02_Clicked('uzenetkuldes')"> Üzenetküldés </button> <br>
+			</ul>
+		</nav>
+		
+		<div id="mainContentDiv02">
+			<div data-ng-show="navigationOptionSelected02=='profilom'">
+				<h1>Profilom</h1>
+				<div ng-controller="profilomController" ng-init="profilomBetolt()">
+					
+					<form editable-form name="profilom_form" onbeforesave="profilomMentes($data)">
+						<div>
+							<!-- modosithato nev -->
+							<span class="title"> Név: </span>
+							<span editable-text="profilom[1]" e-name="nev" e-required>
+							{{ profilom[1] || 'Nincs kiválasztva' }} </span>
+						</div>
+						
+						<div>
+							<!-- modosithato cim -->
+							<span class="title"> Cím: </span>
+							<span editable-text="profilom[2]" e-name="cim" e-required>
+							{{ profilom[2] || 'Nincs kiválasztva' }} </span>
+						</div>
+						
+						<div>
+							<!-- modosithato telefonszam -->
+							<span class="title"> Telefonszám: </span>
+							<span editable-text="profilom[3]" e-name="tel" e-required>
+							{{ profilom[3] || 'Nincs kiválasztva' }} </span>
+						</div>
+						
+						<div>
+							<!-- modosithato e-mail cim -->
+							<span class="title"> E-mail cím: </span>
+							<span editable-email="profilom[4]" e-name="email" e-required>
+							{{ profilom[4] || 'Nincs kiválasztva' }} </span>
+						</div>
+					
+						<div>
+							<!-- modosithato kep -->
+							<span class="title"> Kép: </span>
+							<span editable-text="profilom_adatok.kep" e-name="kep" >
+							{{ profilom_adatok.kep || 'Nincs kiválasztva' }} </span>
+						</div>
+						
+						<div>
+							<!-- modosithato kiszallitasi dij -->
+							<span class="title"> Kiszállítási díj: </span>
+							<span editable-number="profilom_adatok.kiszall_dij" e-name="kiszall_dij" e-required>
+							{{ profilom_adatok.kiszall_dij || 'Nincs kiválasztva' }} </span>
+							<span editable-select="profilom_adatok.penznem" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
+							{{ (penznemek | filter:{value: profilom_adatok.penznem})[0].text }} </span>
+						</div>
+						 
+						<div>
+							<!-- modosithato kiszallitasi napok -->
+							<span class="title"> Kiszállítási napok: </span>
+							<span editable-checklist="profilom_adatok.nap" e-ng-options="n.value as n.text for n in napok">
+							{{ showNapok() }}
+							</span>
+						</div> 
+						
+						<div>
+							<!-- modosithato minimalis vasarloi kosar --> 
+							<span class="title"> Minimális vásárlói kosár értéke: </span>
+							<span editable-number="profilom_adatok.min_kosar" e-name="min_kosar" e-required>
+							{{ profilom_adatok.min_kosar || 'Nincs kiválasztva' }} </span>
+							<span editable-select="profilom_adatok.penznem" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
+							{{ (penznemek | filter:{value: profilom_adatok.penznem})[0].text }} </span>
+						</div>
+						
+						<div>
+							<!-- modosithato szallitasi rendszeresseg -->
+							<span class="title"> Szállítási rendszeresség: </span>
+							<span editable-select="profilom_adatok.rendszeresseg" e-name="rendszeresseg" e-ng-options="r.value as r.text for r in rendszeresseg">
+							{{ (rendszeresseg | filter:{value: profilom_adatok.rendszeresseg})[0].text }} </span>
+						</div> 
+						
+						<div>
+							<!-- modosithato települések --> 
+							<span class="title"> Települések: </span>
+							<span editable-text="profilom_adatok.telepules" e-name="telepules" e-required>
+							{{ profilom_adatok.telepules || 'Nincs kiválasztva' }} </span>
+						</div> 
+						
+						<div class="buttons">
+							<!-- button to show form -->
+							<button type="button" class="btn btn-default" ng-click="profilom_form.$show()" ng-show="!profilom_form.$visible">
+							Módosít  
+							</button>
+							<!-- buttons to submit / cancel form -->
+							<span ng-show="profilom_form.$visible">
+								<button type="submit" class="btn btn-primary" ng-disabled="profilom_form.$waiting">
+								Mentés 
+								</button>
+								<button type="button" class="btn btn-default" ng-disabled="profilom_form.$waiting" ng-click="profilom_form.$cancel()">
+								Mégse
+								</button>
+							</span>
+						</div>
+						
+					</form>
+					
+				</div>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected02=='termekek'">
+				<h1>Termékek</h1>
+				
+				<div ng-controller="termekFeltoltesController" ng-init="termekekBetolt()">
+				<table class="table table-bordered table-hover table-condensed">
+					<tr style="font-weight: bold">
+						<td style="width:2%">ID</td>
+						<td style="width:10%">Név</td>
+						<td style="width:10%">Leírás</td>
+						<td style="width:5%">Ár</td>
+					<!--	<td style="width:25%">Pénznem</td> -->
+						<td style="width:5%">Minimális <br /> rendelési <br /> mennyiség</td>
+						<td style="width:5%">   Fotó   </td>
+						<td style="width:5%">Készlet <br /> mennyiség</td>
+					<!--	<td style="width:5%">Mértékegység</td>  -->
+					<!--	<td style="width:25%">Kategória</td> -->
+						<td style="width:10%">Módosítás</td>
+					</tr>
+					<tr ng-repeat="termek in termekek" >
+
+						<td>
+						<!-- modosithato nev (text with validation) -->
+						<span editable-text="termek[0]" e-name="id" e-form="rowform" e-required>
+						  {{ termek[0]|| 'empty' }}
+						</span>
+						</td>
+						
+						<td>
+						<!-- modosithato nev (text with validation) -->
+						<span editable-text="termek[1]" e-name="nev" e-form="rowform" onbeforesave="vizsgalNev($data, termek.id)" e-required>
+						  {{ termek[1]|| 'empty' }}
+						</span>
+						</td>
+						
+						<td>
+						<!-- modosithato leiras -->
+						<span editable-text="termek[2]" e-name="leiras" e-form="rowform" e-required>
+						  {{ termek[2] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>
+						<!-- modosithato ar -->
+						<span editable-number="termek[3]" e-name="ar" e-form="rowform" onbeforesave="vizsgalAr($data, termek.id)" e-required>
+						  {{ termek[3] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>
+						<!-- modosithato rendelesi mennyiseg -->
+						<span editable-number="termek[4]" e-name="rend_menny" e-form="rowform" onbeforesave="vizsgalRend_menny($data, termek.id)" e-required>
+						  {{ termek[4] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>
+						<!-- modosithato fotó -->
+						<span editable-text="termek[5]" e-name="kep" e-form="rowform" onbeforesave="vizsgalKep($data, termek.id)" e-required>
+						  {{ termek[5] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>
+						<!-- modosithato keszlet mennyiseg -->
+						<span editable-number="termek[6]" e-name="keszlet_menny" e-form="rowform" onbeforesave="vizsgalKeszlet_menny($data, termek.id)" e-required>
+						  {{ termek[6] || 'empty' }}
+						</span>
+						</td>
+						
+				<!--		<td>	 -->		
+						<!-- kivalaszthato mertekegyseg-->
+				<!--			<span editable-select="penznem" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
+							{{ (penznemek)[0].text }} </span>
+						</td>-->
+						
+						<td style="white-space: nowrap">
+						<!-- form -->
+						<form editable-form name="rowform" onbeforesave="termekMent($data, termek.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == termek">
+						  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
+							Mentés
+						  </button>
+						  <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default">
+							Mégse
+						  </button>
+						</form>
+						
+						<div class="buttons" ng-show="!rowform.$visible">
+						  <button class="btn btn-primary" ng-click="rowform.$show()">Módosít</button>
+						  <button class="btn btn-danger" ng-click="termekTorol($index)">Töröl</button>
+						</div>  
+					  </td>
+					</tr>
+				</table>
+
+				<button class="btn btn-default" ng-click="termekHozzaad()">Új termék hozzáadása</button>
+				</div>
+				
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected02=='promocios_termekek'">
+				<h1>Promóciós termékek</h1>
+				
+	<!--			<div ng-controller="termekPromFeltoltesController" ng-init="termekekPromBetolt()">
+				<table class="table table-bordered table-hover table-condensed">
+					<tr style="font-weight: bold">
+						<td style="width:10%">ID</td>
+						<td style="width:20%">Név</td>
+						<td style="width:10%">Régi ár</td>
+						<td style="width:10%">Promóciós ár</td>
+						<td style="width:25%">Pénznem</td>
+						<td style="width:10%">Promóció <br /> kezdeti dátuma </td>
+						<td style="width:10%">Promóció <br /> végső dátuma </td>
+						<td style="width:25%">Módosítás</td>
+					</tr>
+					<tr ng-repeat="szam in [1,2,3]" >
+
+						<td>   -->
+						<!-- ID  -->
+		<!--				<span editable-text="termek[0]" e-name="id" e-form="rowform" e-required>
+						  {{ termek[0]|| 'empty' }}
+						</span>
+						</td>
+						
+						<td> -->
+						<!-- kivalaszthato nev (text with validation) -->
+		<!--				<span editable-text="termek[1]" e-name="nev" e-form="rowform" onbeforesave="vizsgalNev($data, termek.id)" e-required>
+						  {{ termek[1]|| 'empty' }}
+						</span>
+						</td>
+						
+						<td> -->
+						<!-- regi ar (rogzitett) -->
+		<!--				<span text="termek[3]" name="ar">
+						  {{ termek[3] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>-->
+						<!-- modosithato uj ar -->
+		<!--				<span editable-text="termek[4]" e-name="ar" e-form="rowform" onbeforesave="vizsgalUjAr($data, termek.id)" e-required>
+						  {{ termek[3] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>-->
+						<!-- penznem (rogzitett) -->
+		<!--				<span text="termek[5]" name="penznem">
+						  {{ termek[5] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>-->
+						<!-- modosithato kezdeti datum -->
+		<!--				<span editable-date="termek[6]" e-name="keszlet_menny" e-form="rowform" onbeforesave="vizsgalKeszlet_menny($data, termek.id)" e-required>
+						  {{ termek[6] || 'empty' }}
+						</span>
+						</td>
+						
+						<td>-->
+						<!-- modosithato vegso datum -->
+		<!--				<span editable-date="termek[7]" e-name="keszlet_menny" e-form="rowform" onbeforesave="vizsgalKeszlet_menny($data, termek.id)" e-required>
+						  {{ termek[7] || 'empty' }}
+						</span>
+						</td>
+						
+						<td style="white-space: nowrap">-->
+						<!-- form -->
+		<!--				<form editable-form name="rowform" onbeforesave="termekMent($data, termek.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == termek">
+						  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
+							Mentés
+						  </button>
+						  <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default">
+							Mégse
+						  </button>
+						</form>
+						
+						<div class="buttons" ng-show="!rowform.$visible">
+						  <button class="btn btn-primary" ng-click="rowform.$show()">Módosít</button>
+						  <button class="btn btn-danger" ng-click="termekTorol($index)">Töröl</button>
+						</div>  
+					  </td>
+					</tr>
+				</table>
+
+				<button class="btn btn-default" ng-click="termekHozzaad()">Új termék hozzáadása</button>
+				</div> -->
+			</div>  
+			
+			<div data-ng-show="navigationOptionSelected02=='megrendelesek'">
+				<h1>Megrendelések</h1>
+			</div>
+			
+			<div data-ng-show="navigationOptionSelected02=='uzenetkuldes'">
+				<h1>Üzenet küldése</h1>
+			</div>
+			</div>
+				
+		</div>
+
+	</div>
+	
+	<footer id="footer01" ></footer>
+	
+	<script src="scripts/script.js"></script>
+
+</body>
+</html>
