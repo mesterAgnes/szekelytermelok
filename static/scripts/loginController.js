@@ -26,18 +26,29 @@ loginApp.controller('regisztracioController', [
 		};
 		
 		$scope.adatok = {};
+		$scope.adatok.tipus1CB = false;
+		$scope.adatok.tipus2CB = false;
 		$scope.success = "";
+		
+		$scope.testTipus = function() {
+			$scope.checkboxError = !$scope.adatok.tipus1CB && !$scope.adatok.tipus2CB;
+		}
 		
 		$scope.submit = function() {
 			$scope.success = true;
 			document.getElementById("pass1").value = document.getElementById("pass1").value;
-			
-			if( $("#tipus1CB").is(':checked') || $("#tipus2CB").is(':checked')) {
+			if( $scope.adatok.tipus1CB || $scope.adatok.tipus2CB) {
 				$scope.checkboxError = false;
+				regisztracioAdatok = angular.copy($scope.adatok);
+				regisztracioAdatok.pass1 = md5(regisztracioAdatok.pass1);
+				regisztracioAdatok.pass2 = "";
+
 				$http.post('/register/', $scope.adatok)
 				.success(function(data, status, headers, config) {
 					$scope.success = data.success;
 					$scope.adatok = {};
+					$scope.adatok.tipus1CB = false;
+					$scope.adatok.tipus2CB = false;
 					$scope.regisztracio.$setPristine();
 					$scope.navigationStrip01_Clicked('regisztracioSuccess');
 				});
@@ -72,7 +83,9 @@ loginApp.controller('bejelentkezesController', [
 		
 		$scope.log={};
 		$scope.login = function() {
-			$http.post('/login/', $scope.log)
+			loginAdatok = angular.copy($scope.log);
+			loginAdatok.loginPass = md5(loginAdatok.loginPass);
+			$http.post('/login/', loginAdatok)
 				.success(function(data, status, headers, config) {
 					$scope.bejelentkezes.loginSuccess = data.loginSuccess;
 					$scope.bejelentkezes.loggedinUser = data.user;

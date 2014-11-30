@@ -79,8 +79,8 @@
 						<tr>
 							<td>Felhasználó típusa: </td>
 							<td>
-							<input type="checkbox" id="tipus1CB" name="tipus" value="Termelo" data-ng-model="adatok.tipus1CB"> Termelő
-							<input type="checkbox" id="tipus2CB" name="tipus" value="Megrendelo" data-ng-model="adatok.tipus2CB"> Megrendelő
+							<input type="checkbox" id="tipus1CB" name="tipus" value="Termelo" data-ng-model="adatok.tipus1CB" data-ng-change="testTipus()"> Termelő
+							<input type="checkbox" id="tipus2CB" name="tipus" value="Megrendelo" data-ng-model="adatok.tipus2CB" data-ng-change="testTipus()"> Megrendelő
  							<span style="color:red" data-ng-show="checkboxError">
 							*Minimum egy típus megadása kötelező.	</span></td>
 						</tr>

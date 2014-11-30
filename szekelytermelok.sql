@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `Szemelyek`(
 	`Cim` varchar(100) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Tel` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Email` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Jelszo` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+	`Jelszo` varchar(33) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Admin` int(11) NOT NULL,
 	`Termelo` int(11) NOT NULL,
 	`Megrendelo` int(11) NOT NULL,
@@ -157,9 +157,9 @@ CREATE TABLE IF NOT EXISTS `Promociok`(
 --
 
 INSERT INTO `Szemelyek` (`SZ_ID`, `Nev`, `Cim`, `Tel`, `Email`, `Jelszo`, `Admin`, `Termelo`, `Megrendelo`) VALUES
-(1, 'Toth Pal', 'Kezdiszentlelek, Patko utca 5.', '0722568945', 'tothpali@gmail.com', 'pali', 0, 0, 1),
-(2, 'Sarga Maria', 'Szekelykeresztur, Teto utca 45', '0745035255', 'marineni@gmail.com', '123', 0, 1, 0),
-(3, 'Szeles Sara', 'Csikszereda, Sugarut 19', '0748569854', 'sarineni@gmail.com', '1', 0, 1, 1);
+(1, 'Toth Pal', 'Kezdiszentlelek, Patko utca 5.', '0722568945', 'tothpali@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 0, 1),
+(2, 'Sarga Maria', 'Szekelykeresztur, Teto utca 45', '0745035255', 'marineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 0),
+(3, 'Szeles Sara', 'Csikszereda, Sugarut 19', '0748569854', 'sarineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 1);
 
 INSERT INTO `Mertekegysegek` (`ME_ID`, `Nev`) VALUES
 (1, 'g'),
