@@ -57,9 +57,21 @@
 		<div id="mainContentDiv02">
 		
 			<div data-ng-show="navigationOptionSelected03=='m_termekek'">
-				<h1>Termekek</h1>
-				<div id="termekek_lista" data-ng-repeat="termek in termekadatok">
-					{{termek}}
+				<div data-ng-show="!termekLeirasVisible">
+					<h1>Termekek</h1>
+					<div>
+						<div id="termek" data-ng-repeat="termek in termekadatok">
+							<img data-ng-src="{{'kepek/'+termek['0']%4+'_thumb.jpg'}}" data-ng-click="showTermek(termek)">
+							<div>
+								<p>Név:{{termek["1"]}}</p>
+								<p>Leírás:{{termek["2"]}}</p>
+								<p>Ár:{{termek["3"]}}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div data-ng-show="termekLeirasVisible">
+					<img data-ng-src="{{'kepek/'+kivalasztottTermek['0']%4+'.jpg'}}" data-ng-click="termekekBetoltes()">
 				</div>
 			</div>
 			

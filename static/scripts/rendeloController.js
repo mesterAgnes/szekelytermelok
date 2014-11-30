@@ -24,6 +24,7 @@ megrendeloApp.controller('loginSwitchDivController', [
 			.success(function(data, status, headers, config) {
 				$scope.termekadatok = data['termekek']
 				$scope.navigationStrip03_Clicked('m_termekek');
+				$scope.termekLeirasVisible = false;
 			});
 
 		}
@@ -32,6 +33,12 @@ megrendeloApp.controller('loginSwitchDivController', [
 		};
 		$scope.termeloOldal = function() {
 			$window.location.href = '/termelo';
+		}
+		
+		$scope.termekLeirasVisible = false;
+		$scope.showTermek = function(termek) {
+			$scope.termekLeirasVisible = true;
+			$scope.kivalasztottTermek = termek;
 		}
 
 	}
