@@ -1,4 +1,4 @@
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+﻿SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 --
 -- Database: `szekelytermelok`
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `Szemelyek`(
 	`Cim` varchar(100) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Tel` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Email` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Jelszo` varchar(33) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+	`Jelszo` varchar(40) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Admin` int(11) NOT NULL,
 	`Termelo` int(11) NOT NULL,
 	`Megrendelo` int(11) NOT NULL,
@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS `Termelok`(
 	`Kiszallitasi_dij` int,
 	`Min_vasarloi_kosar` int,
 	`R_ID` int references Rendszeresseg(R_ID),
+	`P_ID` int references Penznemek(P_ID),
 	PRIMARY KEY (`SZ_ID`)
 ) ;
 
@@ -178,8 +179,27 @@ INSERT INTO `Termekek` (`T_ID`, `Nev`, `Leiras`, `Ar`, `Min_rendelesi_menny`, `K
 (1, 'Hazi szeles laska', '3 tojasos', 5, 1, '', 10, 3, 2, 1, 2),
 (2, 'Juhturo', 'Fiss es finom', 12, 1, '', 20, 2, 1, 1, 3);
 
-INSERT INTO `Rendszeresseg` (`R_ID`, `Nev`) VALUES
+INSERT INTO `Napok` (`N_ID`, `Nev`) VALUES 
+(1, 'Hétfo'),
+(2, 'Kedd'),
+(3, 'Szerda'),
+(4, 'Csütörtök'),
+(5, 'Péntek'),
+(6, 'Szombat'),
+(7, 'Vasárnap');
+
+INSERT INTO `Rendszeresseg` (`R_ID`, `Nev`) VALUES 
 (1, 'Hetente'),
 (2, 'Kéthetente'),
 (3, 'Háromhetente'),
-(4, 'Havonta');
+(4, 'Havonta'),
+(5, 'Kéthavonta'),
+(6, 'Háromhavonta');
+
+INSERT INTO `Telepulesek` (`Telep_ID`, `Nev`) VALUES 
+(1, 'Kolozsvár'),
+(2, 'Gyergyócsomafalva'),
+(3, 'Sepsiszentgyörgy'),
+(4, 'Székelyudvarhely'),
+(5, 'Vásárhely'),
+(6, 'Csíkszereda');

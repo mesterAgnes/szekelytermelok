@@ -132,9 +132,11 @@ termeloApp.controller('termekFeltoltesController', [
 ]);  
 
 
-termeloApp.controller('profilomController', function($scope, $filter, $http) {
+termeloApp.controller('profilomController', [ '$http', '$scope', '$filter', 
+	function profilom_Controller($http, $scope, $filter) {
 	
-	$scope.profilom_adatok = { nap: [] };
+	$scope.profilom_adatok = { nap: []};
+	$scope.selected = [];
 	
 	$scope.napok = [
 		{value:1, text: 'Hétfő'},
@@ -147,13 +149,14 @@ termeloApp.controller('profilomController', function($scope, $filter, $http) {
 	];
 	
 	$scope.showNapok = function() {
-		var selected = [];
+		$scope.selected = [];
 		angular.forEach($scope.napok, function(n) {
 			if ($scope.profilom_adatok.nap.indexOf(n.value) >= 0) {
-				selected.push(n.text);
+				$scope.selected.push(n.text);
 			}
 		});
-		return selected.length ? selected.join(', ') : 'Nincs kiválasztva';
+		console.log($scope.selected);
+		return $scope.selected.length ? $scope.selected.join(', ') : 'Nincs kiválasztva';
 	};
 	
 	// profilom eddig kitoltott adatainak betoltese
@@ -163,18 +166,46 @@ termeloApp.controller('profilomController', function($scope, $filter, $http) {
 			$scope.profilom = data['profilom'];
 			$scope.penznemek = data['penznemek'];
 			$scope.rendszeresseg = data['rendszeresseg'];
+			$scope.profilom_adat = data['profilom_adat'];
 		});
 	};
 	
 	// profilom lementese
 	$scope.profilomMentes = function(data) {
-		$http.post('/profilommodositas/', data)
+		datas = { 'data': data, 'selected': $scope.selected };
+		console.log("Ez: " + $scope.selected + " "+ datas['selected'] );
+		$http.post('/profilommodositas/', datas)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');
 		});	
 	}; 
-});
+	
+	$scope.vizsgalEmail = function(data) {
+		var filter = /[@][a-z]+[\.][a-z]*$/;
+		if (!filter.test(data)) {
+			return "A megadott e-mail cím nem megfelelő.";
+		}
+	};
+	
+	$scope.vizsgalKep = function(data) {
+		var filter1 = /\.jpg$/;
+		var filter2 = /\.png$/;
+		var filter3 = /\.gif$/;
+		if (!((filter1.test(data)) || (filter2.test(data)) || (filter3.test(data)))) {
+			return "A megadott kép kiterjesztése .jpg vagy .png vagy .gif kell legyen!";
+		}
+	};
+	
+	$scope.vizsgalAr = function(data) {
+		var filter = /-/;
+
+		if (filter.test(data)) {
+			return "A beírt ár nem megfelelő.";
+		}
+	};
+	
+}]);
 
 termeloApp.controller('UzenetKuldesCtrl', function($scope, $filter, $http) {
 	$scope.uzenetetKuld = function() {

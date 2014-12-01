@@ -43,7 +43,7 @@ loginApp.controller('regisztracioController', [
 				regisztracioAdatok.pass1 = md5(regisztracioAdatok.pass1);
 				regisztracioAdatok.pass2 = "";
 
-				$http.post('/register/', $scope.adatok)
+				$http.post('/register/', regisztracioAdatok)
 				.success(function(data, status, headers, config) {
 					$scope.success = data.success;
 					$scope.adatok = {};
@@ -60,7 +60,6 @@ loginApp.controller('regisztracioController', [
 
 	}
 ]);  
-
 
 
 function writeOutUserName( pID ){
@@ -89,12 +88,12 @@ loginApp.controller('bejelentkezesController', [
 				.success(function(data, status, headers, config) {
 					$scope.bejelentkezes.loginSuccess = data.loginSuccess;
 					$scope.bejelentkezes.loggedinUser = data.user;
+					console.log($scope.bejelentkezes.loggedinUser);
 					$scope.log = {};
-					localStorage.setItem('test', 'marineni');
 					loginStoreSession( $scope.bejelentkezes.loggedinUser );
-					if(data.user[3] == 1)
+					if($scope.bejelentkezes.loggedinUser[3] == 1)
 						$window.location.href = '/termelo';
-					else if(data.user[4] == 1)
+					else if($scope.bejelentkezes.loggedinUser[4] == 1)
 						$window.location.href = '/megrendelo';
 				});
 		

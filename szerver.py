@@ -202,35 +202,71 @@ def profilombetoltes():
 		rendszeresseg.append({'value':r[0], 'text':r[1]})
 	logging.warning(rendszeresseg)
 	
+	select_profilom_adatok = ("SELECT * FROM Termelok WHERE SZ_ID = %s")
+	cursor.execute(select_profilom_adatok, [session['SZ_ID']])
+	cnx.commit()
+	profilom_adat = cursor.fetchone()
+	logging.warning(profilom_adat)
+	
 	cursor.close()
 	cnx.close()
-	return jsonify({'profilom':profilom, 'penznemek':penznemek, 'rendszeresseg':rendszeresseg})	
+	return jsonify({'profilom':profilom, 'penznemek':penznemek, 'rendszeresseg':rendszeresseg, 'profilom_adat':profilom_adat})	
 
 @app.route('/profilommodositas/', methods = ['POST'])
 def profilommodositas():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
 	cursor = cnx.cursor()
 	
-	str_teszt = ("SELECT SZ_ID FROM Termelok WHERE SZ_ID = %s")	
+	str_teszt = ("SELECT * FROM Termelok WHERE SZ_ID = %s")
 	cursor.execute(str_teszt, [session['SZ_ID']])
 	cnx.commit()
-	teszt_eredmeny = cursor.lastrowid
+	teszt_eredmeny = cursor.fetchone()
 	logging.warning(teszt_eredmeny)
 	
-	if teszt_eredmeny == 0 :
-		insert_profilom = ("INSERT INTO Termelok "
-							"(SZ_ID, Kep, Kiszallitasi_dij, Min_vasarloi_kosar, R_ID)"
-							"VALUES (%s, %s, %s, %s, %s) ")
-		datas = (session['SZ_ID'], adatok['kep'], adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'])
+	if teszt_eredmeny is None :
+		insert_profilom = ("INSERT INTO Termelok (SZ_ID, Kep, Kiszallitasi_dij, Min_vasarloi_kosar, R_ID, P_ID) VALUES (%s, %s, %s, %s, %s, %s) ")
+		datas = (session['SZ_ID'], adatok['kep'], adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'])
 		logging.warning(datas)
+		logging.warning(adatok['selected'])
 		try:
 			cursor.execute(insert_profilom, datas)
 			cnx.commit()
 		except:
 			cnx.rollback()
-		
+			
+		#for i in adatok['nap']:
+			# insert_napok = ("INSERT INTO Kiszallitasi_napok (SZ_ID, N_ID) VALUES (%s, %s)")
+			# datas = (session['SZ_ID'], adatok['nap']['i'])
+			# logging.warning(datas)
+			# try:
+				# cursor.execute(insert_napok, datas)
+				# cnx.commit()
+			# except:
+				# cnx.rollback()
+	
+	else:
+		update_profilom = ("UPDATE Termelok SET Kep = %s, Kiszallitasi_dij = %s, Min_vasarloi_kosar = %s, R_ID = %s, P_ID = %s WHERE SZ_ID = %s")
+		datas = (adatok['kep'], adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'], session['SZ_ID'])
+		logging.warning(datas)
+		logging.warning(adatok['selected'])
+		try:
+			cursor.execute(update_profilom, datas)
+			cnx.commit()
+		except:
+			cnx.rollback()
+			
+		for i in adatok['selected']:
+			insert_napok = ("INSERT INTO Kiszallitasi_napok (SZ_ID, N_ID) VALUES (%s, %s)")
+			datas = (session['SZ_ID'], adatok['selected']['i'])
+			logging.warning(datas)
+			try:
+				cursor.execute(insert_napok, datas)
+				cnx.commit()
+			except:
+				cnx.rollback()	
+
 	cursor.close()
 	cnx.close()
 	

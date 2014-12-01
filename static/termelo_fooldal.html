@@ -100,30 +100,31 @@
 						<div>
 							<!-- modosithato e-mail cim -->
 							<span class="title"> E-mail cím: </span>
-							<span editable-email="profilom[4]" e-name="email" e-required>
+							<span editable-email="profilom[4]" e-name="email" onbeforesave="vizsgalEmail($data)" e-required>
 							{{ profilom[4] || 'Nincs kiválasztva' }} </span>
 						</div>
 					
 						<div>
 							<!-- modosithato kep -->
 							<span class="title"> Kép: </span>
-							<span editable-text="profilom_adatok.kep" e-name="kep" >
-							{{ profilom_adatok.kep || 'Nincs kiválasztva' }} </span>
+							<span editable-text="profilom_adat[1]" onbeforesave="vizsgalKep($data)" e-name="kep" >
+							{{ profilom_adat[1] || 'Nincs kiválasztva' }} </span>
 						</div>
 						
 						<div>
 							<!-- modosithato kiszallitasi dij -->
 							<span class="title"> Kiszállítási díj: </span>
-							<span editable-number="profilom_adatok.kiszall_dij" e-name="kiszall_dij" e-required>
-							{{ profilom_adatok.kiszall_dij || 'Nincs kiválasztva' }} </span>
-							<span editable-select="profilom_adatok.penznem" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
-							{{ (penznemek | filter:{value: profilom_adatok.penznem})[0].text }} </span>
+							<span editable-number="profilom_adat[2]" e-name="kiszall_dij" onbeforesave="vizsgalAr($data)" e-required>
+							{{ profilom_adat[2] || 'Nincs kiválasztva' }} </span>
+							<span editable-select="profilom_adat[5]" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
+							<!-- {{ (penznemek | filter:{value: profilom_adatok.penznem})[0].text }} -->
+							{{ (penznemek | filter: {value: profilom_adat[5]})[0].text }}	</span>
 						</div>
 						 
 						<div>
 							<!-- modosithato kiszallitasi napok -->
 							<span class="title"> Kiszállítási napok: </span>
-							<span editable-checklist="profilom_adatok.nap" e-ng-options="n.value as n.text for n in napok">
+							<span editable-checklist="profilom_adatok.nap"  e-name="selected" e-ng-options="n.value as n.text for n in napok">
 							{{ showNapok() }}
 							</span>
 						</div> 
@@ -131,17 +132,17 @@
 						<div>
 							<!-- modosithato minimalis vasarloi kosar --> 
 							<span class="title"> Minimális vásárlói kosár értéke: </span>
-							<span editable-number="profilom_adatok.min_kosar" e-name="min_kosar" e-required>
-							{{ profilom_adatok.min_kosar || 'Nincs kiválasztva' }} </span>
-							<span editable-select="profilom_adatok.penznem" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
-							{{ (penznemek | filter:{value: profilom_adatok.penznem})[0].text }} </span>
+							<span editable-number="profilom_adat[3]" e-name="min_kosar" onbeforesave="vizsgalAr($data)" e-required>
+							{{ profilom_adat[3] || 'Nincs kiválasztva' }} </span>
+							<span editable-select="profilom_adat[5]" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
+							{{ (penznemek | filter:{value: profilom_adat[5]})[0].text }} </span>
 						</div>
 						
 						<div>
 							<!-- modosithato szallitasi rendszeresseg -->
 							<span class="title"> Szállítási rendszeresség: </span>
-							<span editable-select="profilom_adatok.rendszeresseg" e-name="rendszeresseg" e-ng-options="r.value as r.text for r in rendszeresseg">
-							{{ (rendszeresseg | filter:{value: profilom_adatok.rendszeresseg})[0].text }} </span>
+							<span editable-select="profilom_adat[4]" e-name="rendszeresseg" e-ng-options="r.value as r.text for r in rendszeresseg">
+							{{ (rendszeresseg | filter:{value: profilom_adat[4]})[0].text }} </span>
 						</div> 
 						
 						<div>
