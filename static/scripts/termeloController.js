@@ -31,7 +31,12 @@ termeloApp.controller('loginSwitchDivController', [
 termeloApp.controller('termekFeltoltesController', [              
 	'$http', '$scope', '$filter', 
 	function termek_feltoltesController($http, $scope, $filter) {
-
+	
+		$scope.sorModosithato = false;
+		$scope.sorModositas = function(value) {
+			$scope.sorModosithato = value;
+		};
+		
 		$scope.ujtermek = 0;	// ha csak termeket modositok, akkor ujtermek = 0, azaz csak UPDATE szukseges
 								// ha uj termeket adtam hozza, akkor ujtermek = 1, vagyis INSERT szukseges
 	
@@ -128,6 +133,13 @@ termeloApp.controller('termekFeltoltesController', [
 			
 			$scope.ujtermek = 1;
 		};
+		
+		$scope.cancelAdd = function() {
+			if ($scope.ujtermek == 1) {
+				$scope.termekek.pop();
+				$scope.ujtermek = 0;
+			}
+		}
 	}
 ]);  
 

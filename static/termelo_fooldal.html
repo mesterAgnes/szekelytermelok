@@ -250,24 +250,26 @@
 						
 						<td style="white-space: nowrap">
 						<!-- form -->
-						<form editable-form name="rowform" onbeforesave="termekMent($data, termek.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == termek">
+						<form editable-form name="rowform" onshow="sorModositas(true)" onhide="sorModositas(false)" oncancel="cancelAdd()" onbeforesave="termekMent($data, termek.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == termek">
+							<div>
 						  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
 							Mentés
 						  </button>
 						  <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default">
 							Mégse
 						  </button>
+							</div>
 						</form>
 						
 						<div class="buttons" ng-show="!rowform.$visible">
-						  <button class="btn btn-primary" ng-click="rowform.$show()">Módosít</button>
-						  <button class="btn btn-danger" ng-click="termekTorol($index)">Töröl</button>
+						  <button class="btn btn-primary" ng-disabled="sorModosithato" ng-click="rowform.$show()">Módosít</button>
+						  <button class="btn btn-danger" ng-disabled="sorModosithato" ng-click="termekTorol($index)">Töröl</button>
 						</div>  
 					  </td>
 					</tr>
 				</table>
 
-				<button class="btn btn-default" ng-click="termekHozzaad()">Új termék hozzáadása</button>
+				<button class="btn btn-default" ng-disabled="sorModosithato" ng-click="termekHozzaad()">Új termék hozzáadása</button>
 				</div>
 				
 			</div>
