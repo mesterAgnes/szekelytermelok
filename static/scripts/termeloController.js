@@ -155,7 +155,6 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 				$scope.selected.push(n.text);
 			}
 		});
-		console.log($scope.selected);
 		return $scope.selected.length ? $scope.selected.join(', ') : 'Nincs kiválasztva';
 	};
 	
@@ -208,13 +207,15 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 }]);
 
 termeloApp.controller('UzenetKuldesCtrl', function($scope, $filter, $http) {
-	$scope.uzenetetKuld = function() {
-		$http.post('/uzenetkuldes/', {})
+	$scope.uzenetKuldes = function() {
+		$scope.adatok.datum = new Date();
+		$http.post('/uzenetkuldes/', $scope.adatok)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
-			alert('Az üzenetet sikeresen elküldtük!');
+			$scope.navigationStrip02_Clicked('uzenetSuccess');		
 		});
 	};
+	
 });
 
 

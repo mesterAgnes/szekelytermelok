@@ -3,9 +3,11 @@
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash, json, jsonify
 
- 
 import logging
 import mysql.connector
+import smtplib
+#from smtplib import SMTP_SSL
+
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = 'development key'
@@ -271,12 +273,7 @@ def profilommodositas():
 	cnx.close()
 	
 	return jsonify({'success': True})
-	
-	
-@app.route('/uzenetkuldes/', methods = ['POST'])	
-def uzenetkuldes():	
-	return jsonify({'succes': True})	
-		
+
 	
 	
 @app.route('/login/', methods = ['POST'])	
@@ -351,6 +348,67 @@ def megrendelo():
 	else:
 		return redirect(url_for('index'))
 	
+	
+
+@app.route('/uzenetkuldes/', methods = ['POST'])
+def uzenetkuldes():
+	adatok = json.loads(request.data)
+	logging.warning(adatok)
+	
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+	cursor.execute("SELECT Email FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
+
+	#FROM = cursor.fetchone()
+	
+	FROM = "mester.agnes@yahoo.com"
+	TO = []				# must be a list
+	TO.append(adatok['cimzett'])
+	logging.warning(TO)
+
+	SUBJECT = adatok['targy']
+	TEXT = adatok['uzenet']
+
+# Prepare actual message
+	message = """\
+	From: %s
+	To: %s
+	Subject: %s
+
+	%s
+	""" % (FROM, ", ".join(TO), SUBJECT, TEXT)
+
+# Send the mail
+#	server = smtplib.SMTP("localhost")
+#	server.sendmail(FROM, TO, message)
+#	server.quit()	
+
+# The actual mail send
+	server = smtplib.SMTP('smtp.gmail.com:25')
+	#server = SMTP_SSL("smtp.webfaction.com", 465)
+	server.starttls()
+	server.sendmail(FROM, TO, message)
+	server.quit()
+	
+	
+# Update database
+	add_uzenet = ("INSERT INTO Uzenetek "
+				   "(Szoveg, Datum, Felado_ID, Cimzett_ID)"
+				   "VALUES (%s, %s, %s, %s)")
+
+	data_uzenet = (adatok['uzenet'], adatok['datum'], session['SZ_ID'], '1')
+
+	cursor.execute(add_user, data_user)
+	
+# Make sure data is committed to the database
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+		
+	
+	return jsonify({'success': True})
+
+
 	
 app.debug = True;
 

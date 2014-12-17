@@ -366,8 +366,32 @@
 			</div>
 			
 			<div data-ng-show="navigationOptionSelected02=='uzenetkuldes'">
+				
 				<h1>Üzenet küldése</h1>
+				<div data-ng-controller="UzenetKuldesCtrl">
+					
+					<form name="uzenetkuldesForm">
+						<label for="cimzett"> Címzett: </label>
+						<input type="email" name="cimzett" data-ng-model="adatok.cimzett" id="cimzett"  required> 
+						<span style="color:red" data-ng-show="uzenetkuldesForm.cimzett.$dirty && uzenetkuldesForm.cimzett.$invalid">
+						<span data-ng-show="uzenetkuldesForm.cimzett.$error.required "> *A címzett megadása kötelező.</span>
+						</span><br>
+						
+						<label for="targy"> Tárgy: </label>
+						<input type="text" name="targy" data-ng-model="adatok.targy" id="targy" > <br>
+						
+						<textarea name="uzenet" data-ng-model="adatok.uzenet" id="uzenet" rows="5" cols="100" required> </textarea> <br>
+					
+					<button data-ng-disabled="uzenetkuldesForm.$invalid" ng-click="uzenetKuldes()"> Küldés </button>
+					<button ng-click="cancelUzenetKuldes()"> Mégse </button>
+					</form>
+				</div>
+				
 			</div>
+			
+			
+			<div data-ng-show="navigationOptionSelected=='uzenetSuccess'">
+				<h1>Az üzenetet sikeresen elküldtük!</h1>
 			</div>
 				
 		</div>
