@@ -1,17 +1,28 @@
 # all the imports
 # from __future__ import print_function
 from flask import Flask, request, session, g, redirect, url_for, \
-     abort, render_template, flash, json, jsonify
-
+     abort, render_template, flash, json, jsonify, send_from_directory
+from werkzeug import secure_filename
+	 
+import os
 import logging
 import mysql.connector
 import smtplib
 #from smtplib import SMTP_SSL
 
-
 app = Flask(__name__, static_url_path='')
 app.secret_key = 'development key'
 
+# This is the path to the upload directory
+app.config['UPLOAD_FOLDER'] = 'static/img/logos/'
+
+# These are the extension that we are accepting to be uploaded
+app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
+
+# For a given file, return whether it's an allowed type or not
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 		
 @app.route('/')
 def index():
@@ -43,7 +54,11 @@ def register():
 	# Insert new user
 	cursor.execute(add_user, data_user)
 	emp_no = cursor.lastrowid
-
+	cnx.commit()
+	
+	logo='logo'+str(emp_no)+'.jpg'
+	os.rename('static/img/logos/logo.jpg','static/img/logos/'+logo)
+	
 	# Make sure data is committed to the database
 	cnx.commit()
 	cursor.close()
@@ -51,30 +66,92 @@ def register():
 	
 	return jsonify({'success': True})
 
+	
+# Route that will process the file upload
+@app.route('/upload', methods=['POST'])
+def upload():
+    # Get the name of the uploaded file
+    file = request.files['file']
+    # Check if the file is one of the allowed types/extensions
+    if file and allowed_file(file.filename):
+        # Make the filename safe, remove unsupported chars
+        # filename = secure_filename(file.filename)
+        filename = 'logo.jpg'
+        # Move the file form the temporal folder to
+        # the upload folder we setup
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # Redirect the user to the uploaded_file route, which
+        # will basicaly show on the browser the uploaded file
+    return redirect(url_for('index'))
+		
+# This route is expecting a parameter containing the name
+# of a file. Then it will locate that file on the upload
+# directory and show it on the browser, so if the user uploads
+# an image, that image is going to be show after the upload
+# @app.route('/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename)	
 
+							   
 @app.route('/termekfeltoltes/', methods = ['POST'])
 def termekfeltoltes():
 	adatok = json.loads(request.data)
-	logging.warning(adatok)
+	# logging.warning(adatok)
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
 	cursor = cnx.cursor()
-	str = ("INSERT INTO Termekek "
-				   "(Nev, Leiras, Ar, Kep, Min_rendelesi_menny, Keszlet_menny, SZ_ID)"
+	string = ("INSERT INTO Termekek "
+				   "(Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, SZ_ID)"
 				   "VALUES (%s, %s, %s, %s, %s, %s, %s)")
 
-	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], 'foto.jpg', adatok['rend_menny'], adatok['keszlet_menny'], session['SZ_ID'])
+	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], 'termek.jpg', adatok['keszlet_menny'], session['SZ_ID'])
 
 	# Insert new user
-	cursor.execute(str, datas)
+	cursor.execute(string, datas)
 	emp_no = cursor.lastrowid
-
-	# Make sure data is committed to the database
 	cnx.commit()
+	
+	add_termek_kep = ("UPDATE Termekek SET KEP=%s WHERE T_ID=%s")
+	termek_kep='termek'+str(emp_no)+'.jpg'
+	cursor.execute(add_termek_kep, (termek_kep, emp_no))
+	cnx.commit()
+	
+	os.rename('static/img/termekek/termek.jpg','static/img/termekek/' + termek_kep)
+	
+	# Make sure data is committed to the database
 	cursor.close()
 	cnx.close()
 	
 	return jsonify({'success': True})
 
+# This is the path to the upload directory
+app.config['UPLOAD_FOLDER2'] = 'static/img/termekek/'
+
+@app.route('/termek_upload', methods=['POST'])
+def termek_upload():
+    # Get the name of the uploaded file
+    t_file = request.files['t_file']
+    # Check if the file is one of the allowed types/extensions
+    if t_file and allowed_file(t_file.filename):
+        # Make the filename safe, remove unsupported chars
+        # filename = secure_filename(file.filename)
+        t_filename = 'termek.jpg'
+        # Move the file form the temporal folder to
+        # the upload folder we setup
+        t_file.save(os.path.join(app.config['UPLOAD_FOLDER2'], t_filename))
+        # Redirect the user to the uploaded_file route, which
+        # will basicaly show on the browser the uploaded file
+    return redirect(url_for('termelo'))
+		
+# This route is expecting a parameter containing the name
+# of a file. Then it will locate that file on the upload
+# directory and show it on the browser, so if the user uploads
+# an image, that image is going to be show after the upload
+# @app.route('/static/img/logos/<filename>')
+def uploaded_logo_file(t_filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER2'],
+                               t_filename)
+							   
 @app.route('/termekbetoltes/', methods = ['POST'])	
 def termekbetoltes():
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
@@ -88,7 +165,7 @@ def termekbetoltes():
 	cursor.execute(select_termekek, [session['SZ_ID']])
 	cnx.commit()
 	termekek = cursor.fetchall()
-	logging.warning(termekek)
+	# logging.warning(termekek)
 	
 	cursor.execute(select_penznemek)
 	cnx.commit()
@@ -96,7 +173,7 @@ def termekbetoltes():
 	penznemek = []
 	for x in ertekek:		
 		penznemek.append({'value':x[0], 'text':x[1]})
-	logging.warning(penznemek)
+	# logging.warning(penznemek)
 	
 	cursor.execute(select_mertekegysegek)
 	cnx.commit()
@@ -104,7 +181,7 @@ def termekbetoltes():
 	mertekegysegek = []
 	for r in ertekek2:
 		mertekegysegek.append({'value':r[0], 'text':r[1]})
-	logging.warning(mertekegysegek)
+	# logging.warning(mertekegysegek)
 	
 	cursor.execute(select_kategoriak)
 	cnx.commit()
@@ -112,7 +189,7 @@ def termekbetoltes():
 	kategoriak = []
 	for r in ertekek3:
 		kategoriak.append({'value':r[0], 'text':r[1]})
-	logging.warning(kategoriak)
+	# logging.warning(kategoriak)
 	
 	cursor.close()
 	cnx.close()
@@ -138,25 +215,25 @@ def mindentermek():
 @app.route('/termekmodositas/', methods = ['POST'])
 def termekmodositas():
 	adatok = json.loads(request.data)
-	logging.warning(adatok)
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
 	cursor = cnx.cursor()
-	str = ("UPDATE Termekek SET "
-				"Nev = %s, Leiras = %s, Ar = %s, Min_rendelesi_menny = %s, Kep = %s, Keszlet_menny = %s, SZ_ID = %s "
+	string = ("UPDATE Termekek SET "
+				"Nev = %s, Leiras = %s, Ar = %s, Min_rendelesi_menny = %s, Keszlet_menny = %s, SZ_ID = %s "
 				"WHERE T_ID = %s")
-	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], 'foto.jpg', adatok['keszlet_menny'], adatok['id'], session['SZ_ID'])
-
+	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], adatok['keszlet_menny'], session['SZ_ID'], adatok['id'])
+	termek_kep='termek'+str(adatok['id'])+'.jpg'
+	os.remove('static/img/termekek/' + termek_kep)
+	logging.warning(termek_kep)
+	os.rename('static/img/termekek/termek.jpg','static/img/termekek/' + termek_kep)
 	try:
-		cursor.execute(str, datas)
+		cursor.execute(string, datas)
 		cnx.commit()
 	except:
 		cnx.rollback()
-		
 	cursor.close()
 	cnx.close()
 	
 	return jsonify({'success': True})
-
 	
 @app.route('/termektorles/', methods = ['POST'])	
 def termektorles():
@@ -225,19 +302,18 @@ def profilommodositas():
 	cursor.execute(str_teszt, [session['SZ_ID']])
 	cnx.commit()
 	teszt_eredmeny = cursor.fetchone()
-	logging.warning(teszt_eredmeny)
+	logo='logo'+str(session['SZ_ID'])+'.jpg'
 	
 	if teszt_eredmeny is None :
 		insert_profilom = ("INSERT INTO Termelok (SZ_ID, Kep, Kiszallitasi_dij, Min_vasarloi_kosar, R_ID, P_ID) VALUES (%s, %s, %s, %s, %s, %s) ")
-		datas = (session['SZ_ID'], adatok['kep'], adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'])
-		logging.warning(datas)
-		logging.warning(adatok['selected'])
+		datas = (session['SZ_ID'], logo, adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'])
 		try:
 			cursor.execute(insert_profilom, datas)
 			cnx.commit()
 		except:
 			cnx.rollback()
-			
+		os.rename('static/img/logos/logo.jpg','static/img/logos/'+logo)
+		cnx.commit()
 		#for i in adatok['nap']:
 			# insert_napok = ("INSERT INTO Kiszallitasi_napok (SZ_ID, N_ID) VALUES (%s, %s)")
 			# datas = (session['SZ_ID'], adatok['nap']['i'])
@@ -249,8 +325,8 @@ def profilommodositas():
 				# cnx.rollback()
 	
 	else:
-		update_profilom = ("UPDATE Termelok SET Kep = %s, Kiszallitasi_dij = %s, Min_vasarloi_kosar = %s, R_ID = %s, P_ID = %s WHERE SZ_ID = %s")
-		datas = (adatok['kep'], adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'], session['SZ_ID'])
+		update_profilom = ("UPDATE Termelok SET Kiszallitasi_dij = %s, Min_vasarloi_kosar = %s, R_ID = %s, P_ID = %s WHERE SZ_ID = %s")
+		datas = (adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'], session['SZ_ID'])
 		logging.warning(datas)
 		logging.warning(adatok['selected'])
 		try:
@@ -259,6 +335,10 @@ def profilommodositas():
 		except:
 			cnx.rollback()
 			
+		os.remove('static/img/logos/' + logo)
+		logging.warning(logo)
+		os.rename('static/img/logos/logo.jpg','static/img/logos/' + logo)	
+		
 		for i in adatok['selected']:
 			insert_napok = ("INSERT INTO Kiszallitasi_napok (SZ_ID, N_ID) VALUES (%s, %s)")
 			datas = (session['SZ_ID'], adatok['selected']['i'])
@@ -273,7 +353,132 @@ def profilommodositas():
 	cnx.close()
 	
 	return jsonify({'success': True})
+	
+@app.route('/logo_upload', methods=['POST'])
+def logo_upload():
+    # Get the name of the uploaded file
+    l_file = request.files['l_file']
+    # Check if the file is one of the allowed types/extensions
+    if l_file and allowed_file(l_file.filename):
+        # Make the filename safe, remove unsupported chars
+        # filename = secure_filename(file.filename)
+        l_filename = 'logo.jpg'
+        # Move the file form the temporal folder to
+        # the upload folder we setup
+        l_file.save(os.path.join(app.config['UPLOAD_FOLDER'], l_filename))
+        # Redirect the user to the uploaded_file route, which
+        # will basicaly show on the browser the uploaded file
+    return redirect(url_for('termelo'))
+		
+# This route is expecting a parameter containing the name
+# of a file. Then it will locate that file on the upload
+# directory and show it on the browser, so if the user uploads
+# an image, that image is going to be show after the upload
+# @app.route('/static/img/logos/<filename>')
+def uploaded_logo_file(l_filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               l_filename)
+							   
+@app.route('/promtermekekbetoltes/', methods = ['POST'])	
+def promtermekekbetoltes():
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
 
+	select_termekek = ("SELECT T_ID, Nev FROM Termekek WHERE SZ_ID = %s")
+	select_promtermekek_regiadatai = ("SELECT T_ID, Nev, Ar, Penznemek.P_ID, Penznem FROM Termekek, Penznemek WHERE T_ID in (SELECT Promociok.T_ID FROM Termekek, Promociok WHERE Termekek.T_ID = Promociok.T_ID AND Termekek.SZ_ID = %s) AND Penznemek.P_ID = Termekek.P_ID")
+	select_promtermekek = ("SELECT * FROM Promociok WHERE T_ID in (SELECT Promociok.T_ID FROM Termekek, Promociok WHERE Termekek.T_ID = Promociok.T_ID AND Termekek.SZ_ID = %s)")
+	select_promtermekekuj = ("SELECT T_ID,Ar FROM Promociok WHERE T_ID in (SELECT Promociok.T_ID FROM Termekek, Promociok WHERE Termekek.T_ID = Promociok.T_ID AND Termekek.SZ_ID = %s)")
+	select_penznemek = ("SELECT P_ID, Penznem FROM Penznemek")
+	
+	cursor.execute(select_termekek, [session['SZ_ID']])
+	cnx.commit()
+	termekek_ertekek = cursor.fetchall()
+	termekek = []
+	for t in termekek_ertekek:
+		termekek.append({'value':t[0], 'text':t[1]})
+	logging.warning(termekek)
+	
+	cursor.execute(select_promtermekek, [session['SZ_ID']])
+	cnx.commit()
+	promtermekek = cursor.fetchall()
+	cursor.execute(select_promtermekekuj, [session['SZ_ID']])
+	cnx.commit()
+	promtermekekuj = cursor.fetchall()
+	
+	logging.warning(promtermekek)
+	datumok = []
+	# for i in promtermekek:
+		# datumk = promtermekek[i][2] 
+		# ujdatumk = datumk.isoformat() 
+		# datumok.append(ujdatumk)
+		# datumv = promtermekek[i][2] 
+		# ujdatumv = datumv.isoformat() 
+		# datumok.append(ujdatumv)
+	datum = promtermekek[0][2] 
+	ujdatum = datum.isoformat() 
+	datumok.append(ujdatum)
+	datum = promtermekek[0][3] 
+	ujdatum = datum.isoformat() 
+	datumok.append(ujdatum)
+	datum = promtermekek[1][2] 
+	ujdatum = datum.isoformat() 
+	datumok.append(ujdatum)
+	datum = promtermekek[1][3] 
+	ujdatum = datum.isoformat() 
+	datumok.append(ujdatum)
+	datum = promtermekek[2][2] 
+	ujdatum = datum.isoformat() 
+	datumok.append(ujdatum)
+	datum = promtermekek[2][3] 
+	ujdatum = datum.isoformat() 
+	datumok.append(ujdatum)
+	logging.warning(datumok)
+	
+	cursor.execute(select_penznemek)
+	cnx.commit()
+	ertekek = cursor.fetchall()
+	penznemek = []
+	for x in ertekek:		
+		penznemek.append({'value':x[0], 'text':x[1]})
+	logging.warning(penznemek)
+	
+	cursor.execute(select_promtermekek_regiadatai, [session['SZ_ID']])
+	cnx.commit()
+	promtermekek_regiadatai = cursor.fetchall()
+	logging.warning(promtermekek_regiadatai)
+	
+	cursor.close()
+	cnx.close()
+	return jsonify({'termekek':termekek, 'promtermekek':promtermekekuj, 'penznemek':penznemek, 'datumok':datumok, 'promtermekek_regiadatai':promtermekek_regiadatai})	
+
+	
+@app.route('/promtermekekmodositas/', methods = ['POST'])
+def promtermekekmodositas():
+	adatok = json.loads(request.data)
+	logging.warning(adatok)
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+	
+	# itt elobb kitorlom a promocios termekeket, mert mindig csak max 3 lehet egy szemelynek
+	torles = ("DELETE FROM Promociok WHERE T_ID in ( SELECT * FROM (SELECT Promociok.T_ID FROM Termekek,Promociok WHERE Termekek.T_ID = Promociok.T_ID AND Termekek.SZ_ID = %s)tmpTabla )")
+	cursor.execute(torles, [session['SZ_ID']])
+	cnx.commit()
+	
+	for i in [0,1,2]:
+		# a termek id-jat a nevi adat alatt talalom
+		insert_promtermek = ("INSERT INTO Promociok (T_ID, Ar, Periodus_k, Periodus_v) VALUES (%s, %s, %s, %s) ")
+		datas = (adatok["nev"+str(i)], adatok["ar"+str(i)], adatok["kezdeti_d"+str(i)], adatok["vegso_d"+str(i)])
+		logging.warning(datas)
+		try:
+			cursor.execute(insert_promtermek, datas)
+			cnx.commit()
+		except:
+			cnx.rollback()
+		
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({'success': True})
 	
 	
 @app.route('/login/', methods = ['POST'])	

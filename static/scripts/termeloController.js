@@ -8,6 +8,7 @@ termeloApp.controller('loginSwitchDivController', [
     '$scope', '$http', '$window',                             
 	function loginSwitchDivController($scope, $http, $window) {
 	
+		$scope.logoid = localStorage.getItem('ID');
 		$scope.nev = localStorage.getItem('Nev');
 		$scope.megrendelo = localStorage.getItem('Megrendelo');
 		$scope.navigationOptionSelected01 = 'kezdolap';	// Kezdolap
@@ -63,7 +64,7 @@ termeloApp.controller('termekFeltoltesController', [
 		$scope.vizsgalKeszlet_menny = function(data, id) {
 			var filter = /-/;
 
-			if (filter.test(data.trim())) {
+			if (filter.test(data)) {
 				return "A beírt mennyiség nem megfelelő.";
 			}
 		};
@@ -94,6 +95,7 @@ termeloApp.controller('termekFeltoltesController', [
 					$scope.success = data.success;
 					alert('Sikeres feltöltés.');
 				});
+				document.getElementById('clickMe').click();
 			}
 			if($scope.ujtermek == 1) {
 				$http.post('/termekfeltoltes/', data)
@@ -101,6 +103,7 @@ termeloApp.controller('termekFeltoltesController', [
 					$scope.success = data.success;
 					alert('Sikeres feltöltés.');
 				});
+				document.getElementById('clickMe').click();
 				$scope.ujtermek == 0;
 			}
 			
@@ -183,13 +186,12 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 	
 	// profilom lementese
 	$scope.profilomMentes = function(data) {
-		datas = { 'data': data, 'selected': $scope.selected };
-		console.log("Ez: " + $scope.selected + " "+ datas['selected'] );
-		$http.post('/profilommodositas/', datas)
+		$http.post('/profilommodositas/', data)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');
 		});	
+		document.getElementById('click2').click();
 	}; 
 	
 	$scope.vizsgalEmail = function(data) {
@@ -199,24 +201,48 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 		}
 	};
 	
-	$scope.vizsgalKep = function(data) {
-		var filter1 = /\.jpg$/;
-		var filter2 = /\.png$/;
-		var filter3 = /\.gif$/;
-		if (!((filter1.test(data)) || (filter2.test(data)) || (filter3.test(data)))) {
-			return "A megadott kép kiterjesztése .jpg vagy .png vagy .gif kell legyen!";
-		}
-	};
-	
 	$scope.vizsgalAr = function(data) {
-		var filter = /-/;
+		var filter = /^[0-9]+[\.]?[0-9]*$/;
 
-		if (filter.test(data)) {
+		if (!filter.test(data)) {
 			return "A beírt ár nem megfelelő.";
 		}
 	};
 	
 }]);
+
+termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$filter',
+	function promociostermek_Controller($http, $scope, $filter) {
+	
+		// eddig feltoltott promocios termekek betoltese
+		$scope.termekekPromBetolt = function() {  
+			$http.post('/promtermekekbetoltes/', {})
+			.success(function(data, status, headers, config) {
+				$scope.termekek = data['termekek'];
+				$scope.promtermekek = data['promtermekek'];
+				$scope.datumok = data['datumok'];
+				$scope.penznemek = data['penznemek'];
+				$scope.promtermekek_regiadatai = data['promtermekek_regiadatai']
+			});
+		};
+		
+		// promocios termekek mentese
+		$scope.promtermekMent = function(data) {
+			$http.post('/promtermekekmodositas/', data)
+			.success(function(data, status, headers, config) {
+				$scope.success = data.success;
+				alert('Sikeres feltöltés.');
+			});
+			$scope.termekekPromBetolt();
+		};
+		
+		/* $scope.showStatus = function(promtermekek_regiadatai[szam][1]) {
+			var selected = [];
+			selected = $filter('filter')($scope.termekek, {value: promtermekek_regiadatai[szam][1]});
+			return selected.length ? selected[0].text : 'Not set';
+		}; */ 
+	}	
+]);
 
 termeloApp.controller('UzenetKuldesCtrl', function($scope, $filter, $http) {
 	$scope.uzenetKuldes = function() {

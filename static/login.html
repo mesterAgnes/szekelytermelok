@@ -45,7 +45,7 @@
 				<h1>Regisztráció</h1>
 				
 				<div data-ng-controller="regisztracioController">
-				<form name="regisztracio" >
+				<form name="regisztracio" action="/upload" method="post" enctype="multipart/form-data">
 					<table>
 						<tr>
 							<td>Név: </td>
@@ -102,7 +102,7 @@
 						</tr>
 						<tr> 
 							<td>Logó: </td>
-							<td><input type="file" id="logo"/></td>
+							<td><input type="file" name="file" id="logo"/></td>
 						</tr>
 					</table>
 					<!--<input type="submit" name="submit" data-ng-disabled="regisztracio.$invalid || passError || radioError" value="Regisztráció">

@@ -61,7 +61,7 @@
 					<h1>Termekek</h1>
 					<div>
 						<div id="termek" data-ng-repeat="termek in termekadatok">
-							<img data-ng-src="{{'kepek/'+termek['0']%4+'_thumb.jpg'}}" data-ng-click="showTermek(termek)">
+							<img id="termekKep" data-ng-src="{{'img/termekek/'+termek['5']}}" data-ng-click="showTermek(termek)">
 							<div>
 								<p>Név:{{termek["1"]}}</p>
 								<p>Leírás:{{termek["2"]}}</p>
@@ -71,7 +71,7 @@
 					</div>
 				</div>
 				<div data-ng-show="termekLeirasVisible">
-					<img data-ng-src="{{'kepek/'+kivalasztottTermek['0']%4+'.jpg'}}" data-ng-click="termekekBetoltes()">
+					<img data-ng-src="{{'img/termekek/'+kivalasztottTermek['5']}}" data-ng-click="termekekBetoltes()">
 				</div>
 			</div>
 			

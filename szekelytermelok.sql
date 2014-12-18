@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `Termekek`(
 	`Leiras` varchar(300) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
 	`Ar` int NOT NULL,
 	`Min_rendelesi_menny` int NOT NULL,
-	`Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+	`Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci,
 	`Keszlet_menny` int(11) NOT NULL,
 	`ME_ID` int references Mertekegysegek(ME_ID),
 	`K_ID` int references Kategoriak(K_ID),
@@ -162,6 +162,10 @@ INSERT INTO `Szemelyek` (`SZ_ID`, `Nev`, `Cim`, `Tel`, `Email`, `Jelszo`, `Admin
 (2, 'Sarga Maria', 'Szekelykeresztur, Teto utca 45', '0745035255', 'marineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 0),
 (3, 'Szeles Sara', 'Csikszereda, Sugarut 19', '0748569854', 'sarineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 1);
 
+INSERT INTO `Termelok` (`SZ_ID`, `Kep`, `Kiszallitasi_dij`, `Min_vasarloi_kosar`, `R_ID`, `P_ID`) VALUES
+(2, 'logo2.jpg',15, 30, 1, 1),
+(3, 'logo3.jpg',12, 50, 3, 2);
+
 INSERT INTO `Mertekegysegek` (`ME_ID`, `Nev`) VALUES
 (1, 'g'),
 (2, 'db'),
@@ -176,8 +180,8 @@ INSERT INTO `Penznemek` (`P_ID`, `Penznem`) VALUES
 (2, 'EURO');
 
 INSERT INTO `Termekek` (`T_ID`, `Nev`, `Leiras`, `Ar`, `Min_rendelesi_menny`, `Kep`, `Keszlet_menny`, `ME_ID`, `K_ID`, `P_ID`, `SZ_ID`) VALUES
-(1, 'Hazi szeles laska', '3 tojasos', 5, 1, '', 10, 3, 2, 1, 2),
-(2, 'Juhturo', 'Fiss es finom', 12, 1, '', 20, 2, 1, 1, 3);
+(1, 'Hazi szeles laska', '3 tojasos', 5, 1, 'termek1.jpg', 10, 3, 2, 1, 2),
+(2, 'Juhturo', 'Fiss es finom', 12, 1, 'termek2.jpg', 20, 2, 1, 1, 3);
 
 INSERT INTO `Napok` (`N_ID`, `Nev`) VALUES 
 (1, 'Hétfo'),
