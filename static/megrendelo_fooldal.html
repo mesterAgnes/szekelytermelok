@@ -49,7 +49,7 @@
 		<div id="bodyDiv01">
 		<nav id="navigationStrip03">   <!-- oldalsomenu -->
 			<ul id="navigationStripUl03">
-				<button data-ng-click="termekekBetoltes()"> Termekek </button> <br>
+				<button id="termekBetoltes" data-ng-click="termekekBetoltes()"> Termekek </button> <br>
 				<button data-ng-click="navigationStrip03_Clicked('m_promocios_termekek')"> Promóciós termékek </button> <br>
 			</ul>
 		</nav>
@@ -70,9 +70,11 @@
 						</div>
 					</div>
 				</div>
-				<div data-ng-show="termekLeirasVisible">
+				
+				<!--<div data-ng-show="termekLeirasVisible">
 					<img data-ng-src="{{'img/termekek/'+kivalasztottTermek['5']}}" data-ng-click="termekekBetoltes()">
-				</div>
+				</div>-->
+
 			</div>
 			
 			<div data-ng-show="navigationOptionSelected03=='m_promocios_termekek'">

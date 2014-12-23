@@ -74,12 +74,12 @@
 			<div data-ng-show="navigationOptionSelected02=='profilom'">
 				<h1>Profilom</h1>
 				<div ng-controller="profilomController" ng-init="profilomBetolt()">
-					<div>
+					<div ng-show="profilom_form.$visible">
 						<!-- modosithato kep -->
 						<span class="title"> Logó: </span>
 							<form name="logo_uload" action="/logo_upload" method="post" enctype="multipart/form-data" > 
 								<input type="file" class="btn btn-primary" name="l_file" />
-								<input type="submit" value="Upload2" id="click2"/>
+								<input type="submit" value="Upload2" id="clickProfil"/>
 							</form>
 					</div>
 					<form editable-form name="profilom_form" onbeforesave="profilomMentes($data)">
@@ -230,7 +230,7 @@
 						<span id="visible_span" ng-show="rowform.$visible" >
 								<form name="termek_upload" action="/termek_upload" method="post" enctype="multipart/form-data" >
 									<input type="file" class="btn btn-primary" name="t_file" />
-									<input type="submit" value="Upload" id="clickMe"/>
+									<input type="submit" value="Upload" id="click{{termek[0]}}"/>
 								</form>
 							</span>
 						</td>

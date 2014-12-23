@@ -1,15 +1,46 @@
 var loginApp = angular.module('loginApp', []); 
+var megrendeloApp = angular.module('megrendeloApp', []); 
 
 
-loginApp.controller('loginSwitchDivController', [              
-    '$scope', '$http',                             
-	function loginSwitchDivController($scope, $http) {
+megrendeloApp.controller('loginSwitchDivController', [              
+    '$scope', '$http', '$window',                       
+	function loginSwitchDivController($scope, $http, $window) {
+		$scope.nev = localStorage.getItem('Nev');
+		$scope.termelo = localStorage.getItem('Termelo');
 
-		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
-		$scope.bejelentkezes = {};
-		$scope.navigationStrip01_Clicked = function(optionString) {
-			$scope.navigationOptionSelected = optionString;
+		$scope.termekadatok = {};
+		$scope.navigationOptionSelected01 = 'kezdolap';	// Kezdolap
+		$scope.kosar = {};
+		$scope.navigationStrip01_Clicked = function(optionString01) {
+			$scope.navigationOptionSelected01 = optionString01;
 		};
+		$scope.navigationOptionSelected03 = 'm_termekek';	// Profilom
+		$scope.uzenetkuldes = {};
+		$scope.navigationStrip03_Clicked = function(optionString03) {
+			$scope.navigationOptionSelected03 = optionString03;
+		};
+		$scope.termekekBetoltes = function() {
+			$http.post('/mindentermek/', {})
+			.success(function(data, status, headers, config) {
+				$scope.termekadatok = data['termekek']
+				$scope.navigationStrip03_Clicked('m_termekek');
+				$scope.termekLeirasVisible = false;
+			});
+
+		}
+		$scope.logout = function() {
+			$window.location.href = '/logout';
+		};
+		$scope.termeloOldal = function() {
+			$window.location.href = '/termelo';
+		}
+		
+		$scope.termekLeirasVisible = false;
+		$scope.showTermek = function(termek) {
+			$scope.termekLeirasVisible = true;
+			$scope.kivalasztottTermek = termek;
+		}
+
 	}
 
 ]);  
@@ -79,7 +110,6 @@ function loginStoreSession( user ) {
 loginApp.controller('bejelentkezesController', [              
 	'$http','$scope', '$window',
 	function bejelentkezesController($http, $scope, $window) {
-		
 		$scope.log={};
 		$scope.login = function() {
 			loginAdatok = angular.copy($scope.log);

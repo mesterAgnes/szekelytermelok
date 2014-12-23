@@ -95,7 +95,7 @@ termeloApp.controller('termekFeltoltesController', [
 					$scope.success = data.success;
 					alert('Sikeres feltöltés.');
 				});
-				document.getElementById('clickMe').click();
+				document.getElementById('click'+data['id']).click();
 			}
 			if($scope.ujtermek == 1) {
 				$http.post('/termekfeltoltes/', data)
@@ -103,7 +103,7 @@ termeloApp.controller('termekFeltoltesController', [
 					$scope.success = data.success;
 					alert('Sikeres feltöltés.');
 				});
-				document.getElementById('clickMe').click();
+				document.getElementById('click').click();
 				$scope.ujtermek == 0;
 			}
 			
@@ -191,7 +191,7 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');
 		});	
-		document.getElementById('click2').click();
+		document.getElementById('clickProfil').click();
 	}; 
 	
 	$scope.vizsgalEmail = function(data) {

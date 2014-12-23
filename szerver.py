@@ -222,6 +222,7 @@ def termekmodositas():
 				"WHERE T_ID = %s")
 	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], adatok['keszlet_menny'], session['SZ_ID'], adatok['id'])
 	termek_kep='termek'+str(adatok['id'])+'.jpg'
+	
 	os.remove('static/img/termekek/' + termek_kep)
 	logging.warning(termek_kep)
 	os.rename('static/img/termekek/termek.jpg','static/img/termekek/' + termek_kep)
