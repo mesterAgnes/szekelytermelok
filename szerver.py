@@ -400,47 +400,47 @@ def promtermekekbetoltes():
 	
 	cursor.execute(select_promtermekek, [session['SZ_ID']])
 	cnx.commit()
-	promtermekek = cursor.fetchall()
+	#promtermekek = cursor.fetchall()
+	promtermekek = cursor.fetchone()
+	
 	cursor.execute(select_promtermekekuj, [session['SZ_ID']])
 	cnx.commit()
 	promtermekekuj = cursor.fetchall()
 	
 	logging.warning(promtermekek)
 	datumok = []
-	# for i in promtermekek:
-		# datumk = promtermekek[i][2] 
-		# ujdatumk = datumk.isoformat() 
-		# datumok.append(ujdatumk)
-		# datumv = promtermekek[i][2] 
-		# ujdatumv = datumv.isoformat() 
-		# datumok.append(ujdatumv)
-	datum = promtermekek[0][2] 
-	ujdatum = datum.isoformat() 
-	datumok.append(ujdatum)
-	datum = promtermekek[0][3] 
-	ujdatum = datum.isoformat() 
-	datumok.append(ujdatum)
-	datum = promtermekek[1][2] 
-	ujdatum = datum.isoformat() 
-	datumok.append(ujdatum)
-	datum = promtermekek[1][3] 
-	ujdatum = datum.isoformat() 
-	datumok.append(ujdatum)
-	datum = promtermekek[2][2] 
-	ujdatum = datum.isoformat() 
-	datumok.append(ujdatum)
-	datum = promtermekek[2][3] 
-	ujdatum = datum.isoformat() 
-	datumok.append(ujdatum)
+	if promtermekek is not None:
+		# for i in promtermekek:
+			# datumk = promtermekek[i][2] 
+			# ujdatumk = datumk.isoformat() 
+			# datumok.append(ujdatumk)
+			# datumv = promtermekek[i][2] 
+			# ujdatumv = datumv.isoformat() 
+			# datumok.append(ujdatumv)
+		cursor.execute(select_promtermekek, [session['SZ_ID']])
+		cnx.commit()
+		promtermekek = cursor.fetchall()
+		
+		logging.warning(promtermekek)
+		datum = promtermekek[0][2] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[0][3] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[1][2] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[1][3] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[2][2] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[2][3] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
 	logging.warning(datumok)
-	
-	cursor.execute(select_penznemek)
-	cnx.commit()
-	ertekek = cursor.fetchall()
-	penznemek = []
-	for x in ertekek:		
-		penznemek.append({'value':x[0], 'text':x[1]})
-	logging.warning(penznemek)
 	
 	cursor.execute(select_promtermekek_regiadatai, [session['SZ_ID']])
 	cnx.commit()
@@ -449,7 +449,7 @@ def promtermekekbetoltes():
 	
 	cursor.close()
 	cnx.close()
-	return jsonify({'termekek':termekek, 'promtermekek':promtermekekuj, 'penznemek':penznemek, 'datumok':datumok, 'promtermekek_regiadatai':promtermekek_regiadatai})	
+	return jsonify({'termekek':termekek, 'promtermekek':promtermekekuj, 'datumok':datumok, 'promtermekek_regiadatai':promtermekek_regiadatai})	
 
 	
 @app.route('/promtermekekmodositas/', methods = ['POST'])
