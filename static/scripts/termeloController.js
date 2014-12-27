@@ -150,9 +150,6 @@ termeloApp.controller('termekFeltoltesController', [
 termeloApp.controller('profilomController', [ '$http', '$scope', '$filter', 
 	function profilom_Controller($http, $scope, $filter) {
 	
-	$scope.profilom_adatok = { nap: []};
-	$scope.selected = [];
-	
 	$scope.napok = [
 		{value:1, text: 'Hétfő'},
 		{value:2, text: 'Kedd'},
@@ -162,15 +159,18 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 		{value:6, text: 'Szombat'},
 		{value:7, text: 'Vasárnap'}
 	];
+
+	$scope.profilom = { kiszallitasi_napok: []};
+
 	
 	$scope.showNapok = function() {
-		$scope.selected = [];
+		var selected = [];
 		angular.forEach($scope.napok, function(n) {
-			if ($scope.profilom_adatok.nap.indexOf(n.value) >= 0) {
-				$scope.selected.push(n.text);
+			if ($scope.profilom.kiszallitasi_napok.indexOf(n.value) >= 0) {
+				selected.push(n.text);
 			}
 		});
-		return $scope.selected.length ? $scope.selected.join(', ') : 'Nincs kiválasztva';
+		return selected.length ? selected.join(', ') : 'Nincs kiválasztva';
 	};
 	
 	// profilom eddig kitoltott adatainak betoltese
@@ -185,8 +185,9 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 	};
 	
 	// profilom lementese
-	$scope.profilomMentes = function(data) {
-		$http.post('/profilommodositas/', data)
+	$scope.profilomMentes = function() {
+
+		$http.post('/profilommodositas/', $scope.profilom)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');

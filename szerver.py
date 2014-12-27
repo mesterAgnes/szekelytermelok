@@ -4,7 +4,7 @@ from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash, json, jsonify, send_from_directory
 from werkzeug import secure_filename
 	 
-import os
+import os, os.path
 import logging
 import mysql.connector
 import smtplib
@@ -263,8 +263,7 @@ def profilombetoltes():
 	
 	cursor.execute(select_profilom, [session['SZ_ID']])
 	cnx.commit()
-	profilom = cursor.fetchone()
-	logging.warning(profilom)
+	profilom_adatok = cursor.fetchone()
 	
 	cursor.execute(select_penznemek)
 	cnx.commit()
@@ -282,14 +281,32 @@ def profilombetoltes():
 		rendszeresseg.append({'value':r[0], 'text':r[1]})
 	logging.warning(rendszeresseg)
 	
-	select_profilom_adatok = ("SELECT * FROM Termelok WHERE SZ_ID = %s")
+	select_profilom_adatok = ("SELECT Kiszallitasi_dij, Min_vasarloi_kosar, R_ID, P_ID FROM Termelok WHERE SZ_ID = %s")
 	cursor.execute(select_profilom_adatok, [session['SZ_ID']])
 	cnx.commit()
 	profilom_adat = cursor.fetchone()
 	logging.warning(profilom_adat)
+
+	select_kiszallitasi_napok = ("SELECT N_ID FROM Kiszallitasi_napok WHERE SZ_ID = %s")
+	cursor.execute(select_kiszallitasi_napok, [session['SZ_ID']])
+	cnx.commit()
+	ertekek3 = cursor.fetchall()
+	kiszall_napok = [r[0] for r in ertekek3]
 	
 	cursor.close()
 	cnx.close()
+
+	profilom = {
+		'nev': profilom_adatok[1],
+		'cim': profilom_adatok[2],
+		'tel': profilom_adatok[3],
+		'email': profilom_adatok[4],
+		'kiszallitasi_dij': profilom_adat[0],
+		'min_kosar': profilom_adat[1],
+		'rendszeresseg': profilom_adat[2],
+		'penznem': profilom_adat[3],
+		'kiszallitasi_napok': kiszall_napok
+	}
 	return jsonify({'profilom':profilom, 'penznemek':penznemek, 'rendszeresseg':rendszeresseg, 'profilom_adat':profilom_adat})	
 
 @app.route('/profilommodositas/', methods = ['POST'])
@@ -307,7 +324,7 @@ def profilommodositas():
 	
 	if teszt_eredmeny is None :
 		insert_profilom = ("INSERT INTO Termelok (SZ_ID, Kep, Kiszallitasi_dij, Min_vasarloi_kosar, R_ID, P_ID) VALUES (%s, %s, %s, %s, %s, %s) ")
-		datas = (session['SZ_ID'], logo, adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'])
+		datas = (session['SZ_ID'], logo, adatok['kiszallitasi_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'])
 		try:
 			cursor.execute(insert_profilom, datas)
 			cnx.commit()
@@ -327,28 +344,31 @@ def profilommodositas():
 	
 	else:
 		update_profilom = ("UPDATE Termelok SET Kiszallitasi_dij = %s, Min_vasarloi_kosar = %s, R_ID = %s, P_ID = %s WHERE SZ_ID = %s")
-		datas = (adatok['kiszall_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'], session['SZ_ID'])
+		datas = (adatok['kiszallitasi_dij'], adatok['min_kosar'], adatok['rendszeresseg'], adatok['penznem'], session['SZ_ID'])
 		logging.warning(datas)
-		logging.warning(adatok['selected'])
 		try:
 			cursor.execute(update_profilom, datas)
 			cnx.commit()
 		except:
 			cnx.rollback()
 			
-		os.remove('static/img/logos/' + logo)
-		logging.warning(logo)
-		os.rename('static/img/logos/logo.jpg','static/img/logos/' + logo)	
+		if os.path.exists('static/img/logos/' + logo):
+			os.remove('static/img/logos/' + logo)
+			logging.warning(logo)
+		if os.path.exists('static/img/logos/logo.jpg'):
+			os.rename('static/img/logos/logo.jpg','static/img/logos/' + logo)	
 		
-		for i in adatok['selected']:
-			insert_napok = ("INSERT INTO Kiszallitasi_napok (SZ_ID, N_ID) VALUES (%s, %s)")
-			datas = (session['SZ_ID'], adatok['selected']['i'])
-			logging.warning(datas)
-			try:
-				cursor.execute(insert_napok, datas)
-				cnx.commit()
-			except:
-				cnx.rollback()	
+	cursor.execute("DELETE FROM Kiszallitasi_napok WHERE SZ_ID = %s", [session['SZ_ID']])
+	logging.warning("XXXXXXXXXXXXXXXXXx:" + str(adatok['kiszallitasi_napok']))
+	for nap_id in adatok['kiszallitasi_napok']:
+		insert_napok = ("INSERT INTO Kiszallitasi_napok (SZ_ID, N_ID) VALUES (%s, %s)")
+		datas = (session['SZ_ID'], nap_id)
+		logging.warning(datas)
+		try:
+			cursor.execute(insert_napok, datas)
+			cnx.commit()
+		except:
+			cnx.rollback()	
 
 	cursor.close()
 	cnx.close()
