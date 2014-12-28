@@ -1,0 +1,123 @@
+html{
+	margin:0;
+	padding:0;
+}
+body{
+	margin:0;
+	padding:0;
+	background:#F1F1F1;
+}
+div#bodyDiv1{
+	width:90%;
+	min-height:600px;	
+	
+	margin:0 auto;
+	padding-bottom:70px;
+	overflow:hidden;
+	
+	background:white;
+	box-shadow:0px 10px 20px 5px #d3d3d3;
+}
+nav#navigationStrip1{
+	position:fixed;
+	z-index:1;
+	
+	height:50px;	
+	width:90%;
+	//text-align:center;
+	//box-shadow:0 5px 3px 1px #d3d3d3;
+	border-bottom:thin solid gray;
+	background:#d3d3d3;
+}
+nav#navigationStrip1 button{
+	width:130px;
+	height:40px;
+	margin-top:11px;
+	background:white;
+	border:1px solid #696969;
+	//border-bottom-color:rgba(0,0,0,0);
+	font:500 1em calibri;
+	color:#696969;
+	
+	transition:all 0.2s;
+}
+nav#navigationStrip1 button:hover{
+	background:#696969;
+	border-color:rgba(0,0,0,0);
+	color:white;
+}
+nav#navigationStrip1 button:focus{
+	outline:none;
+	border-color:white;
+}
+nav#navigationStrip1 button#selected{
+	border:1px solid #696969;
+	border-bottom-color:white;
+}
+span#felhasznaloDiv{
+	display:block;
+	position:absolute;
+	right:10px;
+	top:50%;
+	letter-spacing:2px;
+	font:800 1em calibri;
+	
+}
+nav#navigationStrip2{
+	position:fixed;	
+	width:15%;
+	height:80%;
+	text-align:left;
+
+	border-right:thin solid gray;
+	
+	overflow:hidden;
+}
+nav#navigationStrip2 button{
+	width:80%;
+	height:40px;
+	margin-top:11px;
+	background:gray;
+	border:none;
+	font:500 1em calibri;
+	color:white;
+	
+	text-align:left;
+	padding-left:10px;
+	
+	transition:all 0.2s;
+}
+nav#navigationStrip2 button:hover{
+	width:90%;
+	background:rgb(150,150,150);
+	color:black;
+}
+nav#navigationStrip2 button:focus{
+	outline:none;
+	border-right:2px solid black;
+	color:white;
+}
+nav#navigationStrip2 button#selected{
+	width:90%;
+	outline:none;
+	border-right:2px solid black;
+	color:white;
+}
+div#mainDiv{
+	margin-top:70px;
+	width:100%;
+ }
+h1.opcioCim{
+	margin-left:1.66%;
+}
+div#innerMainDiv{
+	margin-left:16.66%;
+	width:83.34%;
+	height:100%;
+	border:1px solid white;
+ }
+ div#termekekContainer{
+	width:100%;
+	height:100%;
+	//border:1px solid red;
+ }

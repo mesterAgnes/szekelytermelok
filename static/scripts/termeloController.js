@@ -11,12 +11,14 @@ termeloApp.controller('loginSwitchDivController', [
 		$scope.logoid = localStorage.getItem('ID');
 		$scope.nev = localStorage.getItem('Nev');
 		$scope.megrendelo = localStorage.getItem('Megrendelo');
-		$scope.navigationOptionSelected01 = 'kezdolap';	// Kezdolap
-		$scope.navigationStrip01_Clicked = function(optionString01) {
-			$scope.navigationOptionSelected01 = optionString01;
+		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
+		jQuery( "button#kezdolap" ).attr("id","selected");
+		
+		$scope.navigationStrip1_Clicked = function(option) {
+			$scope.navigationOptionSelected = option;
 		};
-		$scope.navigationStrip02_Clicked = function(optionString02) {
-			$scope.navigationOptionSelected02 = optionString02;
+		$scope.navigationStrip2_Clicked = function(option) {
+			$scope.navigationOptionSelected = option;
 		};
 		$scope.logout = function() {
 			$window.location.href = '/logout';
@@ -150,6 +152,9 @@ termeloApp.controller('termekFeltoltesController', [
 termeloApp.controller('profilomController', [ '$http', '$scope', '$filter', 
 	function profilom_Controller($http, $scope, $filter) {
 	
+	$scope.profilom_adatok = { nap: []};
+	$scope.selected = [];
+	
 	$scope.napok = [
 		{value:1, text: 'Hétfő'},
 		{value:2, text: 'Kedd'},
@@ -159,18 +164,15 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 		{value:6, text: 'Szombat'},
 		{value:7, text: 'Vasárnap'}
 	];
-
-	$scope.profilom = { kiszallitasi_napok: []};
-
 	
 	$scope.showNapok = function() {
-		var selected = [];
+		$scope.selected = [];
 		angular.forEach($scope.napok, function(n) {
-			if ($scope.profilom.kiszallitasi_napok.indexOf(n.value) >= 0) {
-				selected.push(n.text);
+			if ($scope.profilom_adatok.nap.indexOf(n.value) >= 0) {
+				$scope.selected.push(n.text);
 			}
 		});
-		return selected.length ? selected.join(', ') : 'Nincs kiválasztva';
+		return $scope.selected.length ? $scope.selected.join(', ') : 'Nincs kiválasztva';
 	};
 	
 	// profilom eddig kitoltott adatainak betoltese
@@ -185,9 +187,8 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 	};
 	
 	// profilom lementese
-	$scope.profilomMentes = function() {
-
-		$http.post('/profilommodositas/', $scope.profilom)
+	$scope.profilomMentes = function(data) {
+		$http.post('/profilommodositas/', data)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');
@@ -255,6 +256,23 @@ termeloApp.controller('UzenetKuldesCtrl', function($scope, $filter, $http) {
 		});
 	};
 	
+});
+
+
+termeloApp.directive('myNavigaton', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, elm, attrs) {            
+			elm.bind("click", function () {
+			alert("szia");
+				jQuery("nav#navigationStrip1 button").attr("id","");
+				jQuery("nav#navigationStrip2 button").attr("id","");
+				
+				var jqueryElm = $(elm[0]);
+				$(jqueryElm).attr("id","selected");
+			});
+		}
+    };
 });
 
 

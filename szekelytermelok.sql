@@ -158,9 +158,9 @@ CREATE TABLE IF NOT EXISTS `Promociok`(
 --
 
 INSERT INTO `Szemelyek` (`SZ_ID`, `Nev`, `Cim`, `Tel`, `Email`, `Jelszo`, `Admin`, `Termelo`, `Megrendelo`) VALUES
-(1, 'Toth Pal', 'Kezdiszentlelek, Patko utca 5.', '0722568945', 'tothpali@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 0, 1),
-(2, 'Sarga Maria', 'Szekelykeresztur, Teto utca 45', '0745035255', 'marineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 0),
-(3, 'Szeles Sara', 'Csikszereda, Sugarut 19', '0748569854', 'sarineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 1);
+(1, 'Tóth Pál', 'Kézdiszentlélek, Patkó utca 5.', '0722568945', 'tothpali@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 0, 1),
+(2, 'Sárga Mária', 'Székelykeresztúr, Tető utca 45', '0745035255', 'marineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 0),
+(3, 'Széles Sára', 'Csíkszereda, Sugárút 19', '0748569854', 'sarineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 1);
 
 INSERT INTO `Termelok` (`SZ_ID`, `Kep`, `Kiszallitasi_dij`, `Min_vasarloi_kosar`, `R_ID`, `P_ID`) VALUES
 (2, 'logo2.jpg',15, 30, 1, 1),
@@ -168,20 +168,32 @@ INSERT INTO `Termelok` (`SZ_ID`, `Kep`, `Kiszallitasi_dij`, `Min_vasarloi_kosar`
 
 INSERT INTO `Mertekegysegek` (`ME_ID`, `Nev`) VALUES
 (1, 'g'),
-(2, 'db'),
-(3, 'csomag');
+(2, 'darab'),
+(3, 'csomag'),
+(4, 'kg'),
+(5, 'dkg'),
+(6, 'borkán');
 
-INSERT INTO `Kategoriak` (`K_ID`, `Nev`) VALUES
-(1, 'tejtermek'),
-(2, 'laska');
+INSERT INTO `kategoriak` (`K_ID`, `Nev`) VALUES
+(1, 'tejtermék'),
+(2, 'laska'),
+(3, 'lekvár');
 
 INSERT INTO `Penznemek` (`P_ID`, `Penznem`) VALUES
 (1, 'RON'),
 (2, 'EURO');
 
 INSERT INTO `Termekek` (`T_ID`, `Nev`, `Leiras`, `Ar`, `Min_rendelesi_menny`, `Kep`, `Keszlet_menny`, `ME_ID`, `K_ID`, `P_ID`, `SZ_ID`) VALUES
-(1, 'Hazi szeles laska', '3 tojasos', 5, 1, 'termek1.jpg', 10, 3, 2, 1, 2),
-(2, 'Juhturo', 'Fiss es finom', 12, 1, 'termek2.jpg', 20, 2, 1, 1, 3);
+(1, 'Házi széles laska', '3 tojásos', 5, 1, 'termek1.jpg', 10, 3, 2, 1, 2),
+(2, 'Juhsajt', 'Friss és finom', 12, 1, 'termek2.jpg', 20, 2, 1, 1, 3),
+(3, 'Tehéntúró', 'Félzsíros', 8, 1, 'termek3.jpg', 10, 5, 1, 1, 2),
+(4, 'Kecskesajt', 'Igazi', 10, 1, 'termek4.jpg', 3, 5, 1, 1, 2),
+(5, 'Szilvalekvár', 'Édes, finom', 5, 1, 'termek5.jpg', 0, 6, 3, 1, 3),
+(7, 'Tehéntúró', 'Mindig friss és krémes', 9, 1, 'termek7.jpg', 10, 5, 1, 1, 3);
+
+INSERT INTO `Promociok` (`T_ID`, `Ar`, `Periodus_k`, `Periodus_v`) VALUES
+(1, 4, '2014-12-28', '2015-01-04'),
+(7, 7, '2014-12-17', '2014-12-18');
 
 INSERT INTO `Napok` (`N_ID`, `Nev`) VALUES 
 (1, 'Hétfo'),

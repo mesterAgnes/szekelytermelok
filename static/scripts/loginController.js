@@ -6,9 +6,13 @@ loginApp.controller('loginSwitchDivController', [
 	function loginSwitchDivController($scope, $http) {
 
 		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
+		jQuery( "button#kezdolap" ).attr("id","selected");
+		
 		$scope.bejelentkezes = {};
-		$scope.navigationStrip01_Clicked = function(optionString) {
-			$scope.navigationOptionSelected = optionString;
+		$scope.navigationStrip_Clicked = function(option) {
+			$scope.navigationOptionSelected = option;
+			jQuery("nav#navigationStrip1 button").attr("id","");
+			jQuery( "button#"+option ).attr("id","selected");
 		};
 	}
 
@@ -73,7 +77,6 @@ function loginStoreSession( user ) {
 	localStorage.setItem('Jelszo', user[2]);
 	localStorage.setItem('Termelo', user[3]);
 	localStorage.setItem('Megrendelo', user[4]);
-	writeOutUserName( "userUdvDiv" );
 }
 
 loginApp.controller('bejelentkezesController', [              
@@ -101,3 +104,19 @@ loginApp.controller('bejelentkezesController', [
 
 	}
 ]);  
+
+
+
+loginApp.directive('myNavigaton', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, elm, attrs) {            
+			elm.bind("click", function () {
+				jQuery("nav#navigationStrip1 button").attr("id","");
+				
+				var jqueryElm = $(elm[0]);
+				$(jqueryElm).attr("id","selected");
+			});
+		}
+    };
+});

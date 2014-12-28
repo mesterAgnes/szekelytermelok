@@ -2,12 +2,23 @@
 <html data-ng-app="megrendeloApp" >   
 
 <head>
-	<title>Székely termelok</title>
+	<title>Székely termelők</title>
 	<meta charset="utf-8">
+	
+	<!-- Angular.js -->
 	<script src= "lib/angular.min.js"></script>
+	
+	<!-- JQuery.js -->
 	<script src="lib/jquery-1.11.1.js"></script>
+	
+	<!-- JS scripts -->
 	<script src="scripts/rendeloController.js"></script>
-	<link rel="stylesheet" type="text/css" href="megrendelo_fooldal.css">
+	<script src="scripts/rendeloScript.js"></script>
+	
+	<!-- Stylesheet -->	
+	<link rel="stylesheet" type="text/css" href="css/altalanos.css">
+	<link rel="stylesheet" type="text/css" href="css/termekek.css">
+	
 </head>
 
 <body>
@@ -15,76 +26,156 @@
 	<header>
 	</header>
 
-	<div id="mainDiv01" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
+	<div id="bodyDiv1" data-ng-controller="termekekController">  <!-- dontes -->
+		
+		<nav id="navigationStrip1">   <!-- menu -->
+			<div style="float:left;width:16.666%;height:10px"></div>
+			<div style="float:left">
+				<button id="kezdolap" data-my-navigaton data-ng-click="navigationStrip1_Clicked('kezdolap')" > Kezdőlap </button>
+				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('projekt')" > A projektről </button>
+				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('linkek')"> Hasznos linkek </button>
+				<button data-my-navigaton data-ng-click="logout()"> Kijelentkezés </button>
+				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('kosar')"> Kosár </button>
+				<button data-my-navigaton data-ng-show="termelo == 1" data-ng-click="termeloOldal()">Termelő oldal</button>		
+				
+				<span id = "felhasznaloDiv"> Üdv, {{nev}}! </span>
+			</div>
+			<div style="clear:both"></div>
+		</nav>
 
-		<nav id="navigationStrip01">   <!-- menu -->
-			<ul id="navigationStripUl01">
-				<button data-ng-click="navigationStrip01_Clicked('kezdolap')"> Kezdolap </button>
-				<button data-ng-click="navigationStrip01_Clicked('projekt')"> A projektrol </button>
-				<button data-ng-click="navigationStrip01_Clicked('linkek')"> Hasznos linkek </button>
-				<button data-ng-click="logout()"> Kijelentkezés </button>
-				<button data-ng-click="navigationStrip01_Clicked('kosar')"> Kosár </button>
-				<button data-ng-show="termelo == 1" data-ng-click="termeloOldal()">Termelő oldal</button>
-			</ul>
-		</nav>
 		
-		<div id="mainContentDiv01">
-			<div data-ng-show="navigationOptionSelected01=='kezdolap'">
-				<h1>{{nev}}</h1>
-			</div>
-			
-			<div data-ng-show="navigationOptionSelected01=='projekt'">
-				<h1>A projektrol</h1>
-			</div>
-			
-			<div data-ng-show="navigationOptionSelected01=='linkek'">
-				<h1>Hasznos linkek</h1>
-			</div>
-			
-			<div data-ng-show="navigationOptionSelected01=='kosar'">
-				<h1>Itt megjelenik a kosar tartalma</h1>
-			</div>
-			
-		</div>
-		<div id="bodyDiv01">
-		<nav id="navigationStrip03">   <!-- oldalsomenu -->
-			<ul id="navigationStripUl03">
-				<button id="termekBetoltes" data-ng-click="termekekBetoltes()"> Termekek </button> <br>
-				<button data-ng-click="navigationStrip03_Clicked('m_promocios_termekek')"> Promóciós termékek </button> <br>
-			</ul>
-		</nav>
+		<div id="mainDiv">
+			<nav id="navigationStrip2">   <!-- oldalso menu -->
+				<button data-my-navigaton data-ng-click="termekekBetoltes()"> Termékek </button> <br>
+				<button data-my-navigaton data-ng-click="termekekBetoltesPr()" > Promóciós termékek </button> <br>
+			</nav>
 		
-		<div id="mainContentDiv02">
-		
-			<div data-ng-show="navigationOptionSelected03=='m_termekek'">
-				<div data-ng-show="!termekLeirasVisible">
-					<h1>Termekek</h1>
-					<div>
-						<div id="termek" data-ng-repeat="termek in termekadatok">
-							<img id="termekKep" data-ng-src="{{'img/termekek/'+termek['5']}}" data-ng-click="showTermek(termek)">
-							<div>
-								<p>Név:{{termek["1"]}}</p>
-								<p>Leírás:{{termek["2"]}}</p>
-								<p>Ár:{{termek["3"]}}</p>
-							</div>
-						</div>
+			<div id="innerMainDiv" >
+			
+				<div data-ng-show="navigationOptionSelected == 'kezdolap'">
+					<h1 class="opcioCim">Kezdőlap</h1>
+				</div>
+				
+				<div data-ng-show="navigationOptionSelected == 'projekt'">
+					<h1 class="opcioCim">A projektről</h1>
+				</div>
+				
+				<div data-ng-show="navigationOptionSelected == 'linkek'">
+					<h1 class="opcioCim">Hasznos linkek</h1>
+				</div>
+				
+				<div data-ng-show="navigationOptionSelected == 'kosar'">
+					<h1 class="opcioCim">Kosár tartalma</h1>
+				</div>
+				
+				<div id='termekReszletek'>	<!-- Egy termek reszletes megjelenitese -->										
+					<div style="position:absolute;top:5px;right:5px">
+						<img class="miniImg" src="kepek/closeW2.png" width=30
+						onclick="$(this).parents('#termekReszletek').hide(300);" />
 					</div>
+					<div class="leftArr">
+						<img class="miniImg" src='./kepek/left.png' width=50 height=50 data-ng-click="(navigationOptionSelected == 'termekek')?showPrevTermek('alt'):showPrevTermek('prom')" />
+					</div>
+					<div class="rightArr">						
+						<img class="miniImg" src='./kepek/right.png' width=50 height=50 data-ng-click="(navigationOptionSelected == 'termekek')?showNextTermek('alt'):showNextTermek('prom')" />
+					</div>
+					<div class="termekReszletekInner">
+						<div id="termekReszletekInnerKep" ></div>
+						<div style="float:left;margin-left:50px">
+							<h2 id="termekNev" > </h2><!-- Termek neve -->
+							<div class="termekReszletekInnerSzoveg" id="termekLeirasID"></div>
+							
+							<div class="termekReszletekInnerKosarba">
+								<input type="number" class="kosarba" min="1" name="darab[id]" value="1" /><p id="mertekegyseg"></p>
+								<button type="submit" onclick="" class="kosarba" >
+									KOSÁRBA
+								</button>
+							</div>
+							<div class="termekReszletekInnerTablazat">
+								<table class="termekAdat">								
+									<tr>
+										<th>Kategória:</th>
+										<td id="termekKategoriaTd"></td>
+									</tr>
+									<tr>
+										<th>Termelő:</th>
+										<td id="termekTermeloTd"></td>
+									</tr>
+									<tr>
+										<th>Minimális rendelési mennyiség: </th>
+										<td id="termekMinMennyTd"></td>
+									</tr>
+									<tr>
+										<th>Készlet mennyiség: </th>
+										<td id="termekKeszletMennyTd"></td>
+									</tr>
+									<tr id="arTr">
+										<th>Ár:</th>
+										<td id="termekArTd"></td>
+									</tr>
+								</table>
+							</div>															
+						</div>											
+					</div>						
 				</div>
-				
-				<!--<div data-ng-show="termekLeirasVisible">
-					<img data-ng-src="{{'img/termekek/'+kivalasztottTermek['5']}}" data-ng-click="termekekBetoltes()">
-				</div>-->
-
-			</div>
 			
-			<div data-ng-show="navigationOptionSelected03=='m_promocios_termekek'">
-				<h1>Promocios termekek</h1>
-				<div id="promocios_termekek_lista">
+				<div data-ng-show="navigationOptionSelected == 'termekek'" id="termekekContainer">				
+					<h1 class="opcioCim">Termékek</h1>									
+					<div class='termekWr' data-ng-repeat="termek in termekadatok">					
 					
+						<div id="{{'termek_'+termek['0']}}" class="termekIn" style="background-image: url({{'img/termekek/'+termek['3']}})">
+							<div class="termekTxtHolder" data-ng-click="showTermekReszletImgClick(termek['0'])">
+								<div class='termekNev'>
+									{{termek["1"]}}
+								</div>
+								<div class='termekTermelo'>
+									Termelő: {{termek["4"]}}
+								</div>
+								<div class="termekAr">
+									Ár: {{termek["2"] + " " + termek["5"]}}
+								</div>
+							</div>
+							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
+							<img class="imgOnImg" src="./kepek/ribbonProm.png" data-ng-show="termek['7'] && termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
+						</div>
+					</div>				
 				</div>
-			</div>
 				
-		</div>
+				
+				<div data-ng-show="navigationOptionSelected=='promtermekek'">
+					<h1 class="opcioCim">Promóciós termékek</h1>
+					
+					<div class='termekWr' data-ng-repeat="termek in termekadatokPr">					
+					
+						<div id="{{'promtermek_'+termek['0']}}" class="termekIn" style="background-image: url({{'img/termekek/'+termek['3']}})">
+							<div class="termekTxtHolder" data-ng-click="showPromTermekReszletImgClick(termek['0'])">
+								<div class='termekNev'>
+									{{termek["1"]}}
+								</div>
+								<div class='termekTermelo'>
+									Termelő: {{termek["4"]}}
+								</div>
+								<div class="termekAr">
+									Ár: {{termek["2"] + " " + termek["5"]}}
+								</div>
+							</div>
+							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
+							<img class="imgOnImg" src="./kepek/ribbonProm.png"  data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
+						</div>
+					</div>				
+				</div>
+					
+					
+				<div data-ng-show="navigationOptionSelected == 'nincstermek'">
+					<h3>Jelenleg nincsenek termékek.</h3>
+				</div>
+
+				<div data-ng-show="navigationOptionSelected == 'nincspromtermek'">
+					<h3>Jelenleg nincsenek promóciós termékek.</h3>
+				</div>				
+					
+			</div>
+			<div style="clear:both"></div>
 		</div>
 
 	</div>

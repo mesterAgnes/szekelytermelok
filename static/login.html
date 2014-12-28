@@ -4,10 +4,20 @@
 <head>
 	<title>Székely termelők</title>
 	<meta charset="utf-8">
+	
+	<!-- Angular.js -->
 	<script src= "lib/angular.min.js"></script>
+	
+	<!-- JQuery.js -->
 	<script src="lib/jquery-1.11.1.js"></script>
-	<script src="lib/md5.js"></script>
+    
+	<!-- controllers.js -->
 	<script src="scripts/loginController.js"></script>
+	
+	<!-- Stylesheet -->
+	<link rel="stylesheet" type="text/css" href="css/altalanos.css">
+	
+	<script src="lib/md5.js"></script>
 </head>
 
 <body>
@@ -15,19 +25,17 @@
 	<header>
 	</header>
 
-	<div id="mainDiv01" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
+	<div id="bodyDiv1" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
 
-		<nav id="navigationStrip01">   <!-- menu -->
-			<ul id="navigationStripUl01">
-				<button data-ng-click="navigationStrip01_Clicked('kezdolap')"> Kezdőlap </button>
-				<button data-ng-click="navigationStrip01_Clicked('projekt')"> A projektről </button>
-				<button data-ng-click="navigationStrip01_Clicked('linkek')"> Hasznos linkek </button>
-				<button data-ng-click="navigationStrip01_Clicked('regisztracio')"> Regisztráció </button>
-				<button data-ng-click="navigationStrip01_Clicked('bejelentkezes')"> Bejelentkezés </button>
-			</ul>
+		<nav id="navigationStrip1">   <!-- menu -->
+			<button data-my-navigation data-ng-click="navigationStrip_Clicked('kezdolap')" id="kezdolap"> Kezdőlap </button>
+			<button data-my-navigation data-ng-click="navigationStrip_Clicked('projekt')" id="projekt"> A projektről </button>
+			<button data-my-navigation data-ng-click="navigationStrip_Clicked('linkek')"  id="linkek"> Hasznos linkek </button>
+			<button data-my-navigation data-ng-click="navigationStrip_Clicked('regisztracio')" id="regisztracio"> Regisztráció </button>
+			<button data-my-navigation data-ng-click="navigationStrip_Clicked('bejelentkezes')" id="bejelentkezes" > Bejelentkezés </button>
 		</nav>
 
-		<div id="mainContentDiv01">
+		<div id="mainDiv">
 			<div data-ng-show="navigationOptionSelected=='kezdolap'">
 				<h1>Kezdőlap</h1>
 			</div>
@@ -140,12 +148,6 @@
 				<button ng-click="login()">Bejelentkezés</button>
 				</form>
 				</div> 
-			</div>
-			
-			<div data-ng-show="navigationOptionSelected=='bejelentkezesSuccess'">
-				<h1>Sikeres bejelentkezés.</h1>
-				<p id = "userUdvDiv">  </p>
-				
 			</div>
 			
 		</div>
