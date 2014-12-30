@@ -491,26 +491,12 @@ def promtermekekbetoltes():
 		cursor.execute(select_promtermekek, [session['SZ_ID']])
 		cnx.commit()
 		promtermekek = cursor.fetchall()
-		
 		logging.warning(promtermekek)
-		datum = promtermekek[0][2] 
-		ujdatum = datum.isoformat() 
-		datumok.append(ujdatum)
-		datum = promtermekek[0][3] 
-		ujdatum = datum.isoformat() 
-		datumok.append(ujdatum)
-		datum = promtermekek[1][2] 
-		ujdatum = datum.isoformat() 
-		datumok.append(ujdatum)
-		datum = promtermekek[1][3] 
-		ujdatum = datum.isoformat() 
-		datumok.append(ujdatum)
-		datum = promtermekek[2][2] 
-		ujdatum = datum.isoformat() 
-		datumok.append(ujdatum)
-		datum = promtermekek[2][3] 
-		ujdatum = datum.isoformat() 
-		datumok.append(ujdatum)
+		
+		for termek in promtermekek:
+			datumok.append(termek[2].isoformat())
+			datumok.append(termek[3].isoformat())
+			
 	logging.warning(datumok)
 	
 	cursor.execute(select_promtermekek_regiadatai, [session['SZ_ID']])
