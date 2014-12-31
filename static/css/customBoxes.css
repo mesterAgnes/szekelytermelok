@@ -1,0 +1,100 @@
+/*myAlert*/
+img#closeImg{
+	position:absolute;
+	top:0;
+	right:0;
+}
+img#closeImg:hover{
+	cursor:pointer;
+}
+div#overlay{
+	position:fixed;
+	left:0;
+	top:0;
+	width:100%;
+	height:100%;
+	background:rgba(0,0,0,1);
+	z-index:2;		
+	opacity:0;		
+}
+div#createdAlertDiv{		
+	white-space:nowrap;
+	position: fixed;
+	margin-left: auto;
+	margin-right: auto;
+	left: 0;
+	right: 0;
+	margin-top:auto;
+	margin-bottom:auto;
+	top:0;
+	bottom:0;
+	
+	z-index:3;		
+	
+	min-width:350px;		
+	max-width:550px;	
+	height:35px;		
+	border:1px solid black;
+	border-radius:5px;
+	box-shadow:2px 2px 5px 1px black;
+	background-color:#911111;
+	
+	font-size:1em;
+	font-weight:800;
+	font-family:calibri;
+	color:white;
+	letter-spacing:2px;
+	text-align:center;
+	line-height:35px;				
+	
+	transition:all 0.2s;
+}
+div#createdConfirmDiv{	
+	position: fixed;
+	margin-left: auto;
+	margin-right: auto;
+	left: 0;
+	right: 0;
+	margin-top:auto;
+	margin-bottom:auto;
+	top:0;
+	bottom:0;
+	
+	z-index:3;	
+		
+	min-width:350px;	
+	max-width:450px;	
+	height:60px;	
+
+	border:1px solid black;
+	border-radius:5px;
+	box-shadow:2px 2px 5px 1px black;
+	background-color:#911111;
+	
+	font-size:1em;
+	font-weight:800;
+	font-family:calibri;
+	color:white;
+	letter-spacing:2px;
+	text-align:center;
+	//line-height:35px;			
+	
+	transition:all 0.2s;
+}
+button#myConfirmButton{	
+	width:70px;
+	height:60%;	
+	line-height:100%;
+	text-align:center;
+	color:white;
+	font-size:0.7em;
+	font-weight:800;
+	letter-spacing:6px;		
+	background:#2E2A33;	
+	border:none;
+	transition:all 0.2s;	
+}
+button#myConfirmButton:hover{
+	color:#911111;		
+	cursor:pointer;
+}

@@ -6,6 +6,7 @@ body{
 	margin:0;
 	padding:0;
 	background:#F1F1F1;
+	font:calibri;
 }
 div#bodyDiv1{
 	width:90%;
@@ -121,3 +122,11 @@ div#innerMainDiv{
 	height:100%;
 	//border:1px solid red;
  }
+ 
+ footer#footer1{
+	text-align:center;
+ }
+ h1.uzenetH1{
+	font:1.1em;
+	margin: 2% 2% 2% 5%;
+}
