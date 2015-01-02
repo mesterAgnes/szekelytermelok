@@ -67,6 +67,33 @@
 				
 				<div data-ng-show="navigationOptionSelected == 'kosar'">
 					<h1 class="opcioCim">Kosár tartalma</h1>
+			
+					<div id='kosarTartalma'>
+						<table class='termekekKosara'>
+							<tr ng-repeat="termek in kosar" >
+
+								<td> <img class='imgKosarban' src="{{'./img/termekek/termek' + termek.id + '.jpg'}}" ></img> </td>
+								<td> {{ termek.nev }} </td>
+								<td> ({{ termek.termelo }}) </td>
+								<td> {{ termek.mennyiseg }}  {{ termek.mertekegyseg }} </td>
+								<td> {{ termek.ar*termek.mennyiseg }}  {{ termek.penznem }} </td>
+								<td>
+									<div style="display:inline;" data-ng-show="!rowform.$visible">
+										<button data-ng-click="termekTorol( termek.id, termek.mennyiseg );" class="kosar" >TÖRLÉS</button>
+									</div>  
+								</td>
+							</tr>
+						</table>
+				
+						<div style="text-align:center; margin-top:5%">
+							<button data-ng-click="rendelesKiirasa()" class="kosar">
+								RENDELÉS
+							</button>
+						</div>
+					</div>
+				</div>				
+				<div data-ng-show="navigationOptionSelected == 'ureskosar'">
+					<h1 class="uzenetH1" > Nincs egy termék sem a kosárban. </h1>
 				</div>
 				
 				<div id='termekReszletek'>	<!-- Egy termek reszletes megjelenitese -->										
@@ -190,6 +217,44 @@
 				<div data-ng-show="navigationOptionSelected == 'nincsrendeles'">
 					<h3>Nincsenek rendelései önnek!</h3>
 				</div>
+					
+				<!-- Rendeles megjelenitese: -->
+				<div data-ng-show="navigationOptionSelected == 'rendeles'"  data-ng-init="osszegInit()" >
+					<h1 class="opcioCim">1. A megrendelni kívánt termékek:</h1>
+			
+					<div class='kosarTartalma'>
+						<table class='termekekKosara'>
+							<tr ng-repeat="termek in kosar" >
+
+								<td> <img class='imgKosarban' src="{{'./img/termekek/termek' + termek.id + '.jpg'}}" ></img> </td>
+								<td> {{ termek.nev }} </td>
+								<td> ({{ termek.termelo }}) </td>
+								<td> {{ termek.mennyiseg }}  {{ termek.mertekegyseg }} </td>
+								<td> {{ termek.ar*termek.mennyiseg }}  {{ termek.penznem }} </td>
+							</tr>
+						</table>
+						<div class='kosarTartalma'>
+							<h2>Összesen: {{ osszegString }} </h2>
+						</div>
+				
+						<div style="float:left;width:50%;text-align:center; margin-top:5%">
+							<button data-ng-click="vizsgalKosar();" class="kosar">
+								VISSZA
+							</button>
+						</div>
+						<div style="float:left;width:50%;text-align:center; margin-top:5%">
+							<button data-ng-click="rendeles();" class="kosar">
+								TOVÁBB
+							</button>
+						</div>
+						<div style="clear:both"></div>
+					</div>
+				</div>	
+				
+				<div data-ng-show="navigationOptionSelected == 'sikeresRendeles'">
+					<h3> A rendelését sikeresen elküldtük. A rendeléseit a Rendelések menüpont alatt tekintheti meg.</h3>
+				</div>	
+				
 					
 			</div>
 			<div style="clear:both"></div>

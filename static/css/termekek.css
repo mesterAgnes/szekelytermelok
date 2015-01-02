@@ -286,3 +286,16 @@ button.kosarba:focus{
 	outline:none;
 	border:1px solid rgb(50,50,50);
 }
+
+button.kosar{
+	width:120px;
+	height:34px;
+	text-align:center;
+	background:rgb(50,50,50);
+	border:1px solid white;
+	color:white;
+	font-weight:800;
+	
+	transition:all .3s;
+	position:relative;	
+}
