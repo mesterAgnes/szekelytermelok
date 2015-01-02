@@ -3,6 +3,7 @@
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash, json, jsonify, send_from_directory
 from werkzeug import secure_filename
+from datetime import datetime
 	 
 import os
 import logging
@@ -244,6 +245,111 @@ def mindenpromtermek():
 	cnx.close()
 	return jsonify({'termekek':termekek})	
 	
+def date_handler(obj):
+    return obj.isoformat() if hasattr(obj, 'isoformat') else obj
+	
+@app.route('/rendeleseim/', methods = ['POST'])	
+def rendeleseim():
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+
+	rendelesek = ( "SELECT T_ID, Mennyiseg, Statusz FROM Megrendelesek "
+					"WHERE Rendelo_ID=%s")				
+	cursor.execute(rendelesek,[session['SZ_ID']])
+	cnx.commit()
+	rendeleseim = cursor.fetchall()
+	logging.warning(rendeleseim)
+	datum = ( "SELECT Datum FROM Megrendelesek "
+				"WHERE Rendelo_ID=%s")
+	cursor.execute(datum,[session['SZ_ID']])
+	cnx.commit()
+	datumok = cursor.fetchall()
+	
+	id = ( "SELECT T_ID FROM Megrendelesek "
+			"WHERE Rendelo_ID=%s")
+	cursor.execute(id,[session['SZ_ID']])
+	cnx.commit()
+	idk = cursor.fetchall()
+	termeknevek = []
+	
+	for ids in idk:
+		i=int(str(ids).strip("(,), \,"))
+		logging.warning(i)
+		sql = ( "SELECT Nev FROM Termekek WHERE T_ID = %s")
+		cursor.execute(sql,[i])
+		nev=cursor.fetchall()
+		nev=str(nev).strip("[,],\",\,,(,),\'")
+		termeknevek.append(nev)
+	
+	cursor.close()
+	cnx.close()
+	return jsonify({'rendeleseim':rendeleseim, 'datumok':json.dumps(datumok, default=date_handler), 'termeknevek':termeknevek })
+
+@app.route('/megrendeleseim/', methods = ['POST'])	
+def megrendeleseim():
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+	logging.warning(session['SZ_ID'])
+	rendelesek = ("SELECT m.M_ID, m.Mennyiseg, m.Statusz "
+					"FROM Termekek t, Szemelyek sz, Megrendelesek m "
+					"WHERE sz.SZ_ID=t.SZ_ID and m.T_ID=t.T_ID and t.SZ_ID = %s")				
+	cursor.execute(rendelesek,[session['SZ_ID']])
+	cnx.commit()
+	rendeleseim = cursor.fetchall()
+	
+	datum = ("SELECT m.Datum "
+			"FROM Termekek t, Szemelyek sz, Megrendelesek m "
+			"WHERE sz.SZ_ID=t.SZ_ID and m.T_ID=t.T_ID and t.SZ_ID = %s")
+	cursor.execute(datum,[session['SZ_ID']])
+	cnx.commit()
+	datumok = cursor.fetchall()
+	
+	id = ("SELECT m.T_ID "
+		"FROM Termekek t, Szemelyek sz, Megrendelesek m "
+		"WHERE sz.SZ_ID=t.SZ_ID and m.T_ID=t.T_ID and t.SZ_ID = %s")
+	cursor.execute(id,[session['SZ_ID']])
+	cnx.commit()
+	idk = cursor.fetchall()
+	termeknevek = []
+		
+	for ids in idk:
+		i=int(str(ids).strip("(,), \,"))
+		sql = ( "SELECT Nev FROM Termekek WHERE T_ID = %s")
+		cursor.execute(sql,[i])
+		nev=cursor.fetchall()
+		nev=str(nev).strip("[,],\",\,,(,),\'")
+		termeknevek.append(nev)
+	
+	cursor.close()
+	cnx.close()
+	return jsonify({'rendeleseim':rendeleseim, 'datumok':json.dumps(datumok, default=date_handler), 'termeknevek':termeknevek })
+	
+@app.route('/megrendelesMent/', methods = ['POST'])	
+def megrendelesMent():
+	adatok = json.loads(request.data)
+	
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cursor = cnx.cursor()
+	
+	if (adatok['statusz']==0):
+		statusz='Új megrendelés';
+	if (adatok['statusz']==1):
+		statusz='Függőben van';
+	if (adatok['statusz']==2):
+		statusz='Kiszállítva';
+	string = ("UPDATE Megrendelesek SET "
+				"Statusz = %s"
+				"WHERE M_ID = %s")
+	datas = (statusz, adatok['id'])
+	try:
+		cursor.execute(string, datas)
+		cnx.commit()
+	except:
+		cnx.rollback()
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({'success': True})	
 	
 @app.route('/egytermek/', methods = ['POST'])	
 def egytermek():
@@ -280,96 +386,6 @@ def egypromtermek():
 	cnx.close()
 	return jsonify({'termek':termek})	
 	
-	
-	
-@app.route('/vizsgaltermek/', methods = ['POST'])	
-def vizsgaltermek():		# a mennyisegek lekerdezese a kosarba-teves elott
-	id = json.loads(request.data)
-	logging.warning(id)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
-	cursor = cnx.cursor()
-
-	select_termek = ("SELECT Min_rendelesi_menny, Keszlet_menny	"
-					 "FROM Termekek "
-					 "WHERE T_ID = %s")
-	cursor.execute(select_termek, [id])
-	cnx.commit()
-	termek = cursor.fetchall()
-	logging.warning(termek)
-	cursor.close()
-	cnx.close()
-	return jsonify({'termek':termek})
-	
-	
-@app.route('/kosarbatermek/', methods = ['POST'])	
-def kosarbatermek():
-	adatok = json.loads(request.data)
-	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
-	cursor = cnx.cursor()
-
-	update_termek = ("UPDATE Termekek SET Keszlet_menny = Keszlet_menny - %s WHERE T_ID = %s")
-	
-	try:
-		cursor.execute( update_termek, (adatok['nr'], adatok['id']) )
-		cnx.commit()
-		result = True
-	except:
-		cnx.rollback()
-		result = False
-	cursor.close()
-	cnx.close()
-	
-	return jsonify({'success': result})		
-	
-	
-@app.route('/torleskosarbol/', methods = ['POST'])	
-def torleskosarbol():
-	adatok = json.loads(request.data)
-	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
-	cursor = cnx.cursor()
-
-	update_termek = ("UPDATE Termekek SET Keszlet_menny = Keszlet_menny + %s WHERE T_ID = %s")
-	
-	try:
-		cursor.execute( update_termek, (adatok['nr'], adatok['id']) )
-		cnx.commit()
-		result = True
-	except:
-		cnx.rollback()
-		result = False
-	cursor.close()
-	cnx.close()
-	
-	return jsonify({'success': result})		
-	
-	
-@app.route('/rendeles/', methods = ['POST'])
-def rendeles():
-	adatok = json.loads(request.data)
-	logging.warning("RENDELES")
-	logging.warning(adatok['termekek'])
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
-	cursor = cnx.cursor()
-	
-	result = True
-	for termek in adatok['termekek']:
-		add_rend = ("INSERT INTO Megrendelesek "
-					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
-				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
-		data_rend = (termek['mennyiseg'], adatok['datum'], termek['ar'], termek['id'], session['SZ_ID'])
-		try:
-			cursor.execute( add_rend, data_rend )
-			cnx.commit()
-		except:
-			cnx.rollback()
-			result = False
-			break
-	
-	cursor.close()
-	cnx.close()
-	return jsonify({'success': result})			
 	
 	
 @app.route('/termekmodositas/', methods = ['POST'])
@@ -583,10 +599,24 @@ def promtermekekbetoltes():
 		promtermekek = cursor.fetchall()
 		
 		logging.warning(promtermekek)
-		for termek in promtermekek:
-			datumok.append(termek[2].isoformat())
-			datumok.append(termek[3].isoformat())
-			
+		datum = promtermekek[0][2] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[0][3] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[1][2] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[1][3] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[2][2] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
+		datum = promtermekek[2][3] 
+		ujdatum = datum.isoformat() 
+		datumok.append(ujdatum)
 	logging.warning(datumok)
 	
 	cursor.execute(select_promtermekek_regiadatai, [session['SZ_ID']])

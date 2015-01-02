@@ -9,16 +9,16 @@
 	<script src= "lib/angular.min.js"></script>
 	
 	<!-- Latest compiled and minified CSS -->
-	<!--
+	
 	<link rel="stylesheet" href="lib/bootstrap.min.css">
 	</link>
-	-->
+
 	<!-- JQuery.js -->
 	<script src="lib/jquery-1.11.1.js"></script>
 	
 	<!-- Angular-xeditable -->
-    <!--link href="lib/angular-xeditable/css/xeditable.css" rel="stylesheet">
-    --><script src="lib/angular-xeditable/js/xeditable.js"></script>
+    <link href="lib/angular-xeditable/css/xeditable.css" rel="stylesheet">
+    <script src="lib/angular-xeditable/js/xeditable.js"></script>
     
 	<!-- controllers.js -->
 	<script src="scripts/termeloController.js"></script>
@@ -88,6 +88,9 @@
 									<input type="file" class="btn btn-primary" name="l_file" />
 									<input type="submit" value="Upload2" id="clickProfil"/>
 								</form>
+						</div>
+						<div ng-show="!profilom_form.$visible">
+							<div id="logoDiv"><img id="logo" data-ng-src="{{'img/logos/logo'+logoid+'.jpg'}}" ></div>
 						</div>
 						<form editable-form name="profilom_form" onbeforesave="profilomMentes($data)">
 							<div>
@@ -237,9 +240,12 @@
 							<span id="visible_span" ng-show="rowform.$visible" >
 									<form name="termek_upload" action="/termek_upload" method="post" enctype="multipart/form-data" >
 										<input type="file" class="btn btn-primary" name="t_file" />
-										<input type="submit" value="Upload" id="click{{termek[0]}}"/>
+										<input type="submit" value="Upload" id="click{{termek[0]}}" class="clicks" />
 									</form>
-								</span>
+							</span>
+							<span id="visible_span" ng-show="!rowform.$visible" >
+								<div id="logoDiv"><img id="logo" data-ng-src="{{'img/termekek/termek'+termek[0]+'.jpg'}}" ></div>
+							</span>
 							</td>
 							
 							<td>
@@ -368,6 +374,59 @@
 				
 				<div data-ng-show="navigationOptionSelected =='megrendelesek'">
 					<h1 class="opcioCim">Megrendelések</h1>
+					<div id="megrendelesekDiv" data-ng-controller="MegrendelesekController" ng-init="megrendelesekBetolt()">
+					<table class="table table-bordered table-hover table-condensed">
+						<tr style="font-weight: bold">
+							<td style="width:10%">ID</td>
+							<td style="width:20%">Terméknév</td>
+							<td style="width:10%">Menntiség</td>
+							<td style="width:20%">Státusz</td>
+							<td style="width:10%">Dátum</td>
+						</tr>
+						<tr ng-repeat="megrendeles in megrendelesek" >
+							<td>
+							<span editable-number=" megrendeles[4]" e-name="id" e-form="megrendelesForm" e-required>
+							  {{ megrendeles[4] }}
+							</span>
+							</td>
+							
+							<td>
+							<span e-name="nev" e-form="megrendelesForm">
+							  {{ megrendeles[0] }}
+							</span>
+							</td>
+							
+							<td>
+							<span e-name="mennyiseg" e-form="megrendelesForm">
+							  {{ megrendeles[1] }}
+							</span>
+							</td>
+							
+							<td>
+								<span editable-select="megrendeles[2]" e-name="statusz" e-ng-options="s.value as s.text for s in statuszok" e-form="megrendelesForm" e-required>
+									{{megrendeles[2]}}	
+								</span>
+							</td>
+							
+							<td>
+							<span e-name="datum" e-form="megrendelesForm">
+							  {{ megrendeles[3] }}
+							</span>
+							</td>
+							<td style="white-space: nowrap">
+								<form editable-form name="megrendelesForm"  onshow="sorModositas(true)" onhide="sorModositas(false)" oncancel="cancelModify()" onbeforesave="statuszMent($data)" ng-show="megrendelesForm.$visible" class="form-buttons form-inline" shown="inserted == megrendeles">
+									<div>
+										<button type="submit" ng-disabled="megrendelesForm.$waiting" class="btn btn-primary">Mentés</button>
+										<button type="submit" ng-disabled="megrendelesForm.$waiting" ng-click="megrendelesForm.$cancel()" class="btn btn-default">Mégse</button>
+									</div>
+								</form>
+								<div class="buttons" ng-show="!megrendelesForm.$visible">
+								  <button class="btn btn-primary" ng-disabled="sorModosithato" ng-click="megrendelesForm.$show()">Módosít</button>
+								</div> 
+							</td>
+						</tr>
+					</table>
+					</div>
 				</div>
 				
 				<div data-ng-show="navigationOptionSelected =='uzenetkuldes'">
@@ -404,7 +463,7 @@
 		</div>
 	</div>
 	
-	<footer id="footer1" ></footer>
+	<footer id="footer01" ></footer>
 	
 	<script src="scripts/script.js"></script>
 

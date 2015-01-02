@@ -6,6 +6,28 @@ div#mainContentDiv01{
 	width:800px;
 }
 
+div#rendelesekDiv {
+	display: flex;
+	flex-direction: column ;
+	margin: 10px;
+	float: left;
+	padding: 10px;
+}
+
+div#rendelesDiv {
+	display: flex;
+	margin: 10px;
+	align-items: center;
+	border-style: solid;
+    border-width: 1px;
+	padding: 10px;
+}
+
+img#images {
+	height: 30%;
+	width: 30%;
+	margin: 10px;
+}
 
 div.termekWr{
 	float:left;
@@ -254,7 +276,6 @@ button.kosarba{
 	font-weight:800;
 	
 	transition:all .3s;
-	position:relative;	
 }
 button.kosarba:hover{
 	color:rgb(50,50,50);
@@ -263,46 +284,5 @@ button.kosarba:hover{
 }
 button.kosarba:focus{
 	outline:none;
+	border:1px solid rgb(50,50,50);
 }
-
-button.kosar{
-	width:120px;
-	height:34px;
-	text-align:center;
-	background:rgb(50,50,50);
-	border:1px solid white;
-	color:white;
-	font-weight:800;
-	
-	transition:all .3s;
-	position:relative;	
-}
-button.kosar:hover{
-	color:rgb(50,50,50);
-	background:white;
-	border:1px solid #323232;
-	cursor:pointer;
-}
-button.kosar:focus{
-	outline:none;
-}
-div.kosarTartalma{
-	margin: 5% 5% 0% 5%;
-	font-family:calibri;
-}
-table.termekekKosara{
-	border-collapse:collapse;	
-	width: 100%;
-}
-table.termekekKosara td{
-	text-align:center;
-	font-size:1.4em;
-	font-family:calibri;
-	padding:2% 2% 2% 2%; 
-	border-bottom:1px solid #323232;
-}
-img.imgKosarban{
-	width: 100px;	
-}
-
-

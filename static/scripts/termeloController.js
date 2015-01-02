@@ -246,6 +246,72 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 	}	
 ]);
 
+termeloApp.controller('MegrendelesekController', function($scope, $filter, $http) {
+	$scope.sorModosithato = false;
+	$scope.sorModositas = function(value) {
+		$scope.sorModosithato = value;
+	};
+	
+	$scope.megrendelesekBetolt = function() {
+		$http.post('/megrendeleseim/', {})
+		.success(function(data, status, headers, config) {
+			$scope.rendeleseim = data['rendeleseim'];
+			$scope.datumok = data['datumok']
+			$scope.termeknevek = data['termeknevek'];
+			$scope.statuszok = [
+				{text:'Új megrendelés', value:0},
+				{text:'Függőben van', value:1},
+				{text:'Kiszállítva', value:2}
+			];
+			$scope.megrendelesek = [];
+			$scope.dates = [];
+			for	(i = 0; i < $scope.rendeleseim.length; i++) {
+				$scope.dates[i]="";
+			}
+			for	(i = 0; i < $scope.rendeleseim.length; i++) {
+				if (i==0) {
+					for (j=3;j<13;j++) { 
+						$scope.dates[i]+=$scope.datumok[j];
+					}
+				} else 
+					if (i==1){
+						for (j=19;j<29;j++) { 
+							$scope.dates[i]+=$scope.datumok[j];
+						}
+					} else {
+						for (j=i*13+i*6-3;j<i*13+i*6+7;j++) { 
+							$scope.dates[i]+=$scope.datumok[j];
+						}
+					}
+			}
+			
+			for	(i = 0; i < $scope.rendeleseim.length; i++) {
+				$scope.megrendelesek[i] = {
+					'0' : $scope.termeknevek[i],
+					'1' : $scope.rendeleseim[i][1],
+					'2' : $scope.rendeleseim[i][2],
+					'3' : $scope.dates[i],
+					'4' : $scope.rendeleseim[i][0]
+				}
+			}
+		});
+	}
+	
+	$scope.statuszMent = function(data) {
+		console.log(data);
+		$http.post('/megrendelesMent/', data)
+		.success(function(data, status, headers, config) {
+			$scope.success = data.success;
+			alert('Sikeres modositas.');
+		});
+		$scope.megrendelesekBetolt();
+	};
+	
+	$scope.cancelModify = function() {
+		$scope.megrendelesekBetolt();
+	};
+});
+
 termeloApp.controller('UzenetKuldesCtrl', function($scope, $filter, $http) {
 	$scope.uzenetKuldes = function() {
 		$scope.adatok.datum = new Date();
