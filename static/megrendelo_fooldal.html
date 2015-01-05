@@ -11,6 +11,10 @@
 	<!-- JQuery.js -->
 	<script src="lib/jquery-1.11.1.js"></script>
 	
+	<!-- Angular-xeditable -->
+    <link href="lib/angular-xeditable/css/xeditable.css" rel="stylesheet">
+    <script src="lib/angular-xeditable/js/xeditable.js"></script>
+	
 	<!-- JS scripts -->
 	<script src="scripts/rendeloController.js"></script>
 	<script src="scripts/rendeloScript.js"></script>
@@ -18,7 +22,15 @@
 	<!-- Stylesheet -->	
 	<link rel="stylesheet" type="text/css" href="css/altalanos.css">
 	<link rel="stylesheet" type="text/css" href="css/termekek.css">
+	<link rel="stylesheet" type="text/css" href="css/customBoxes.css">
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="lib/bootstrap.min.css">
 	
+	<!-- checklist-model -->
+	<script src="scripts/checklist-model.js"></script>
+	
+	<!-- md5 -->
+	<script src="lib/md5.js"></script>
 </head>
 
 <body>
@@ -35,7 +47,7 @@
 				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('projekt')" > A projektről </button>
 				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('linkek')"> Hasznos linkek </button>
 				<button data-my-navigaton data-ng-click="logout()"> Kijelentkezés </button>
-				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('kosar')"> Kosár </button>
+				<button data-my-navigaton data-ng-click="vizsgalKosar()"> Kosár </button>
 				<button data-my-navigaton data-ng-show="termelo == 1" data-ng-click="termeloOldal()">Termelő oldal</button>		
 				
 				<span id = "felhasznaloDiv"> Üdv, {{nev}}! </span>
@@ -46,8 +58,9 @@
 		
 		<div id="mainDiv">
 			<nav id="navigationStrip2">   <!-- oldalso menu -->
-				<button data-my-navigaton data-ng-click="termekekBetoltes()"> Termékek </button> <br>
-				<button data-my-navigaton data-ng-click="termekekBetoltesPr()" > Promóciós termékek </button> <br>
+				<button data-my-navigaton data-ng-click="navigationStrip2_Clicked('m_profilom')"> Profilom </button> 
+				<button data-my-navigaton data-ng-click="termekekBetoltes('alt')"> Termékek </button> <br>
+				<button data-my-navigaton data-ng-click="termekekBetoltes('promo')" > Promóciós termékek </button> <br>
 				<button data-my-navigaton data-ng-click="rendeleseimBetoltes()" > Rendeléseim </button> <br>
 			</nav>
 		
@@ -55,15 +68,128 @@
 			
 				<div data-ng-show="navigationOptionSelected == 'kezdolap'">
 					<h1 class="opcioCim">Kezdőlap</h1>
+					<p>Üdvözöljük a Székelytermelők honlapján!</p>
+					<img src="szekelykapu.jpg" alt="Szekelykapu">
 				</div>
 				
 				<div data-ng-show="navigationOptionSelected == 'projekt'">
 					<h1 class="opcioCim">A projektről</h1>
+					<br><br><br>
+					<div>
+						<p>Székelyföldön sok olyan helyi termelő létezik, aki különböző helyi termékeket állít elő, de nincs lehetősége eljuttatni egy szélesebb vásárlói körbe.
+						   A városon élőknek ritkán adódik lehetősége ezen termékek megszerzésére, főleg azok mindennapi fogyasztására.
+						</p>
+						<p>Tapasztalva, hogy mekkora sikernek örvendenek a különböző székelyföldi városokban megrendezésre kerülő hagyományos vásárok, 
+						   arra az elhatározásra jutottunk, hogy tovább kellene fejleszteni ezt a kezdeményezést, ugyanis ezek a termelők többnyire nagy termelői kapacitással rendelkeznek, 
+						   és a vásárlók részéről is nagyobb igény lenne, ha könnyebben beszerezhetnék az árucikkeket.
+						</p>
+						<p>Célunk megteremteni a lehetőséget a termelőnek, hogy értékesíthesse árucikkeit, és a vásárlónak, hogy kedvére válogathasson a számára kedvelt és előszeretettel fogyasztott élelmiszerek között, 
+						   és akár naponta beszerezhesse azokat. 
+						</p>
+					</div>
 				</div>
 				
 				<div data-ng-show="navigationOptionSelected == 'linkek'">
 					<h1 class="opcioCim">Hasznos linkek</h1>
+					<br><br><br>
+					<a href="http://www.szekelytermek.ro/">A székelytermék </a> <br>
+					<a href="http://www.varoshaza.ro/hirek/hagyomanyos-helyi-termekek-vasara/">Székelyudvarhely - hagyományos termékek vására</a> <br>
 				</div>
+				
+				
+				<div data-ng-show="navigationOptionSelected == 'm_profilom'">
+				<h1 class="opcioCim">Profilom </h1>
+				<div ng-controller="m_profilomController" ng-init="m_profilomBetolt()">
+					<form  editable-form name="m_profilom_form" onbeforesave="m_profilomMentes($data)">
+						<div>
+							<!-- modosithato nev -->
+							<span class="title"> Név: </span>
+							<span editable-text="profilom[1]" e-name="nev" e-required>
+							{{ profilom[1] || 'Nincs kiválasztva' }} </span> 
+						</div>
+						
+						<div>
+							<!-- modosithato cim -->
+							<span class="title"> Cím: </span>
+							<span editable-text="profilom[2]" e-name="cim" e-required>
+							{{ profilom[2] || 'Nincs kiválasztva' }} </span> 
+						</div>
+						
+						<div>
+							<!-- modosithato telefonszam -->
+							<span class="title"> Telefonszám: </span>
+							<span editable-text="profilom[3]" e-name="tel" e-required>
+							{{ profilom[3] || 'Nincs kiválasztva' }} </span> 
+						</div>
+						
+						<div>
+							<!-- modosithato e-mail cim -->
+							<span class="title"> E-mail cím: </span>
+							<span editable-email="profilom[4]" e-name="email" onbeforesave="vizsgalEmail($data)" e-required>
+							{{ profilom[4] || 'Nincs kiválasztva' }} </span> 
+						</div>
+					
+						<div class="buttons">
+							<!-- button to show form -->
+							<button type="button" class="btn btn-default" ng-click="m_profilom_form.$show()" ng-show="!m_profilom_form.$visible">
+							Módosít  
+							</button>
+							<!-- buttons to submit / cancel form -->
+							<span ng-show="m_profilom_form.$visible">
+								<button type="submit" class="btn btn-primary" ng-disabled="m_profilom_form.$waiting">
+								Mentés 
+								</button>
+								<button type="button" class="btn btn-default" ng-disabled="m_profilom_form.$waiting" ng-click="m_profilom_form.$cancel()">
+								Mégse
+								</button>
+							</span>
+						</div>
+					</form>
+					
+					<div>
+						<br><br><br><br>
+						<p>Ha a jelszót szeretnéd módosítani, azt az alábbi gombra kattintva teheted meg: </p>
+						<form editable-form name="m_jelszo_modositas_form">
+							<!-- button to show form -->
+							<button type="button" class="btn btn-default" ng-click="m_jelszo_modositas_form.$show()" ng-show="!m_jelszo_modositas_form.$visible">
+							Módosít
+							</button>
+						
+							<!-- buttons to submit / cancel form -->
+							<span ng-show="m_jelszo_modositas_form.$visible">
+								<div>
+									<!-- regi jelszo -->
+									<span class="title"> Régi jelszó: </span>
+									<input type="password" name="regipass" data-ng-model="adatok.regipass" data-ng-change="vizsgal_regiPassword()" id="regipass" placeholder="Régi jelszó"  required>
+									<span style="color:red" data-ng-show="m_jelszo_modositas_form.regipass.$dirty && regipassError && !m_jelszo_modositas_form.regipass.$invalid">
+									*A megadott jelszó nem megfelelő! </span>
+								</div>
+								<div>
+									<!-- uj jelszo -->
+									<span class="title"> Új jelszó: </span>
+									<input type="password" name="ujpass1" data-ng-model="adatok.ujpass1" data-ng-change="vizsgalPasswords()" id="ujpass1" placeholder="Új jelszó"  required>
+								</div>
+								<div>
+									<!-- uj jelszo megerositese -->
+									<span class="title"> Új jelszó megerősítése: </span>
+									<input type="password" name="ujpass2" data-ng-model="adatok.ujpass2" data-ng-change="vizsgalPasswords()" id="ujpass2" placeholder="Új jelszó megerősítése"  required>
+									<span style="color:red" data-ng-show="m_jelszo_modositas_form.ujpass2.$dirty && passError && !m_jelszo_modositas_form.ujpass2.$invalid">
+									*A két jelszó nem egyezik meg.</span>
+								</div>
+					
+								<button type="submit" class="btn btn-primary" ng-disabled="m_jelszo_modositas_form.$invalid || passError || regipassError" ng-click="jelszoModositas()">
+								Mentés 
+								</button>
+								<button type="button" class="btn btn-default" ng-disabled="m_jelszo_modositas_form.$waiting" ng-click="m_jelszo_modositas_form.$cancel()">
+								Mégse
+								</button>
+							</span>
+						</form>
+					</div>
+					
+				</div>
+				</div>
+				
 				
 				<div data-ng-show="navigationOptionSelected == 'kosar'">
 					<h1 class="opcioCim">Kosár tartalma</h1>
@@ -114,8 +240,8 @@
 							<div class="termekReszletekInnerSzoveg" id="termekLeirasID"></div>
 							
 							<div class="termekReszletekInnerKosarba">
-								<input type="number" class="kosarba" min="1" name="darab[id]" value="1" /><p id="mertekegyseg"></p>
-								<button type="submit" onclick="" class="kosarba" >
+								<input type="number" class="kosarba" min="1" name="darab" value="1" /><p id="mertekegyseg"></p>
+								<button type="submit" data-ng-click="(navigationOptionSelected == 'termekek')?kosarba('alt'):kosarba('promo');" class="kosarba">
 									KOSÁRBA
 								</button>
 							</div>
@@ -152,7 +278,7 @@
 					<div class='termekWr' data-ng-repeat="termek in termekadatok">					
 					
 						<div id="{{'termek_'+termek['0']}}" class="termekIn" style="background-image: url({{'img/termekek/'+termek['3']}})">
-							<div class="termekTxtHolder" data-ng-click="showTermekReszletImgClick(termek['0'])">
+							<div class="termekTxtHolder" data-ng-click="showTermekReszletImgClick(termek['0'], 'alt')">
 								<div class='termekNev'>
 									{{termek["1"]}}
 								</div>
@@ -163,20 +289,20 @@
 									Ár: {{termek["2"] + " " + termek["5"]}}
 								</div>
 							</div>
-							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
-							<img class="imgOnImg" src="./kepek/ribbonProm.png" data-ng-show="termek['7'] && termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
+							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'], 'alt')"></img>
+							<img class="imgOnImg" src="./kepek/ribbonProm.png" data-ng-show="termek['7'] && termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'], 'alt')"></img>
 						</div>
 					</div>				
 				</div>
 				
 				
-				<div data-ng-show="navigationOptionSelected=='promtermekek'">
+				<div data-ng-show="navigationOptionSelected == 'promtermekek'">
 					<h1 class="opcioCim">Promóciós termékek</h1>
 					
-					<div class='termekWr' data-ng-repeat="termek in termekadatokPr">					
+					<div class='termekWr' data-ng-repeat="termek in termekadatok">					
 					
 						<div id="{{'promtermek_'+termek['0']}}" class="termekIn" style="background-image: url({{'img/termekek/'+termek['3']}})">
-							<div class="termekTxtHolder" data-ng-click="showPromTermekReszletImgClick(termek['0'])">
+							<div class="termekTxtHolder" data-ng-click="showTermekReszletImgClick(termek['0'], 'promo')">
 								<div class='termekNev'>
 									{{termek["1"]}}
 								</div>
@@ -187,24 +313,12 @@
 									Ár: {{termek["2"] + " " + termek["5"]}}
 								</div>
 							</div>
-							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
-							<img class="imgOnImg" src="./kepek/ribbonProm.png"  data-ng-click="showTermekReszletImgClick(termek['0'])"></img>
+							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'], 'promo')"></img>
+							<img class="imgOnImg" src="./kepek/ribbonProm.png"  data-ng-click="showTermekReszletImgClick(termek['0'], 'promo')"></img>
 						</div>
 					</div>				
 				</div>
 					
-				<div data-ng-show="navigationOptionSelected=='rendeleseim'">
-					<h1 class="rendelesCim">Rendeléseim</h1>
-					<div id="rendelesekDiv">
-						<div id="rendelesDiv" data-ng-repeat="rendeles in  rendelesek ">
-								<img id="images" data-ng-src="{{'img/termekek/termek'+rendeles[4]+'.jpg'}}"><br>
-								Terméknév: {{rendeles[0]}} <br>
-								Mennyiség: {{rendeles[1]}} <br>
-								Státusz: {{rendeles[2]}} <br>
-								Dátum: {{rendeles[3]}} 
-						</div>
-					</div>
-				</div>
 					
 				<div data-ng-show="navigationOptionSelected == 'nincstermek'">
 					<h3>Jelenleg nincsenek termékek.</h3>
@@ -214,10 +328,7 @@
 					<h3>Jelenleg nincsenek promóciós termékek.</h3>
 				</div>	
 
-				<div data-ng-show="navigationOptionSelected == 'nincsrendeles'">
-					<h3>Nincsenek rendelései önnek!</h3>
-				</div>
-					
+				
 				<!-- Rendeles megjelenitese: -->
 				<div data-ng-show="navigationOptionSelected == 'rendeles'"  data-ng-init="osszegInit()" >
 					<h1 class="opcioCim">1. A megrendelni kívánt termékek:</h1>
@@ -253,8 +364,24 @@
 				
 				<div data-ng-show="navigationOptionSelected == 'sikeresRendeles'">
 					<h3> A rendelését sikeresen elküldtük. A rendeléseit a Rendelések menüpont alatt tekintheti meg.</h3>
-				</div>	
+				</div>		
 				
+				
+				<!-- Eddigi rendelesek megtekintese -->
+				<div data-ng-show="navigationOptionSelected=='rendeleseim'">
+					<h1 class="rendelesCim">Rendeléseim</h1>
+					<div id="rendelesekDiv">
+						<div id="rendelesDiv" data-ng-repeat="rendeles in  rendelesek ">
+								<img id="images" data-ng-src="{{'img/termekek/termek'+rendeles[4]+'.jpg'}}"><br>
+								Terméknév: {{rendeles[0]}} <br>
+								Egységár: {{rendeles[5]}} {{ rendeles[6] }}\{{ rendeles[7] }} <br>
+								Összár: {{rendeles[8]}} {{rendeles[6]}} <br>
+								Mennyiség: {{rendeles[1]}} {{rendeles[7]}} <br>
+								Státusz: {{rendeles[2]}} <br>
+								Dátum: {{rendeles[3]}} 
+						</div>
+					</div>
+				</div>
 					
 			</div>
 			<div style="clear:both"></div>
@@ -262,7 +389,7 @@
 
 	</div>
 	
-	<footer id="footer01" ></footer>
+	<footer id="footer1" ></footer>
 	
 	<script src="scripts/script.js"></script>
 

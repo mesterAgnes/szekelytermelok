@@ -96,16 +96,20 @@ termeloApp.controller('termekFeltoltesController', [
 				.success(function(data, status, headers, config) {
 					$scope.success = data.success;
 					alert('Sikeres feltöltés.');
+					location.reload();
 				});
-				document.getElementById('click'+data['id']).click();
+				if(document.getElementById('fileinput'+data['id']).value != "")
+					document.getElementById('click'+data['id']).click();
 			}
 			if($scope.ujtermek == 1) {
 				$http.post('/termekfeltoltes/', data)
 				.success(function(data, status, headers, config) {
 					$scope.success = data.success;
 					alert('Sikeres feltöltés.');
+					location.reload();
 				});
-				document.getElementById('click').click();
+				if(document.getElementById('fileinput').value != "")
+					document.getElementById('click').click();
 				$scope.ujtermek == 0;
 			}
 			
@@ -188,12 +192,14 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 	
 	// profilom lementese
 	$scope.profilomMentes = function(data) {
+		if(document.getElementById('fileinputProfil').value != "")
+			document.getElementById('clickProfil').click();
 		$http.post('/profilommodositas/', data)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');
+			location.reload();
 		});	
-		document.getElementById('clickProfil').click();
 	}; 
 	
 	$scope.vizsgalEmail = function(data) {
@@ -211,6 +217,37 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 		}
 	};
 	
+	$scope.regipassError = false;
+	$scope.passError = false;
+	
+	$scope.vizsgal_regiPassword = function() {
+		regipass = angular.copy($scope.adatok.regipass);
+		regipass = md5(regipass);   // ebben taroljuk a felhasznalo altal beirt jelszot
+		// console.log(regipass);
+		$http.post('/jelszolekeres/', {})
+		.success(function(data, status, headers, config) {
+			$scope.pass = data['pass'];
+			// console.log($scope.pass[0]);
+		});	
+		$scope.regipassError = $scope.pass[0] !== regipass; 
+	};
+	
+	$scope.vizsgalPasswords = function() {
+		$scope.passError = $scope.adatok.ujpass1 !== $scope.adatok.ujpass2;
+	};
+	
+	// jelszo modositas
+	$scope.jelszoModositas = function() {
+		Adatok = angular.copy($scope.adatok);
+		Adatok.ujpass1 = md5(Adatok.ujpass1);
+		console.log(Adatok.ujpass1)
+		$http.post('/jelszomodositas/', Adatok)
+		.success(function(data, status, headers, config) {
+			$scope.success = data.success;
+			alert('Sikeres jelszó módosítás.');
+		});	
+	};
+	
 }]);
 
 termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$filter',
@@ -226,6 +263,69 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 				$scope.penznemek = data['penznemek'];
 				$scope.promtermekek_regiadatai = data['promtermekek_regiadatai']
 			});
+		};
+		
+		// a termek valtoztatasanal aktualizaljuk az adatokat
+		promtermek_aktualizal = function(szam) {
+			// console.log(szam);
+			data = document.getElementById('nev'+szam).options[document.getElementById('nev'+szam).selectedIndex].innerHTML;
+			// console.log(data);
+			$http.post('/promtermek_aktualizal/', {'nev':data})
+			.success(function(data, status, headers, config) {
+				//$scope.promtermekek_regiadatai = data['promtermekek_regiadatai'];
+				promtermekek_lista = data['promtermekek_lista'];
+				// console.log(promtermekek_lista);
+				$scope.promtermekek[szam][0] = promtermekek_lista[0];
+				$scope.promtermekek_regiadatai[szam][2] = promtermekek_lista[2];
+				$scope.promtermekek_regiadatai[szam][4] = promtermekek_lista[4];
+			});
+		};
+		
+		$scope.termekError = false;
+		
+		$scope.vizsgalTermekek = function(data) {
+			termek1 = data['nev0'];
+			termek2 = data['nev1'];
+			termek3 = data['nev2'];
+			//console.log(termek1);
+			//console.log(termek2);
+			//console.log(termek3);
+			
+			if ((termek1 == termek2) || (termek1 == termek3) || (termek2 == termek3)) {
+				document.getElementById('termek_ismetlodes').style.opacity = 1;
+				return "Hiba!";
+			}
+			else {
+				document.getElementById('termek_ismetlodes').style.opacity = 0;
+				$scope.promtermekMent(data);
+			}
+		};
+		
+		$scope.vizsgalDatum = function(data, szam) {
+			vdatum = data;
+			// console.log(vdatum);
+			if (szam == 0) {
+				kdatum = angular.copy($scope.tableform.kezdeti_d0.$viewValue);
+			}
+			if (szam == 1) {
+				kdatum = angular.copy($scope.tableform.kezdeti_d1.$viewValue);
+			}
+			if (szam == 2) {
+				kdatum = angular.copy($scope.tableform.kezdeti_d2.$viewValue);
+			}
+			// console.log(kdatum);
+		    if (kdatum > vdatum) {
+					return "A kezdeti dátum nem lehet később, mint a befejezés!";
+			}
+		};
+		
+		$scope.vizsgalUjAr = function(data,szam) {
+			// console.log(data);  // promocios ar 
+			// console.log(szam);
+			regiar = parseInt(document.getElementById('ar'+szam).innerHTML);
+			// console.log(regiar);
+			if (regiar <= data)
+				return "A promóciós ár kevesebb kell legyen, mint a régi ár!";
 		};
 		
 		// promocios termekek mentese
@@ -258,40 +358,28 @@ termeloApp.controller('MegrendelesekController', function($scope, $filter, $http
 			$scope.rendeleseim = data['rendeleseim'];
 			$scope.datumok = data['datumok']
 			$scope.termeknevek = data['termeknevek'];
+			$scope.mertekegysegek = data['mertekegysegek']
+			$scope.penznemek = data['penznemek'];
+			$scope.megrendelonevek = data['megrendelonevek'];
 			$scope.statuszok = [
-				{text:'Új megrendelés', value:0},
+				{text:'Új rendelés', value:0},
 				{text:'Függőben van', value:1},
 				{text:'Kiszállítva', value:2}
 			];
 			$scope.megrendelesek = [];
-			$scope.dates = [];
-			for	(i = 0; i < $scope.rendeleseim.length; i++) {
-				$scope.dates[i]="";
-			}
-			for	(i = 0; i < $scope.rendeleseim.length; i++) {
-				if (i==0) {
-					for (j=3;j<13;j++) { 
-						$scope.dates[i]+=$scope.datumok[j];
-					}
-				} else 
-					if (i==1){
-						for (j=19;j<29;j++) { 
-							$scope.dates[i]+=$scope.datumok[j];
-						}
-					} else {
-						for (j=i*13+i*6-3;j<i*13+i*6+7;j++) { 
-							$scope.dates[i]+=$scope.datumok[j];
-						}
-					}
-			}
 			
 			for	(i = 0; i < $scope.rendeleseim.length; i++) {
 				$scope.megrendelesek[i] = {
 					'0' : $scope.termeknevek[i],
 					'1' : $scope.rendeleseim[i][1],
 					'2' : $scope.rendeleseim[i][2],
-					'3' : $scope.dates[i],
-					'4' : $scope.rendeleseim[i][0]
+					'3' : $scope.datumok[i],
+					'4' : $scope.rendeleseim[i][0],
+					'5' : $scope.rendeleseim[i][3],
+					'6' : $scope.penznemek[i],
+					'7' : $scope.mertekegysegek[i],
+					'8' : $scope.megrendelonevek[i],
+					'9' : $scope.rendeleseim[i][3]*$scope.rendeleseim[i][1]
 				}
 			}
 		});

@@ -89,10 +89,13 @@ CREATE TABLE IF NOT EXISTS `megrendelesek` (
 --
 
 INSERT INTO `megrendelesek` (`M_ID`, `Mennyiseg`, `Statusz`, `Datum`, `Ar`, `T_ID`, `Rendelo_ID`) VALUES
-(3, 3, 'Új rendelés', '2014-12-31', 4, 1, 3),
-(4, 1, 'Új rendelés', '2014-12-31', 2, 4, 3),
-(5, 2, 'Új rendelés', '2014-12-31', 3, 2, 3),
-(6, 2, 'Új rendelés', '2014-12-31', 7, 7, 3);
+(1, 3, 'Új rendelés', '2014-12-31', 4, 1, 3),
+(2, 1, 'Új rendelés', '2014-12-31', 2, 4, 3),
+(3, 2, 'Új rendelés', '2014-12-31', 3, 2, 3),
+(4, 2, 'Új rendelés', '2014-12-31', 7, 7, 3),
+(5, 2, 'Új rendelés', '2015-01-03', 4, 1, 3),
+(6, 3, 'Új rendelés', '2015-01-03', 2, 4, 3),
+(7, 1, 'Új rendelés', '2015-01-03', 9, 7, 3);
 
 -- --------------------------------------------------------
 
@@ -326,26 +329,6 @@ CREATE TABLE IF NOT EXISTS `uzenetek` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `megrendelok`
---
-
-CREATE TABLE IF NOT EXISTS `megrendelok` (
-	`SZ_ID` int(11) NOT NULL DEFAULT '0',
-	`Szall_cim` varchar(60) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `megrendelok`
---
-
-INSERT INTO `Megrendelok` (`SZ_ID`,`Szall_cim`) VALUES
-(1,'Kézdiszentlélek, Patkó utca 5.'),
-(3,'Csíkszereda, Sugárút 19');
---
--- Indexes for dumped tables
---
-
---
 -- Indexes for table `kategoriak`
 --
 ALTER TABLE `kategoriak`
@@ -428,16 +411,6 @@ ALTER TABLE `termelok`
 --
 ALTER TABLE `uzenetek`
  ADD PRIMARY KEY (`U_ID`);
-
---
--- Indexes for table `megrendelok`
---
-ALTER TABLE `megrendelok`
- ADD PRIMARY KEY (`SZ_ID`);
-
---
--- AUTO_INCREMENT for dumped tables
---
 
 --
 -- AUTO_INCREMENT for table `kategoriak`

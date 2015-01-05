@@ -13,7 +13,6 @@ div#rendelesekDiv {
 	float: left;
 	padding: 10px;
 }
-
 div#rendelesDiv {
 	display: flex;
 	margin: 10px;
@@ -21,8 +20,10 @@ div#rendelesDiv {
 	border-style: solid;
     border-width: 1px;
 	padding: 10px;
+	font-family: verdana;
+	font-size: 18px;
+	color: grey;
 }
-
 img#images {
 	height: 30%;
 	width: 30%;
@@ -50,7 +51,6 @@ div.termekIn{
 	background-size:100%,100%;		
 	
 	transition:all 0.3s ease-out;
-
 }
 div.termekIn:hover{
 	border:1px solid rgba(0,0,0,0);
@@ -276,6 +276,7 @@ button.kosarba{
 	font-weight:800;
 	
 	transition:all .3s;
+	position:relative;	
 }
 button.kosarba:hover{
 	color:rgb(50,50,50);
@@ -284,7 +285,6 @@ button.kosarba:hover{
 }
 button.kosarba:focus{
 	outline:none;
-	border:1px solid rgb(50,50,50);
 }
 
 button.kosar{
@@ -298,4 +298,31 @@ button.kosar{
 	
 	transition:all .3s;
 	position:relative;	
+}
+button.kosar:hover{
+	color:rgb(50,50,50);
+	background:white;
+	border:1px solid #323232;
+	cursor:pointer;
+}
+button.kosar:focus{
+	outline:none;
+}
+div.kosarTartalma{
+	margin: 5% 5% 0% 5%;
+	font-family:calibri;
+}
+table.termekekKosara{
+	border-collapse:collapse;	
+	width: 100%;
+}
+table.termekekKosara td{
+	text-align:center;
+	font-size:1.4em;
+	font-family:calibri;
+	padding:2% 2% 2% 2%; 
+	border-bottom:1px solid #323232;
+}
+img.imgKosarban{
+	width: 100px;	
 }

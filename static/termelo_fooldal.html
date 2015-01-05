@@ -9,9 +9,7 @@
 	<script src= "lib/angular.min.js"></script>
 	
 	<!-- Latest compiled and minified CSS -->
-	
 	<link rel="stylesheet" href="lib/bootstrap.min.css">
-	</link>
 
 	<!-- JQuery.js -->
 	<script src="lib/jquery-1.11.1.js"></script>
@@ -29,6 +27,9 @@
 	
 	<!-- checklist-model -->
 	<script src="scripts/checklist-model.js"></script>
+	
+	<!-- md5 -->
+	<script src="lib/md5.js"></script>
 
 </head>
 
@@ -42,9 +43,9 @@
 		<nav id="navigationStrip1">   <!-- menu -->
 			<div style="float:left;width:16.666%;height:10px"></div>
 			<div style="float:left">
-				<button data-my-navigation id="kezdolap" data-ng-click="navigationStrip01_Clicked('kezdolap')" > Kezdőlap </button>
-				<button data-my-navigation data-ng-click="navigationStrip01_Clicked('projekt')"> A projektről </button>
-				<button data-my-navigation data-ng-click="navigationStrip01_Clicked('linkek')"> Hasznos linkek </button>
+				<button data-my-navigation id="kezdolap" data-ng-click="navigationStrip1_Clicked('kezdolap')" > Kezdőlap </button>
+				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('projekt')"> A projektről </button>
+				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('linkek')"> Hasznos linkek </button>
 				<button data-my-navigation data-ng-click="logout()"> Kijelentkezés </button>
 				<button data-my-navigation data-ng-show="megrendelo == 1" data-ng-click="megrendeloOldal()">Megrendelő oldal</button>
 			
@@ -67,14 +68,32 @@
 							
 				<div data-ng-show="navigationOptionSelected =='kezdolap'">
 					<h1 class="opcioCim">Kezdőlap</h1>
+					<p>Üdvözöljük a Székelytermelők honlapján!</p>
+					<img src="szekelykapu.jpg" alt="Szekelykapu">
 				</div>
 				
 				<div data-ng-show="navigationOptionSelected =='projekt'">
 					<h1 class="opcioCim">A projektről</h1>
+					<br><br><br>
+					<div>
+						<p>Székelyföldön sok olyan helyi termelő létezik, aki különböző helyi termékeket állít elő, de nincs lehetősége eljuttatni egy szélesebb vásárlói körbe.
+						   A városon élőknek ritkán adódik lehetősége ezen termékek megszerzésére, főleg azok mindennapi fogyasztására.
+						</p>
+						<p>Tapasztalva, hogy mekkora sikernek örvendenek a különböző székelyföldi városokban megrendezésre kerülő hagyományos vásárok, 
+						   arra az elhatározásra jutottunk, hogy tovább kellene fejleszteni ezt a kezdeményezést, ugyanis ezek a termelők többnyire nagy termelői kapacitással rendelkeznek, 
+						   és a vásárlók részéről is nagyobb igény lenne, ha könnyebben beszerezhetnék az árucikkeket.
+						</p>
+						<p>Célunk megteremteni a lehetőséget a termelőnek, hogy értékesíthesse árucikkeit, és a vásárlónak, hogy kedvére válogathasson a számára kedvelt és előszeretettel fogyasztott élelmiszerek között, 
+						   és akár naponta beszerezhesse azokat. 
+						</p>
+					</div>
 				</div>
 				
 				<div data-ng-show="navigationOptionSelected =='linkek'">
 					<h1 class="opcioCim">Hasznos linkek</h1>
+					<br><br><br>
+					<a href="http://www.szekelytermek.ro/">A székelytermék </a> <br>
+					<a href="http://www.varoshaza.ro/hirek/hagyomanyos-helyi-termekek-vasara/">Székelyudvarhely - hagyományos termékek vására</a> <br>
 				</div>
 			
 			
@@ -85,7 +104,7 @@
 							<!-- modosithato kep -->
 							<span class="title"> Logó: </span>
 								<form name="logo_uload" action="/logo_upload" method="post" enctype="multipart/form-data" > 
-									<input type="file" class="btn btn-primary" name="l_file" />
+									<input type="file" id="fileinputProfil" class="btn btn-primary" name="l_file" />
 									<input type="submit" value="Upload2" id="clickProfil"/>
 								</form>
 						</div>
@@ -178,6 +197,48 @@
 								</span>
 							</div>
 						</form>
+						
+						<div>
+						<br><br><br><br>
+						<p>Ha a jelszót szeretnéd módosítani, azt az alábbi gombra kattintva teheted meg: </p>
+						<form editable-form name="jelszo_modositas_form">
+							<!-- button to show form -->
+							<button type="button" class="btn btn-default" ng-click="jelszo_modositas_form.$show()" ng-show="!jelszo_modositas_form.$visible">
+							Módosít
+							</button>
+						
+							<!-- buttons to submit / cancel form -->
+							<span ng-show="jelszo_modositas_form.$visible">
+								<div>
+									<!-- regi jelszo -->
+									<span class="title"> Régi jelszó: </span>
+									<input type="password" name="regipass" data-ng-model="adatok.regipass" data-ng-change="vizsgal_regiPassword()" id="regipass" placeholder="Régi jelszó"  required>
+									<span style="color:red" data-ng-show="jelszo_modositas_form.regipass.$dirty && regipassError && !jelszo_modositas_form.regipass.$invalid">
+									*A megadott jelszó nem megfelelő! </span>
+								</div>
+								<div>
+									<!-- uj jelszo -->
+									<span class="title"> Új jelszó: </span>
+									<input type="password" name="ujpass1" data-ng-model="adatok.ujpass1" data-ng-change="vizsgalPasswords()" id="ujpass1" placeholder="Új jelszó"  required>
+								</div>
+								<div>
+									<!-- uj jelszo megerositese -->
+									<span class="title"> Új jelszó megerősítése: </span>
+									<input type="password" name="ujpass2" data-ng-model="adatok.ujpass2" data-ng-change="vizsgalPasswords()" id="ujpass2" placeholder="Új jelszó megerősítése"  required>
+									<span style="color:red" data-ng-show="jelszo_modositas_form.ujpass2.$dirty && passError && !jelszo_modositas_form.ujpass2.$invalid">
+									*A két jelszó nem egyezik meg.</span>
+								</div>
+					
+								<button type="submit" class="btn btn-primary" ng-disabled="jelszo_modositas_form.$invalid || passError || regipassError" ng-click="jelszoModositas()">
+								Mentés 
+								</button>
+								<button type="button" class="btn btn-default" ng-disabled="jelszo_modositas_form.$waiting" ng-click="jelszo_modositas_form.$cancel()">
+								Mégse
+								</button>
+							</span>
+						</form>
+						</div>
+					
 					</div>
 				</div>
 				
@@ -239,7 +300,7 @@
 							<!-- modosithato fotó -->
 							<span id="visible_span" ng-show="rowform.$visible" >
 								<form name="termek_upload" action="/termek_upload" method="post" enctype="multipart/form-data" >
-									<input type="file" class="btn btn-primary" name="t_file" />
+									<input type="file" id="fileinput{{termek[0]}}" class="btn btn-primary" name="t_file" />
 									<input type="submit" value="Upload" id="click{{termek[0]}}" class="clicks" />
 								</form>
 							</span>
@@ -291,7 +352,7 @@
 					<h1 class="opcioCim">Promóciós termékek</h1>
 					
 					<div ng-controller="termekPromFeltoltesController" ng-init="termekekPromBetolt()">
-					<form editable-form name="tableform" onbeforesave="promtermekMent($data)" oncancel="cancel()"> 
+					<form editable-form name="tableform" onbeforesave="vizsgalTermekek($data)" oncancel="cancel()"> 
 					<!-- table -->
 					<table class="table table-bordered table-hover table-condensed">
 						<tr style="font-weight: bold">
@@ -307,14 +368,14 @@
 						<tr ng-repeat="szam in [0,1,2]" >
 							<td>   
 							<!-- ID  -->
-							<span editable-text="promtermekek[szam][0]" e-name="id{{szam}}" e-form="tableform">
-							  {{ promtermekek[szam][0]|| 'empty' }}
+							<span text="promtermekek[szam][0]" e-name="id{{szam}}" e-form="tableform">
+							  {{ promtermekek[szam][0]|| ' ' }}
 							</span>
 							</td>
 
 							<td>
 							<!-- termek neve -->
-							<span editable-select="promtermekek_regiadatai[szam][1]" e-name="nev{{szam}}" e-form="tableform" e-ng-options="t.value as t.text for t in termekek" required>
+							<span editable-select="promtermekek_regiadatai[szam][1]" e-id="nev{{szam}}" e-name="nev{{szam}}" e-form="tableform"  e-onChange="promtermek_aktualizal({{szam}})" e-ng-options="t.value as t.text for t in termekek" required>
 								{{ promtermekek_regiadatai[szam][1] }}
 								<!-- {{ showNev() }} -->
 							</span>
@@ -322,41 +383,45 @@
 							
 							<td> 
 							<!-- regi ar (rogzitett) -->
-							<span text="promtermekek_regiadatai[szam][2]" name="ar">
-							  {{ promtermekek_regiadatai[szam][2] || 'empty' }}
+							<span text="promtermekek_regiadatai[szam][2]" name="ar" id="ar{{szam}}">
+							  {{ promtermekek_regiadatai[szam][2] || ' ' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- modosithato uj ar -->
-							<span editable-text="promtermekek[szam][1]" e-name="ar{{szam}}" e-form="tableform"  onbeforesave="vizsgalUjAr($data)" required> 
-							  {{ promtermekek[szam][1] || 'empty' }}
+							<span editable-text="promtermekek[szam][1]" e-name="ar{{szam}}" e-form="tableform"  onbeforesave="vizsgalUjAr($data, szam)" required> 
+							  {{ promtermekek[szam][1] || ' ' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- penznem (rogzitett) -->
 							<span text="promtermekek_regiadatai[szam][4]" name="penznem">
-							  {{ promtermekek_regiadatai[szam][4] || 'empty' }}
+							  {{ promtermekek_regiadatai[szam][4] || ' ' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- modosithato kezdeti datum -->
-							<span editable-date="datumok[szam*2]" e-name="kezdeti_d{{szam}}" e-form="tableform" onbeforesave="vizsgalDatum_k($data)" required>
-							  {{ datumok[szam*2] || 'empty' }}
+							<span editable-date="datumok[szam*2]" e-name="kezdeti_d{{szam}}" e-id="kezdeti_d{{szam}}" e-form="tableform"  required>
+							  {{ datumok[szam*2] || ' ' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- modosithato vegso datum -->
-							<span editable-date="datumok[szam*2+1]" e-name="vegso_d{{szam}}" e-form="tableform" onbeforesave="vizsgalDatum_v($data)" required>
-							  {{ datumok[szam*2+1] || 'empty' }}
+							<span editable-date="datumok[szam*2+1]" e-name="vegso_d{{szam}}" e-form="tableform" onbeforesave="vizsgalDatum($data,szam)" required>
+							  {{ datumok[szam*2+1] || ' ' }}
 							</span>
 							</td>
 						</tr>
 					</table>		
 
+					<div id="termek_ismetlodes" style="opacity:0">
+					<span style="color:red">A promóciós termékeknek különbözőeknek kell lenniük! </span>
+					</div>
+					
 					<!-- buttons -->
 					<div class="btn-edit">
 						<button type="button" class="btn btn-default" ng-show="!tableform.$visible" ng-click="tableform.$show()">
@@ -365,7 +430,7 @@
 					</div>
 					<div class="btn-form" ng-show="tableform.$visible">
 						<button type="submit" ng-disabled="tableform.$waiting" class="btn btn-primary"> Mentés </button>
-						<button type="button" ng-disabled="tableform.$waiting" ng-click="tableform.$cancel()" class="btn btn-default"> Mégse </button>
+						<button type="button" ng-disabled="tableform.$waiting" ng-click="tableform.$cancel() && termekekPromBetolt()" class="btn btn-default"> Mégse </button>
 					</div>	
 							
 					</form> 
@@ -377,29 +442,52 @@
 					<div id="megrendelesekDiv" data-ng-controller="MegrendelesekController" ng-init="megrendelesekBetolt()">
 					<table class="table table-bordered table-hover table-condensed">
 						<tr style="font-weight: bold">
-							<td style="width:10%">ID</td>
+							<td style="width:5%">ID</td>
+							<td style="width:5%">Megrendelő <br> neve</td>
 							<td style="width:20%">Terméknév</td>
-							<td style="width:10%">Menntiség</td>
-							<td style="width:20%">Státusz</td>
+							<td style="width:15%">Egyégár</td>
+							<td style="width:10%">Összár</td>
+							<td style="width:10%">Mennyiség</td>
+							<td style="width:10%">Státusz</td>
 							<td style="width:10%">Dátum</td>
+							<td style="width:10%">Módosítás</td>
 						</tr>
 						<tr ng-repeat="megrendeles in megrendelesek" >
 							<td>
-							<span editable-number=" megrendeles[4]" e-name="id" e-form="megrendelesForm" e-required>
-							  {{ megrendeles[4] }}
-							</span>
+								<span editable-number=" megrendeles[4]" e-name="id" e-form="megrendelesForm" e-required>
+								  {{ megrendeles[4] }}
+								</span>
 							</td>
 							
 							<td>
-							<span e-name="nev" e-form="megrendelesForm">
-							  {{ megrendeles[0] }}
-							</span>
+								<span e-name="mnev" e-form="megrendelesForm">
+								  {{ megrendeles[8] }}
+								</span>
 							</td>
 							
 							<td>
-							<span e-name="mennyiseg" e-form="megrendelesForm">
-							  {{ megrendeles[1] }}
-							</span>
+								<span e-name="nev" e-form="megrendelesForm">
+								  {{ megrendeles[0] }}
+								</span>
+							</td>
+							
+							
+							<td>
+								<span e-name="ar" e-form="megrendelesForm">
+								  {{ megrendeles[5] }} {{ megrendeles[6] }}\{{ megrendeles[7] }}
+								</span>
+							</td>
+							
+							<td>
+								<span e-name="oar" e-form="megrendelesForm">
+								  {{ megrendeles[9] }} {{ megrendeles[6] }}
+								</span>
+							</td>
+							
+							<td>
+								<span e-name="mennyiseg" e-form="megrendelesForm">
+								  {{ megrendeles[1] }} {{ megrendeles[7] }}
+								</span>
 							</td>
 							
 							<td>
@@ -409,9 +497,9 @@
 							</td>
 							
 							<td>
-							<span e-name="datum" e-form="megrendelesForm">
-							  {{ megrendeles[3] }}
-							</span>
+								<span e-name="datum" e-form="megrendelesForm">
+								  {{ megrendeles[3] }}
+								</span>
 							</td>
 							<td style="white-space: nowrap">
 								<form editable-form name="megrendelesForm"  onshow="sorModositas(true)" onhide="sorModositas(false)" oncancel="cancelModify()" onbeforesave="statuszMent($data)" ng-show="megrendelesForm.$visible" class="form-buttons form-inline" shown="inserted == megrendeles">
@@ -463,7 +551,7 @@
 		</div>
 	</div>
 	
-	<footer id="footer01" ></footer>
+	<footer id="footer1" ></footer>
 	
 	<script src="scripts/script.js"></script>
 
