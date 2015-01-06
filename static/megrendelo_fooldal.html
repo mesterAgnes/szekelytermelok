@@ -47,7 +47,7 @@
 				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('projekt')" > A projektről </button>
 				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('linkek')"> Hasznos linkek </button>
 				<button data-my-navigaton data-ng-click="logout()"> Kijelentkezés </button>
-				<button data-my-navigaton data-ng-click="vizsgalKosar()"> Kosár </button>
+				<button data-my-navigaton data-ng-click="kiirKosar()"> Kosár </button>
 				<button data-my-navigaton data-ng-show="termelo == 1" data-ng-click="termeloOldal()">Termelő oldal</button>		
 				
 				<span id = "felhasznaloDiv"> Üdv, {{nev}}! </span>
@@ -58,7 +58,7 @@
 		
 		<div id="mainDiv">
 			<nav id="navigationStrip2">   <!-- oldalso menu -->
-				<button data-my-navigaton data-ng-click="navigationStrip2_Clicked('m_profilom')"> Profilom </button> 
+				<button data-my-navigaton data-ng-click="setRendelesProfil(false); navigationStrip2_Clicked('m_profilom');"> Profilom </button> 
 				<button data-my-navigaton data-ng-click="termekekBetoltes('alt')"> Termékek </button> <br>
 				<button data-my-navigaton data-ng-click="termekekBetoltes('promo')" > Promóciós termékek </button> <br>
 				<button data-my-navigaton data-ng-click="rendeleseimBetoltes()" > Rendeléseim </button> <br>
@@ -97,9 +97,10 @@
 				</div>
 				
 				
-				<div data-ng-show="navigationOptionSelected == 'm_profilom'">
-				<h1 class="opcioCim">Profilom </h1>
-				<div ng-controller="m_profilomController" ng-init="m_profilomBetolt()">
+				<div data-ng-show="navigationOptionSelected == 'm_profilom'"   ng-controller="m_profilomController" ng-init="m_profilomBetolt()">
+					<h1 class="opcioCim" data-ng-hide="getRendelesProfil();" >Profilom </h1>
+					<h1 class="opcioCim" data-ng-show="getRendelesProfil();" >2. Személyes adatok: </h1> <!-- A rendeles soran is modosithatoak a szemelyes adatok -->
+				
 					<form  editable-form name="m_profilom_form" onbeforesave="m_profilomMentes($data)">
 						<div>
 							<!-- modosithato nev -->
@@ -146,7 +147,7 @@
 						</div>
 					</form>
 					
-					<div>
+					<div data-ng-hide="getRendelesProfil();" class="semmi"> <!-- A rendeles soran jelszot nem modosithat, csak a Profilom menubol -->
 						<br><br><br><br>
 						<p>Ha a jelszót szeretnéd módosítani, azt az alábbi gombra kattintva teheted meg: </p>
 						<form editable-form name="m_jelszo_modositas_form">
@@ -187,7 +188,20 @@
 						</form>
 					</div>
 					
-				</div>
+					<div data-ng-show="getRendelesProfil();" class="semmi"> <!-- A profilom menupont soran ez nem jelenik meg, csak ha a rendelesekbol jut el ide -->
+						<div style="float:left;width:50%;text-align:center; margin-top:5%"  > 
+							<button data-ng-click=" rendelesKiirasa(); setRendelesProfil(false); " class="kosar">
+								VISSZA
+							</button>
+						</div>
+						<div style="float:left;width:50%;text-align:center; margin-top:5%">
+							<button data-ng-click=" rendeles(); setRendelesProfil(false);" class="kosar">
+								RENDELÉS
+							</button>
+						</div>
+						<div style="clear:both"></div>
+					</div>
+					
 				</div>
 				
 				
@@ -196,16 +210,15 @@
 			
 					<div id='kosarTartalma'>
 						<table class='termekekKosara'>
-							<tr ng-repeat="termek in kosar" >
-
-								<td> <img class='imgKosarban' src="{{'./img/termekek/termek' + termek.id + '.jpg'}}" ></img> </td>
-								<td> {{ termek.nev }} </td>
-								<td> ({{ termek.termelo }}) </td>
-								<td> {{ termek.mennyiseg }}  {{ termek.mertekegyseg }} </td>
-								<td> {{ termek.ar*termek.mennyiseg }}  {{ termek.penznem }} </td>
+							<tr data-ng-repeat="termek in kosar" >
+								<td> <img data-ng-show="kosar.length > 0" class='imgKosarban' src="{{'./img/termekek/termek' + termek[0] + '.jpg'}}" ></img> </td>
+								<td> {{ termek[1] }} </td>
+								<td> ({{ termek[2] }}) </td>
+								<td> {{ termek[3] }}  {{ termek[4] }} </td>
+								<td> {{ termek[5]*termek[3] }}  {{ termek[6] }} </td>
 								<td>
 									<div style="display:inline;" data-ng-show="!rowform.$visible">
-										<button data-ng-click="termekTorol( termek.id, termek.mennyiseg );" class="kosar" >TÖRLÉS</button>
+										<button data-ng-click="termekTorol( termek[0], termek[3] );" class="kosar" >TÖRLÉS</button>
 									</div>  
 								</td>
 							</tr>
@@ -336,12 +349,12 @@
 					<div class='kosarTartalma'>
 						<table class='termekekKosara'>
 							<tr ng-repeat="termek in kosar" >
-
-								<td> <img class='imgKosarban' src="{{'./img/termekek/termek' + termek.id + '.jpg'}}" ></img> </td>
-								<td> {{ termek.nev }} </td>
-								<td> ({{ termek.termelo }}) </td>
-								<td> {{ termek.mennyiseg }}  {{ termek.mertekegyseg }} </td>
-								<td> {{ termek.ar*termek.mennyiseg }}  {{ termek.penznem }} </td>
+								
+								<td> <img class='imgKosarban' src="{{'./img/termekek/termek' + termek[0] + '.jpg'}}" ></img> </td>
+								<td> {{ termek[1] }} </td>
+								<td> ({{ termek[2] }}) </td>
+								<td> {{ termek[3] }}  {{ termek[4] }} </td>
+								<td> {{ termek[5]*termek[3] }}  {{ termek[6] }} </td>
 							</tr>
 						</table>
 						<div class='kosarTartalma'>
@@ -349,12 +362,12 @@
 						</div>
 				
 						<div style="float:left;width:50%;text-align:center; margin-top:5%">
-							<button data-ng-click="vizsgalKosar();" class="kosar">
+							<button data-ng-click="navigationStrip1_Clicked('kosar');" class="kosar">
 								VISSZA
 							</button>
 						</div>
 						<div style="float:left;width:50%;text-align:center; margin-top:5%">
-							<button data-ng-click="rendeles();" class="kosar">
+							<button data-ng-click="rendelesProfil();" class="kosar">
 								TOVÁBB
 							</button>
 						</div>
@@ -374,11 +387,11 @@
 						<div id="rendelesDiv" data-ng-repeat="rendeles in  rendelesek ">
 								<img id="images" data-ng-src="{{'img/termekek/termek'+rendeles[4]+'.jpg'}}"><br>
 								Terméknév: {{rendeles[0]}} <br>
-								Egységár: {{rendeles[5]}} {{ rendeles[6] }}\{{ rendeles[7] }} <br>
-								Összár: {{rendeles[8]}} {{rendeles[6]}} <br>
+								Egységár: {{rendeles[5]}} {{ rendeles[6] }}/{{ rendeles[7] }} <br>
 								Mennyiség: {{rendeles[1]}} {{rendeles[7]}} <br>
+								Összár: {{rendeles[8]}} {{rendeles[6]}} <br>
 								Státusz: {{rendeles[2]}} <br>
-								Dátum: {{rendeles[3]}} 
+								Rendelés dátuma: {{rendeles[3]}} 
 						</div>
 					</div>
 				</div>

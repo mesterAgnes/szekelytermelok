@@ -1,9 +1,9 @@
-﻿-- phpMyAdmin SQL Dump
+-- phpMyAdmin SQL Dump
 -- version 4.2.7.1
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 31, 2014 at 09:06 PM
+-- Generation Time: Jan 07, 2015 at 12:48 AM
 -- Server version: 5.5.39
 -- PHP Version: 5.4.31
 
@@ -20,10 +20,6 @@ SET time_zone = "+00:00";
 -- Database: `szekelytermelok`
 --
 
-
-CREATE DATABASE IF NOT EXISTS `szekelytermelok`;
-USE `szekelytermelok`;
-
 -- --------------------------------------------------------
 
 --
@@ -31,8 +27,8 @@ USE `szekelytermelok`;
 --
 
 CREATE TABLE IF NOT EXISTS `kategoriak` (
-	`K_ID` int(11) NOT NULL,
-	`Nev` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
+`K_ID` int(11) NOT NULL,
+  `Nev` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 --
@@ -51,9 +47,9 @@ INSERT INTO `kategoriak` (`K_ID`, `Nev`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `kiszallitasi_helyek` (
-	`KiszallHely_ID` int(11) NOT NULL,
-	`SZ_ID` int(11) DEFAULT NULL,
-	`Telep_ID` int(11) DEFAULT NULL
+`KiszallHely_ID` int(11) NOT NULL,
+  `SZ_ID` int(11) DEFAULT NULL,
+  `Telep_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -63,9 +59,22 @@ CREATE TABLE IF NOT EXISTS `kiszallitasi_helyek` (
 --
 
 CREATE TABLE IF NOT EXISTS `kiszallitasi_napok` (
-	`KiszallNap_ID` int(11) NOT NULL,
-	`SZ_ID` int(11) DEFAULT NULL,
-	`N_ID` int(11) DEFAULT NULL
+`KiszallNap_ID` int(11) NOT NULL,
+  `SZ_ID` int(11) DEFAULT NULL,
+  `N_ID` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `kosarak`
+--
+
+CREATE TABLE IF NOT EXISTS `kosarak` (
+`K_ID` int(11) NOT NULL,
+  `T_ID` int(11) NOT NULL COMMENT 'termek',
+  `SZ_ID` int(11) NOT NULL COMMENT 'megrendelo',
+  `Mennyiseg` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -75,27 +84,33 @@ CREATE TABLE IF NOT EXISTS `kiszallitasi_napok` (
 --
 
 CREATE TABLE IF NOT EXISTS `megrendelesek` (
-	`M_ID` int(11) NOT NULL,
-	`Mennyiseg` int(11) NOT NULL,
-	`Statusz` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Datum` date DEFAULT NULL,
-	`Ar` float NOT NULL COMMENT 'Egysegnyi mennyiseg ara',
-	`T_ID` int(11) DEFAULT NULL,
-	`Rendelo_ID` int(11) DEFAULT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
+`M_ID` int(11) NOT NULL,
+  `Mennyiseg` int(11) NOT NULL,
+  `Statusz` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Datum` date DEFAULT NULL,
+  `Ar` float NOT NULL COMMENT 'Egysegnyi mennyiseg ara',
+  `T_ID` int(11) DEFAULT NULL,
+  `Rendelo_ID` int(11) DEFAULT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=19 ;
 
 --
 -- Dumping data for table `megrendelesek`
 --
 
 INSERT INTO `megrendelesek` (`M_ID`, `Mennyiseg`, `Statusz`, `Datum`, `Ar`, `T_ID`, `Rendelo_ID`) VALUES
-(1, 3, 'Új rendelés', '2014-12-31', 4, 1, 3),
-(2, 1, 'Új rendelés', '2014-12-31', 2, 4, 3),
-(3, 2, 'Új rendelés', '2014-12-31', 3, 2, 3),
-(4, 2, 'Új rendelés', '2014-12-31', 7, 7, 3),
-(5, 2, 'Új rendelés', '2015-01-03', 4, 1, 3),
-(6, 3, 'Új rendelés', '2015-01-03', 2, 4, 3),
-(7, 1, 'Új rendelés', '2015-01-03', 9, 7, 3);
+(3, 3, 'Új rendelés', '2014-12-31', 4, 1, 3),
+(4, 1, 'Új rendelés', '2014-12-31', 2, 4, 3),
+(5, 2, 'Új rendelés', '2014-12-31', 3, 2, 3),
+(6, 2, 'Új rendelés', '2014-12-31', 7, 7, 3),
+(7, 1, 'Új rendelés', '2014-12-31', 8, 3, 3),
+(8, 1, 'Új rendelés', '2014-12-31', 2, 4, 3),
+(9, 2, 'Új rendelés', '2015-01-03', 4, 1, 3),
+(10, 3, 'Új rendelés', '2015-01-03', 2, 4, 3),
+(11, 1, 'Új rendelés', '2015-01-03', 9, 7, 3),
+(15, 2, 'Új rendelés', '2015-01-06', 4, 1, 3),
+(16, 2, 'Új rendelés', '2015-01-06', 8, 7, 3),
+(17, 1, 'Új rendelés', '2015-01-06', 3, 2, 3),
+(18, 1, 'Új rendelés', '2015-01-06', 2, 4, 3);
 
 -- --------------------------------------------------------
 
@@ -104,8 +119,8 @@ INSERT INTO `megrendelesek` (`M_ID`, `Mennyiseg`, `Statusz`, `Datum`, `Ar`, `T_I
 --
 
 CREATE TABLE IF NOT EXISTS `mertekegysegek` (
-	`ME_ID` int(11) NOT NULL,
-	`Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
+`ME_ID` int(11) NOT NULL,
+  `Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
@@ -127,8 +142,8 @@ INSERT INTO `mertekegysegek` (`ME_ID`, `Nev`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `napok` (
-	`N_ID` int(11) NOT NULL,
-	`Nev` varchar(10) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
+`N_ID` int(11) NOT NULL,
+  `Nev` varchar(10) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
 
 --
@@ -151,8 +166,8 @@ INSERT INTO `napok` (`N_ID`, `Nev`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `penznemek` (
-	`P_ID` int(11) NOT NULL,
-	`Penznem` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
+`P_ID` int(11) NOT NULL,
+  `Penznem` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 --
@@ -170,10 +185,10 @@ INSERT INTO `penznemek` (`P_ID`, `Penznem`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `promociok` (
-	`T_ID` int(11) NOT NULL DEFAULT '0',
-	`Ar` int(11) NOT NULL,
-	`Periodus_k` date DEFAULT NULL,
-	`Periodus_v` date DEFAULT NULL
+  `T_ID` int(11) NOT NULL DEFAULT '0',
+  `Ar` int(11) NOT NULL,
+  `Periodus_k` date DEFAULT NULL,
+  `Periodus_v` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -182,7 +197,7 @@ CREATE TABLE IF NOT EXISTS `promociok` (
 
 INSERT INTO `promociok` (`T_ID`, `Ar`, `Periodus_k`, `Periodus_v`) VALUES
 (1, 4, '2014-12-28', '2015-01-04'),
-(7, 7, '2014-12-17', '2014-12-18');
+(7, 8, '2014-12-17', '2014-12-18');
 
 -- --------------------------------------------------------
 
@@ -191,8 +206,8 @@ INSERT INTO `promociok` (`T_ID`, `Ar`, `Periodus_k`, `Periodus_v`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `rendszeresseg` (
-	`R_ID` int(11) NOT NULL,
-	`Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
+`R_ID` int(11) NOT NULL,
+  `Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
@@ -214,15 +229,15 @@ INSERT INTO `rendszeresseg` (`R_ID`, `Nev`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `szemelyek` (
-	`SZ_ID` int(11) NOT NULL,
-	`Nev` varchar(50) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Cim` varchar(100) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Tel` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Email` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Jelszo` varchar(40) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Admin` int(11) NOT NULL,
-	`Termelo` int(11) NOT NULL,
-	`Megrendelo` int(11) NOT NULL
+`SZ_ID` int(11) NOT NULL,
+  `Nev` varchar(50) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Cim` varchar(100) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Tel` varchar(15) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Email` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Jelszo` varchar(40) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Admin` int(11) NOT NULL,
+  `Termelo` int(11) NOT NULL,
+  `Megrendelo` int(11) NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 --
@@ -232,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `szemelyek` (
 INSERT INTO `szemelyek` (`SZ_ID`, `Nev`, `Cim`, `Tel`, `Email`, `Jelszo`, `Admin`, `Termelo`, `Megrendelo`) VALUES
 (1, 'Tóth Pál', 'Kézdiszentlélek, Patkó utca 5.', '0722568945', 'tothpali@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 0, 1),
 (2, 'Sárga Mária', 'Székelykeresztúr, Tető utca 45', '0745035255', 'marineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 0),
-(3, 'Széles Sára', 'Csíkszereda, Sugárút 19', '0748569854', 'sarineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 1);
+(3, 'Széles Sára', 'Kézdivásárhely, Sugárút 19', '0748569854', 'sarineni@gmail.com', '81dc9bdb52d04dc20036dbd8313ed055', 0, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -241,8 +256,8 @@ INSERT INTO `szemelyek` (`SZ_ID`, `Nev`, `Cim`, `Tel`, `Email`, `Jelszo`, `Admin
 --
 
 CREATE TABLE IF NOT EXISTS `telepulesek` (
-	`Telep_ID` int(11) NOT NULL,
-	`Nev` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
+`Telep_ID` int(11) NOT NULL,
+  `Nev` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
@@ -264,17 +279,17 @@ INSERT INTO `telepulesek` (`Telep_ID`, `Nev`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `termekek` (
-	`T_ID` int(11) NOT NULL,
-	`Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Leiras` varchar(300) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Ar` int(11) NOT NULL,
-	`Min_rendelesi_menny` int(11) NOT NULL,
-	`Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci DEFAULT NULL,
-	`Keszlet_menny` int(11) NOT NULL,
-	`ME_ID` int(11) DEFAULT NULL COMMENT 'MertekegysegID',
-	`K_ID` int(11) DEFAULT NULL COMMENT 'KategoriaID',
-	`P_ID` int(11) DEFAULT NULL COMMENT 'penznemID',
-	`SZ_ID` int(11) DEFAULT NULL COMMENT 'SzemelyID(termeloID)'
+`T_ID` int(11) NOT NULL,
+  `Nev` varchar(20) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Leiras` varchar(300) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Ar` int(11) NOT NULL,
+  `Min_rendelesi_menny` int(11) NOT NULL,
+  `Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci DEFAULT NULL,
+  `Keszlet_menny` int(11) NOT NULL,
+  `ME_ID` int(11) DEFAULT NULL COMMENT 'MertekegysegID',
+  `K_ID` int(11) DEFAULT NULL COMMENT 'KategoriaID',
+  `P_ID` int(11) DEFAULT NULL COMMENT 'penznemID',
+  `SZ_ID` int(11) DEFAULT NULL COMMENT 'SzemelyID(termeloID)'
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
 
 --
@@ -282,12 +297,12 @@ CREATE TABLE IF NOT EXISTS `termekek` (
 --
 
 INSERT INTO `termekek` (`T_ID`, `Nev`, `Leiras`, `Ar`, `Min_rendelesi_menny`, `Kep`, `Keszlet_menny`, `ME_ID`, `K_ID`, `P_ID`, `SZ_ID`) VALUES
-(1, 'Házi széles laska', '3 tojásos', 5, 1, 'termek1.jpg', 10, 3, 2, 1, 2),
+(1, 'Házi széles laska', '3 tojásos', 5, 1, 'termek1.jpg', 4, 3, 2, 1, 2),
 (2, 'Juhsajt', 'Friss és finom', 3, 1, 'termek2.jpg', 2, 2, 1, 2, 3),
-(3, 'Tehéntúró', 'Félzsíros', 8, 1, 'termek3.jpg', 15, 5, 1, 1, 2),
-(4, 'Kecskesajt', 'Igazi', 2, 1, 'termek4.jpg', 3, 5, 1, 2, 2),
+(3, 'Tehéntúró', 'Félzsíros', 8, 1, 'termek3.jpg', 9, 5, 1, 1, 2),
+(4, 'Kecskesajt', 'Igazi', 2, 1, 'termek4.jpg', 8, 5, 1, 2, 2),
 (5, 'Szilvalekvár', 'Édes, finom', 5, 1, 'termek5.jpg', 0, 6, 3, 1, 3),
-(7, 'Tehéntúró', 'Mindig friss és krémes', 9, 1, 'termek7.jpg', 2, 5, 1, 1, 3);
+(7, 'Tehéntúró', 'Mindig friss és krémes', 9, 1, 'termek7.jpg', 11, 5, 1, 1, 3);
 
 -- --------------------------------------------------------
 
@@ -296,12 +311,12 @@ INSERT INTO `termekek` (`T_ID`, `Nev`, `Leiras`, `Ar`, `Min_rendelesi_menny`, `K
 --
 
 CREATE TABLE IF NOT EXISTS `termelok` (
-	`SZ_ID` int(11) NOT NULL DEFAULT '0',
-	`Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci DEFAULT NULL,
-	`Kiszallitasi_dij` int(11) DEFAULT NULL,
-	`Min_vasarloi_kosar` int(11) DEFAULT NULL,
-	`R_ID` int(11) DEFAULT NULL,
-	`P_ID` int(11) DEFAULT NULL
+  `SZ_ID` int(11) NOT NULL DEFAULT '0',
+  `Kep` varchar(30) CHARACTER SET utf8 COLLATE utf8_hungarian_ci DEFAULT NULL,
+  `Kiszallitasi_dij` int(11) DEFAULT NULL,
+  `Min_vasarloi_kosar` int(11) DEFAULT NULL,
+  `R_ID` int(11) DEFAULT NULL,
+  `P_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -319,14 +334,16 @@ INSERT INTO `termelok` (`SZ_ID`, `Kep`, `Kiszallitasi_dij`, `Min_vasarloi_kosar`
 --
 
 CREATE TABLE IF NOT EXISTS `uzenetek` (
-	`U_ID` int(11) NOT NULL,
-	`Szoveg` varchar(1000) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
-	`Datum` date DEFAULT NULL,
-	`Felado_ID` int(11) DEFAULT NULL,
-	`Cimzett_ID` int(11) DEFAULT NULL
+`U_ID` int(11) NOT NULL,
+  `Szoveg` varchar(1000) CHARACTER SET utf8 COLLATE utf8_hungarian_ci NOT NULL,
+  `Datum` date DEFAULT NULL,
+  `Felado_ID` int(11) DEFAULT NULL,
+  `Cimzett_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
--- --------------------------------------------------------
+--
+-- Indexes for dumped tables
+--
 
 --
 -- Indexes for table `kategoriak`
@@ -345,6 +362,12 @@ ALTER TABLE `kiszallitasi_helyek`
 --
 ALTER TABLE `kiszallitasi_napok`
  ADD PRIMARY KEY (`KiszallNap_ID`);
+
+--
+-- Indexes for table `kosarak`
+--
+ALTER TABLE `kosarak`
+ ADD PRIMARY KEY (`K_ID`);
 
 --
 -- Indexes for table `megrendelesek`
@@ -413,6 +436,10 @@ ALTER TABLE `uzenetek`
  ADD PRIMARY KEY (`U_ID`);
 
 --
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
 -- AUTO_INCREMENT for table `kategoriak`
 --
 ALTER TABLE `kategoriak`
@@ -428,10 +455,15 @@ MODIFY `KiszallHely_ID` int(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `kiszallitasi_napok`
 MODIFY `KiszallNap_ID` int(11) NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `kosarak`
+--
+ALTER TABLE `kosarak`
+MODIFY `K_ID` int(11) NOT NULL AUTO_INCREMENT;
+--
 -- AUTO_INCREMENT for table `megrendelesek`
 --
 ALTER TABLE `megrendelesek`
-MODIFY `M_ID` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
+MODIFY `M_ID` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=19;
 --
 -- AUTO_INCREMENT for table `mertekegysegek`
 --

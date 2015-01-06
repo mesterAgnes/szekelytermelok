@@ -246,6 +246,7 @@ def mindenpromtermek():
 	cnx.close()
 	return jsonify({'termekek':termekek})	
 	
+	
 def date_handler(obj):
     return obj.isoformat() if hasattr(obj, 'isoformat') else obj
 	
@@ -478,20 +479,106 @@ def kosarbatermek():
 	logging.warning(adatok)
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
 	cursor = cnx.cursor()
-
+	
+	# csokkentjuk a keszleten levo termekmennyiseget
 	update_termek = ("UPDATE Termekek SET Keszlet_menny = Keszlet_menny - %s WHERE T_ID = %s")
 	
 	try:
 		cursor.execute( update_termek, (adatok['nr'], adatok['id']) )
 		cnx.commit()
-		result = True
 	except:
 		cnx.rollback()
-		result = False
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})
+
+	# vizsgaljuk, hogy mar van-e ennek a szemelynek a kosaraban ilyen IDju termek
+	# ha igen, UPDATE-tel noveljuk a mennyiseget, ha nem, uj sort szurunk be
+	select_termek = ("SELECT K_ID FROM Kosarak WHERE T_ID = %s AND SZ_ID = %s")	
+	try:
+		cursor.execute( select_termek, (adatok['id'], session['SZ_ID']) )
+		cnx.commit()
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})
+	
+	if cursor.fetchone():			
+		# mar letezik ez a termek ezzel a felhasznaloval a kosarak tablaban, ugyhogy update szukseges	
+		query_termek = ("UPDATE Kosarak SET Mennyiseg = Mennyiseg + %s WHERE T_ID = %s AND SZ_ID = %s")
+		data_termek = (adatok['nr'], adatok['id'], session['SZ_ID'])
+		logging.warning(data_termek)	
+	else:
+		# beszurunk egy uj sort a kosarak tablaba	
+		query_termek = ("INSERT INTO Kosarak "
+						"(T_ID, SZ_ID, Mennyiseg)"
+						"VALUES (%s, %s, %s)")
+		data_termek = (adatok['id'], session['SZ_ID'], adatok['nr'] )
+		logging.warning(data_termek)
+	try:
+		cursor.execute( query_termek, data_termek )
+		cnx.commit()
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})	
 	cursor.close()
 	cnx.close()
 	
-	return jsonify({'success': result})		
+	return jsonify({'success': True})			
+	
+	
+	
+@app.route('/lekerdezkosar/', methods = ['POST'])	
+def lekerdezkosar():	
+	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cursor = cnx.cursor()
+	
+	# vizsgaljuk, hogy mar van-e ennek a szemelynek a kosaraban termek
+	
+	# promocios termekek lekerdezese:
+	select_termek = ("SELECT k.T_ID, t.Nev, sz.Nev, Mennyiseg, me.Nev, pr.Ar, Penznem "
+					" FROM Kosarak k, Termekek t, Szemelyek sz, Mertekegysegek me, Penznemek p, Promociok pr "
+					" WHERE t.T_ID = k.T_ID AND t.SZ_ID=sz.SZ_ID AND p.P_ID=t.P_ID AND k.SZ_ID = %s AND t.ME_ID=me.ME_ID AND pr.T_ID=k.T_ID "
+					" AND k.T_ID IN ( SELECT T_ID FROM Promociok )")	
+	try:
+		cursor.execute( select_termek, [session['SZ_ID']] )
+		cnx.commit()
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'hiba': True})	
+	promok = cursor.fetchall()
+	
+	# NEM promocios termekek lekerdezese:
+	select_termek = ("SELECT k.T_ID, t.Nev, sz.Nev, Mennyiseg, me.Nev, t.Ar, Penznem "
+					" FROM Kosarak k, Termekek t, Szemelyek sz, Mertekegysegek me, Penznemek p"
+					" WHERE t.T_ID = k.T_ID AND t.SZ_ID=sz.SZ_ID AND p.P_ID=t.P_ID AND t.ME_ID=me.ME_ID AND k.SZ_ID = %s "
+					" AND k.T_ID NOT IN ( SELECT T_ID FROM Promociok )")	
+	try:
+		cursor.execute( select_termek, [session['SZ_ID']] )
+		cnx.commit()
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'hiba': True})	
+	termekek = cursor.fetchall()
+	
+	if not promok:	# ha vannak termekek, visszakuldjuk ezeket, ha nincs egy termek sem (sem normal, sem promocios), uzenetet kuldunk vissza
+		if not termekek:
+			return jsonify({'result': "Nincs_termek"})
+
+	logging.warning(promok)
+	logging.warning(termekek)
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({'promok': promok, "termekek": termekek})	
+	
 	
 	
 @app.route('/torleskosarbol/', methods = ['POST'])	
@@ -500,11 +587,20 @@ def torleskosarbol():
 	logging.warning(adatok)
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
 	cursor = cnx.cursor()
-
-	update_termek = ("UPDATE Termekek SET Keszlet_menny = Keszlet_menny + %s WHERE T_ID = %s")
+	result = True
 	
+	update_termek = ("UPDATE Termekek SET Keszlet_menny = Keszlet_menny + %s WHERE T_ID = %s")
 	try:
 		cursor.execute( update_termek, (adatok['nr'], adatok['id']) )
+		cnx.commit()
+		result = True
+	except:
+		cnx.rollback()
+		result = False
+	
+	delete_termek = ("DELETE FROM Kosarak WHERE T_ID = %s and SZ_ID = %s")
+	try:
+		cursor.execute( delete_termek, (adatok['id'], session['SZ_ID']) )
 		cnx.commit()
 		result = True
 	except:
@@ -514,33 +610,94 @@ def torleskosarbol():
 	cnx.close()
 	
 	return jsonify({'success': result})		
+		
 	
 	
 @app.route('/rendeles/', methods = ['POST'])
 def rendeles():
 	adatok = json.loads(request.data)
-	logging.warning("RENDELES")
-	logging.warning(adatok['termekek'])
+	logging.warning(adatok['datum'])
 	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
 	cursor = cnx.cursor()
 	
-	result = True
-	for termek in adatok['termekek']:
+	# lekerdezzuk a termekeket a kosarbol
+	
+# 1. promocios termekek lekerdezese ( az ar miatt kell szetvalasztani oket):
+	select_termek = ("SELECT k.T_ID AS Id, Mennyiseg, Ar "
+					" FROM Kosarak k, Promociok pr "
+					" WHERE k.T_ID = pr.T_ID AND k.T_ID IN ( SELECT T_ID FROM Promociok ) AND k.SZ_ID = %s")	
+	try:
+		cursor.execute( select_termek, [session['SZ_ID']] )
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})	
+	
+	termekek = cursor.fetchall()
+	cnx.commit()
+	
+	for termek in termekek:
+		# berakjuk a termekeket a Megrendelesek tablaba
 		add_rend = ("INSERT INTO Megrendelesek "
 					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
 				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
-		data_rend = (termek['mennyiseg'], adatok['datum'], termek['ar'], termek['id'], session['SZ_ID'])
+		data_rend = (termek[1], adatok['datum'], termek[2], termek[0], session['SZ_ID'])
 		try:
 			cursor.execute( add_rend, data_rend )
 			cnx.commit()
 		except:
 			cnx.rollback()
-			result = False
-			break
+			cursor.close()
+			cnx.close()
+			return jsonify({'success': False})	
+
+# 2. nem promocios termekek lekerdezese ( az ar miatt kell szetvalasztani oket):
+	select_termek = ("SELECT k.T_ID AS Id, Mennyiseg, Ar "
+					" FROM Kosarak k, Termekek t "
+					" WHERE k.T_ID = t.T_ID AND k.T_ID NOT IN ( SELECT T_ID FROM Promociok ) AND k.SZ_ID = %s")	
+	try:
+		cursor.execute( select_termek, [session['SZ_ID']] )
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})	
+	
+	termekek = cursor.fetchall()
+	cnx.commit()
+	
+	for termek in termekek:
+		# berakjuk a termekeket a Megrendelesek tablaba
+		add_rend = ("INSERT INTO Megrendelesek "
+					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
+				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
+		data_rend = (termek[1], adatok['datum'], termek[2], termek[0], session['SZ_ID'])
+		try:
+			cursor.execute( add_rend, data_rend )
+			cnx.commit()
+		except:
+			cnx.rollback()
+			cursor.close()
+			cnx.close()
+			return jsonify({'success': False})	
+
+			
+	# toroljuk a kosarbol az illeto szemely osszes termeket
+	delete_kosar = ("DELETE FROM Kosarak WHERE SZ_ID = %s ")
+	try:
+		cursor.execute( delete_kosar, [session['SZ_ID']] )
+		cnx.commit()
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})	
 	
 	cursor.close()
 	cnx.close()
-	return jsonify({'success': result})	
+	return jsonify({'success': True})	
+	
 	
 @app.route('/termekmodositas/', methods = ['POST'])
 def termekmodositas():
