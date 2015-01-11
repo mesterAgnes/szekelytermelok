@@ -7,12 +7,14 @@ loginApp.controller('loginSwitchDivController', [
 
 		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
 		jQuery( "button#kezdolap" ).attr("id","selected");
-		
-		$scope.bejelentkezes = {};
+
 		$scope.navigationStrip_Clicked = function(option) {
 			$scope.navigationOptionSelected = option;
-			jQuery("nav#navigationStrip1 button").attr("id","");
-			jQuery( "button#"+option ).attr("id","selected");
+		};		
+		$scope.bejelentkezes_Hover = function(){
+			$("button#loginButton").mouseenter(function(){
+				$("div#loginDiv").slideDown(300);
+			});
 		};
 	}
 
@@ -83,7 +85,8 @@ loginApp.controller('bejelentkezesController', [
 	'$http','$scope', '$window',
 	function bejelentkezesController($http, $scope, $window) {
 		
-		$scope.log={};
+		$scope.log = {};
+		$scope.bejelentkezes = {};
 		$scope.login = function() {
 			loginAdatok = angular.copy($scope.log);
 			loginAdatok.loginPass = md5(loginAdatok.loginPass);
@@ -106,8 +109,7 @@ loginApp.controller('bejelentkezesController', [
 ]);  
 
 
-
-loginApp.directive('myNavigaton', function() {
+loginApp.directive('myNavigation', function() {
     return {
         restrict: 'A',
         link: function(scope, elm, attrs) {            
@@ -120,3 +122,4 @@ loginApp.directive('myNavigaton', function() {
 		}
     };
 });
+

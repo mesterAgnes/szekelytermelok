@@ -8,9 +8,10 @@ termeloApp.controller('loginSwitchDivController', [
     '$scope', '$http', '$window',                             
 	function loginSwitchDivController($scope, $http, $window) {
 	
+		$scope.megrendelo =  localStorage.getItem('Megrendelo');	// lekerjuk a felhasznalo termeloi statuszat(0 vagy 1), hogy tudjuk, megrendelokent is van-e szerepe	
 		$scope.logoid = localStorage.getItem('ID');
 		$scope.nev = localStorage.getItem('Nev');
-		$scope.megrendelo = localStorage.getItem('Megrendelo');
+
 		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
 		jQuery( "button#kezdolap" ).attr("id","selected");
 		
@@ -25,6 +26,10 @@ termeloApp.controller('loginSwitchDivController', [
 		};
 		$scope.megrendeloOldal = function() {
 			$window.location.href = '/megrendelo';
+		}
+		
+		$scope.aktualizalPromociok = function(){
+		;
 		}
 	}
 
@@ -198,7 +203,7 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');
-			location.reload();
+			
 		});	
 	}; 
 	
@@ -259,6 +264,7 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 			.success(function(data, status, headers, config) {
 				$scope.termekek = data['termekek'];
 				$scope.promtermekek = data['promtermekek'];
+				console.log($scope.promtermekek);
 				$scope.datumok = data['datumok'];
 				$scope.penznemek = data['penznemek'];
 				$scope.promtermekek_regiadatai = data['promtermekek_regiadatai']
@@ -361,25 +367,28 @@ termeloApp.controller('MegrendelesekController', function($scope, $filter, $http
 			$scope.mertekegysegek = data['mertekegysegek']
 			$scope.penznemek = data['penznemek'];
 			$scope.megrendelonevek = data['megrendelonevek'];
-			$scope.statuszok = [
-				{text:'Új rendelés', value:0},
-				{text:'Függőben van', value:1},
-				{text:'Kiszállítva', value:2}
-			];
+			$scope.statuszok = data['statuszok'];
+			$scope.osszesstatusz = data['osszstat'];
 			$scope.megrendelesek = [];
+			$scope.statusz = [];
+			
+			for	(i = 0; i < $scope.osszesstatusz.length; i++) {
+				$scope.statusz.push({text:$scope.osszesstatusz[i] , value:i+1});
+			} 
 			
 			for	(i = 0; i < $scope.rendeleseim.length; i++) {
 				$scope.megrendelesek[i] = {
 					'0' : $scope.termeknevek[i],
 					'1' : $scope.rendeleseim[i][1],
-					'2' : $scope.rendeleseim[i][2],
+					'2' : $scope.statuszok[i],
 					'3' : $scope.datumok[i],
 					'4' : $scope.rendeleseim[i][0],
 					'5' : $scope.rendeleseim[i][3],
 					'6' : $scope.penznemek[i],
 					'7' : $scope.mertekegysegek[i],
 					'8' : $scope.megrendelonevek[i],
-					'9' : $scope.rendeleseim[i][3]*$scope.rendeleseim[i][1]
+					'9' : $scope.rendeleseim[i][3]*$scope.rendeleseim[i][1],
+					'10': $scope.rendeleseim[i][2]
 				}
 			}
 		});
@@ -413,12 +422,11 @@ termeloApp.controller('UzenetKuldesCtrl', function($scope, $filter, $http) {
 });
 
 
-termeloApp.directive('myNavigaton', function() {
+termeloApp.directive('myNavigation', function() {
     return {
         restrict: 'A',
         link: function(scope, elm, attrs) {            
 			elm.bind("click", function () {
-			alert("szia");
 				jQuery("nav#navigationStrip1 button").attr("id","");
 				jQuery("nav#navigationStrip2 button").attr("id","");
 				

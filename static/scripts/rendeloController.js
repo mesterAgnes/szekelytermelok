@@ -1,8 +1,8 @@
 var megrendeloApp = angular.module('megrendeloApp', ["xeditable", "checklist-model"]); 
 
 
-megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter', 
-	function m_profilom_Controller($http, $scope, $filter) {
+megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter', 'kozosProfil',
+	function m_profilom_Controller($http, $scope, $filter, kozosProfil) {
 	
 	// profilom eddig kitoltott adatainak betoltese
 	$scope.m_profilomBetolt = function() {
@@ -60,14 +60,23 @@ megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter',
 		});	
 	};
 	
+		
+	$scope.getRendelesProfil = function(){
+		return kozosProfil.getRendelesProfilBool();
+	}
+	
+	$scope.setRendelesProfil = function(value){
+		kozosProfil.setRendelesProfilBool(value);
+	}
+	
 }]);
 
 megrendeloApp.controller('termekekController', [              
-    '$scope', '$http', '$window',                       
-	function termekekController($scope, $http, $window) {
+    '$scope', '$http', '$window', 'kozosProfil',                      
+	function termekekController($scope, $http, $window, kozosProfil) {
 
 		$scope.nev = localStorage.getItem('Nev');
-		$scope.termelo = localStorage.getItem('Termelo');
+		$scope.termelo =  localStorage.getItem('Termelo');		// lekerjuk a felhasznalo termeloi statuszat(0 vagy 1), hogy tudjuk, termelokent is van-e szerepe	
 
 		// a termekek adatai:	
 		$scope.termekadatok = {};		// termekek altalanos adatai
@@ -125,6 +134,7 @@ megrendeloApp.controller('termekekController', [
 				$http.post('/mindenpromtermek/', {})
 				.success(function(data, status, headers, config) {
 					$scope.termekadatok = data['termekek'];
+					setWhetherProm($scope.termekadatok, true);
 					
 					console.log($scope.termekadatok);
 					
@@ -155,6 +165,15 @@ megrendeloApp.controller('termekekController', [
 			.success(function(data, status, headers, config) {
 				$scope.termekadat = data['termek'];
 				
+				// a kapott datumok formazasa:
+				$scope.termekadat[0][11] = $scope.termekadat[0][11].slice(1, -1);
+				$scope.termekadat[0][12] = $scope.termekadat[0][12].slice(1, -1);
+				$scope.termekadat[0][11] = $scope.termekadat[0][11].replace(/-/g, ".");
+				$scope.termekadat[0][12] = $scope.termekadat[0][12].replace(/-/g, ".");
+				
+				// kategoria formazasa:
+				$scope.termekadat[0][8] =  $scope.termekadat[0][8].toUpperCase();
+				
 				console.log($scope.termekadat);
 				
 				$( '#termekReszletek' ).show(300);
@@ -163,11 +182,12 @@ megrendeloApp.controller('termekekController', [
 				$( '#mertekegyseg' ).html( "   " + $scope.termekadat[0][9] );
 				$( '#termekNev' ).html( $scope.termekadat[0][0] );
 				
+				$( '#termekLeirasID' ).html( "<span style='font-weight:800;margin-right:20px;'>&#8226;</span>" + $scope.termekadat[0][1] );
+				$( '#termekKategoria' ).html( "<span style='font-weight:800;margin-right:20px;'>&#8226;</span>" + $scope.termekadat[0][8] );
+				
 				// a tablazat adatai:
-				$( '#termekKategoriaTd' ).html( $scope.termekadat[0][8] );
 				$( '#termekTermeloTd' ).html( $scope.termekadat[0][6] );
 				$( '#termekMinMennyTd' ).html( $scope.termekadat[0][4] + " " + $scope.termekadat[0][9] );
-				$( '#termekLeirasID' ).html( "<span style='font-weight:800;margin-right:20px;'>&#8226;</span>" + $scope.termekadat[0][1] );
 				
 				$("tr#arTr").first().html("<th>Régi ár: </th><td>"+$scope.termekadat[0][2] + " " + $scope.termekadat[0][7]+"</td>");
 				
@@ -175,6 +195,12 @@ megrendeloApp.controller('termekekController', [
 					$("tr#ujarTr").first().html("<th id='ujAr'>Promóciós ár: </th><td id='ujAr'>"+$scope.termekadat[0][10]+" "+$scope.termekadat[0][7]+"</td>");				
 				else
 					$("tr#arTr").after("<tr id='ujarTr'><th id='ujAr'>Promóciós ár: </th><td id='ujAr'>"+$scope.termekadat[0][10]+" "+$scope.termekadat[0][7]+"</td></tr>");
+				
+				if ( $( "tr#promDatum" ).length )
+					$("tr#promDatum").first().html("<th id='promDatum'>A promóció érvényessége: </th><td id='promDatum'>"+$scope.termekadat[0][11]+" - "+$scope.termekadat[0][12]+"</td>");				
+				else
+					$("tr#ujarTr").after("<tr id='promDatum'><th id='promDatum'>A promóció érvényessége: </th><td id='promDatum'>"+$scope.termekadat[0][11]+" - "+$scope.termekadat[0][12]+"</td></tr>");
+			
 				
 				if($scope.termekadat[0][5] == "0")
 					$( '#termekKeszletMennyTd' ).html( "Nincs készleten." );
@@ -188,20 +214,27 @@ megrendeloApp.controller('termekekController', [
 			$http.post('/egytermek/', id)
 			.success(function(data, status, headers, config) {
 				$scope.termekadat = data['termek'];
-		
+				
+				// kategoria formazasa:
+				$scope.termekadat[0][8] =  $scope.termekadat[0][8].toUpperCase();
+
 				$( '#termekReszletek' ).show(300);
 				$( '#termekReszletekInnerKep' ).css('background-image', "url('img/termekek/"+$scope.termekadat[0][3]+"')");
 				$( "input.kosarba" ).val(1);
 				$( '#mertekegyseg' ).html( "   " + $scope.termekadat[0][9] );
 				$( '#termekNev' ).html( $scope.termekadat[0][0] );
-				$( '#termekKategoriaTd' ).html( $scope.termekadat[0][8] );
+				$( '#termekLeirasID' ).html( "<span style='font-weight:800;margin-right:20px;'>&#8226;</span>" + $scope.termekadat[0][1] );
+				$( '#termekKategoria' ).html( "<span style='font-weight:800;margin-right:20px;'>&#8226;</span>" + $scope.termekadat[0][8] );
+				
 				$( '#termekTermeloTd' ).html( $scope.termekadat[0][6] );
 				$( '#termekMinMennyTd' ).html( $scope.termekadat[0][4] + " " + $scope.termekadat[0][9] );
-				$( '#termekLeirasID' ).html( "<span style='font-weight:800;margin-right:20px;'>&#8226;</span>" + $scope.termekadat[0][1] );
-			
+				
 				$( "tr#arTr" ).first().html("<th>Ár: </th><td>"+$scope.termekadat[0][2] + " " + $scope.termekadat[0][7]+"</td>");
 				if ( $( "tr#ujarTr" ).length ) {
 					$( "tr#ujarTr" ).remove();
+				}
+				if ( $( "tr#promDatum" ).length ) {
+					$( "tr#promDatum" ).remove();
 				}
 				
 				if($scope.termekadat[0][5] == "0") 
@@ -214,7 +247,10 @@ megrendeloApp.controller('termekekController', [
 		
 	// egy termek reszletes, sajatos adatainak megjelenitese:
 		$scope.showTermekReszlet = function(id, opcio) {
-			
+			$("body div#overlay").remove();
+			$("body").prepend("<div id='overlay'></div>");
+			$("body div#overlay").fadeTo(0,0);
+			//fadeTo(speedInMilliSec, opacityToReach)
 			if(opcio === "promo"){    // biztosan egy promocios termek megjelenitese
 				$scope.showTermekReszlet_prom(id);
 			}
@@ -299,29 +335,9 @@ megrendeloApp.controller('termekekController', [
 			}
 			else{
 				
-				// az adatbazisban csokkentjuk a keszleten levo mennyiseget:
+				// az adatbazisban csokkentjuk a keszleten levo mennyiseget, es aktualizaljuk a Kosarak tablat:
 				$http.post('/kosarbatermek/', {id: id, nr: menny} )
-				.success(function(data, status, headers, config) {
-					
-					// termek ( ID + rendelt mennyiseg ) lementese a $scope.kosarba:	
-					var index = getIndexById(id, $scope.kosar);
-					
-					if( index !== null ){		// ha mar letezik, azaz mar van ebbol a termekbol a kosarban
-								// a helyes mennyiseg = a mar eddig kosarba rakott mennyiseg ebbol a termekbol + a mostani, uj mennyiseg 
-						$scope.kosar[index].mennyiseg = parseInt($scope.kosar[index].mennyiseg) + menny;
-					}
-					else { 	// ez egy uj termek:
-						var termekAr = 0;
-						
-						if( $scope.termekadat[0][10] != 'undefined' && $scope.termekadat[0][10] != null )  // ha az aktualis termek promocios termek
-							termekAr = $scope.termekadat[0][10];
-						else
-							termekAr = $scope.termekadat[0][2]; 
-						$scope.kosar.push( { id: id, nev:$scope.termekadat[0][0], termelo:$scope.termekadat[0][6], mertekegyseg:$scope.termekadat[0][9], mennyiseg:menny, ar: termekAr, penznem: $scope.termekadat[0][7]  } );
-					
-					}
-					console.log($scope.kosar);
-					
+				.success(function(data, status, headers, config) {					
 					// csokkentjuk a keszleten levo mennyiseget:
 					$scope.termekadat[0][5] = parseInt($scope.termekadat[0][5]) - menny;
 					
@@ -341,38 +357,39 @@ megrendeloApp.controller('termekekController', [
 		}
 		
 		
-		$scope.vizsgalKosar = function(){
-		
-			if ( typeof($scope.kosar) === 'undefined' || $scope.kosar.length == 0) {
-				$scope.navigationStrip1_Clicked('ureskosar');
-				return;		// ha a kosar ures, megjelenitjuk az uzenetet, es kilepunk
-			}
-			$scope.navigationStrip1_Clicked('kosar');
+		$scope.kiirKosar = function(){
+			
+			$http.post('/lekerdezkosar/', {})
+			.success(function(data, status, headers, config) {	
+				var kosar = data['result'];
+				if ( kosar != null && kosar != "undefined" && kosar == "Nincs_termek" ) {
+					$scope.navigationStrip1_Clicked('ureskosar');
+					return;		// ha a kosar ures, megjelenitjuk az uzenetet, es kilepunk
+				}
+				else {
+					$scope.kosar = data['termekek'];
+					var promok = data['promok'];
+					$scope.kosar = mergeArrays($scope.kosar, promok);
+					promok = null;
+					
+					$scope.navigationStrip1_Clicked('kosar');
+				}
+			})
+			.error(function(data, status, headers, config) {
+				showMyAlert( "Hiba történt a kosár megjelenítése közben!" );
+			});				
 		}	
 		
 		
 		// ------------- Kosar tartalmanak modositasa: -------------
-		
-		$scope.vizsgalNr = function(data, id) {
-			var filter = /-/;
-			if (filter.test(data)) {
-				return "A beírt mennyiség nem megfelelő.";
-			}
-		};
 
 		// termek torlese
 		$scope.termekTorol = function(id, menny) {
 			
 			$http.post('/torleskosarbol/', { id:id, nr:menny })
 			.success(function(data, status, headers, config) {
-				$scope.success = data.success;
-				
-				// torles a $scope.kosarbol
-				var index = getIndexById(id, $scope.kosar);
-				$scope.kosar.splice(index, 1);		// "kivagjuk" az index-edik elemet
 				showMyAlert('Sikeres törlés.');
-				
-				$scope.vizsgalKosar();		// frissitjuk a kosar tartalmat az oldalon is 
+				$scope.kiirKosar();		// frissitjuk a kosar tartalmat az oldalon is 
 			})
 			.error(function(data, status, headers, config) {
 				showMyAlert('Hiba a törlés közben.');
@@ -385,7 +402,7 @@ megrendeloApp.controller('termekekController', [
 			// osszegyujtjuk a kulonbozo penznemeket:
 			var penznemek = [];
 			for(var i = 0, len = $scope.kosar.length; i < len; ++i){
-				penznemek[i] = $scope.kosar[i].penznem;
+				penznemek[i] = $scope.kosar[i][6];
 			}
 			penznemek = unique(penznemek);		// halmazza alakitjuk
 			console.log(penznemek);
@@ -394,14 +411,12 @@ megrendeloApp.controller('termekekController', [
 			for(var i = 0, len = penznemek.length; i < len; ++i){	
 				for(var j = 0, len2 = $scope.kosar.length; j < len2; ++j){	
 						
-					if( $scope.kosar[j].penznem == penznemek[i] ){
+					if( $scope.kosar[j][6] == penznemek[i] ){
 						if( reszosszegek.hasOwnProperty( penznemek[i] ) ){
-							reszosszegek[ penznemek[i] ] = parseInt( reszosszegek[ penznemek[i] ] ) + parseInt($scope.kosar[j].ar*$scope.kosar[j].mennyiseg);
-							console.log("i = "+i+", j = "+j+", penznemek[i] = "+penznemek[i]+", reszosszegek[ penznemek[i] ] = "+reszosszegek[ penznemek[i] ]);			
+							reszosszegek[ penznemek[i] ] = parseInt( reszosszegek[ penznemek[i] ] ) + parseInt($scope.kosar[j][5]*$scope.kosar[j][3]);
 						}
 						else{
-							reszosszegek[ penznemek[i] ] = $scope.kosar[j].ar*$scope.kosar[j].mennyiseg;
-							console.log("i = "+i+", j = "+j+", penznemek[i] = "+penznemek[i]+", reszosszegek[ penznemek[i] ] = "+reszosszegek[ penznemek[i] ]+", $scope.kosar[j].ar = "+$scope.kosar[j].ar);			
+							reszosszegek[ penznemek[i] ] = $scope.kosar[j][5]*$scope.kosar[j][3];		
 						}
 					}
 				}
@@ -432,17 +447,17 @@ megrendeloApp.controller('termekekController', [
 			$scope.navigationStrip1_Clicked('rendeles');
 		}
 		
+		$scope.rendelesProfil = function() {
+			kozosProfil.setRendelesProfilBool(true);
+			$scope.navigationStrip2_Clicked('m_profilom');
+		}
+		
 		// kosarban levo osszes termek megrendelese
 		$scope.rendeles = function() {
-		
-			var kuld = {};			// ezt az asszociativ yombot fogjuk elkuldeni a szervernek
-			kuld['datum'] = new Date();		// a megrendeles datuma
-			kuld['termekek'] = [];			// a termekek tombje, mely asszociativ tomboket tartalmaz
-			for(var i=0, len = $scope.kosar.length; i < len; i++) {		// id : mennyiseg parok
-				kuld['termekek'].push( {  'id': $scope.kosar[i].id, 'mennyiseg': $scope.kosar[i].mennyiseg , 'ar': $scope.kosar[i].ar } );
-			}		
-			console.log(kuld);
-			$http.post('/rendeles/', kuld)
+
+			datum = new Date();
+			console.log(datum);
+			$http.post('/rendeles/', { datum: datum } )
 			.success(function(data, status, headers, config) {
 				$scope.success = data.success;
 				
@@ -451,7 +466,7 @@ megrendeloApp.controller('termekekController', [
 			})
 			.error(function(data, status, headers, config) {
 				showMyAlert('Hiba a rendelés küldése közben.');
-				$scope.vizsgalKosar();	// ujra kiiratjuk a kosar tartalmat
+				$scope.kiirKosar();	// ujra kiiratjuk a kosar tartalmat
 			});
 		}	
 		
@@ -465,6 +480,7 @@ megrendeloApp.controller('termekekController', [
 				$scope.termeknevek = data['termeknevek'];
 				$scope.mertekegysegek = data['mertekegysegek']
 				$scope.penznemek = data['penznemek'];
+				$scope.statuszok = data['statuszok'];
 				
 				$scope.rendelesek = [];
 				
@@ -472,13 +488,13 @@ megrendeloApp.controller('termekekController', [
 					$scope.rendelesek[i] = {
 						'0' : $scope.termeknevek[i],
 						'1' : $scope.rendeleseim[i][1],
-						'2' : $scope.rendeleseim[i][2],
+						'2' : $scope.statuszok[i],
 						'3' : $scope.datumok[i],
 						'4' : $scope.rendeleseim[i][0],
-						'5' : $scope.rendeleseim[i][3],
+						'5' : $scope.rendeleseim[i][2],
 						'6' : $scope.penznemek[i],
 						'7' : $scope.mertekegysegek[i],
-						'8' : $scope.rendeleseim[i][3]*$scope.rendeleseim[i][1]
+						'8' : $scope.rendeleseim[i][2]*$scope.rendeleseim[i][1]
  					}
 				}
 				
@@ -493,7 +509,7 @@ megrendeloApp.controller('termekekController', [
 	}
 ]);  
 
-megrendeloApp.directive('myNavigaton', function() {
+megrendeloApp.directive('myNavigation', function() {
     return {
         restrict: 'A',
         link: function(scope, elm, attrs) {            
@@ -506,4 +522,18 @@ megrendeloApp.directive('myNavigaton', function() {
 			});
 		}
     };
+});
+
+
+
+megrendeloApp.service('kozosProfil', function () {
+	var rendelesProfilBool = false;    // false = a profilt nem a rendeles soran jelenitodik meg
+	return {
+		getRendelesProfilBool: function () {
+			return rendelesProfilBool;
+		},
+		setRendelesProfilBool: function(value) {
+			rendelesProfilBool = value;
+		}
+	};
 });
