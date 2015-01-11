@@ -11,11 +11,6 @@ loginApp.controller('loginSwitchDivController', [
 		$scope.navigationStrip_Clicked = function(option) {
 			$scope.navigationOptionSelected = option;
 		};		
-		$scope.bejelentkezes_Hover = function(){
-			$("button#loginButton").mouseenter(function(){
-				$("div#loginDiv").slideDown(300);
-			});
-		};
 	}
 
 ]);  
@@ -88,11 +83,18 @@ loginApp.controller('bejelentkezesController', [
 		$scope.log = {};
 		$scope.bejelentkezes = {};
 		$scope.login = function() {
-			loginAdatok = angular.copy($scope.log);
+			loginAdatok = angular.copy($scope.log);  // ebben taroljuk a felhasznalo altal beirt adatokat
 			loginAdatok.loginPass = md5(loginAdatok.loginPass);
+			
 			$http.post('/login/', loginAdatok)
-				.success(function(data, status, headers, config) {
-					$scope.bejelentkezes.loginSuccess = data.loginSuccess;
+			.success(function(data, status, headers, config) {
+				$scope.bejelentkezes.loginSuccess = data.loginSuccess;
+				// console.log($scope.bejelentkezes.loginSuccess);
+				if ($scope.bejelentkezes.loginSuccess == false) {
+					document.getElementById('helytelen').style.opacity = 1;
+				}
+				else {
+					document.getElementById('helytelen').style.opacity = 0;
 					$scope.bejelentkezes.loggedinUser = data.user;
 					console.log($scope.bejelentkezes.loggedinUser);
 					$scope.log = {};
@@ -101,10 +103,9 @@ loginApp.controller('bejelentkezesController', [
 						$window.location.href = '/termelo';
 					else if($scope.bejelentkezes.loggedinUser[4] == 1)
 						$window.location.href = '/megrendelo';
-				});
-		
+				} 	
+			});
 		};
-
 	}
 ]);  
 

@@ -101,9 +101,8 @@
 			<div id="innerMainDiv">
 							
 				<div data-ng-show="navigationOptionSelected =='kezdolap'">
-					<h1 class="opcioCim">Kezdőlap</h1>
-					<p>Üdvözöljük a Székelytermelők honlapján!</p>
-					<img src="szekelykapu.jpg" alt="Szekelykapu">
+					<h3>Üdvözöljük a Székelytermelők honlapján!</h3>
+					<img src="kepek/szekelykapu.jpg" alt="Szekelykapu">
 				</div>
 				
 				<div data-ng-show="navigationOptionSelected =='projekt'">
@@ -175,19 +174,26 @@
 							</div>
 						
 							<div>
+								<!-- modosithato penznem -->
+								<span class="title"> Pénznem: </span>
+								<span editable-select="profilom_adat[5]" e-name="penznem" e-id="penznem" class="penznem" e-onChange="penznem_aktualizal()" e-ng-options="p.value as p.text for p in penznemek">
+								{{ (penznemek | filter: {value: profilom_adat[5]})[0].text }}	</span>
+							</div> 
+							
+							<div>
 								<!-- modosithato kiszallitasi dij -->
 								<span class="title"> Kiszállítási díj: </span>
 								<span editable-text="profilom_adat[2]" e-name="kiszall_dij" onbeforesave="vizsgalAr($data)" e-required>
 								{{ profilom_adat[2] || 'Nincs kiválasztva' }} </span>
-								<span editable-select="profilom_adat[5]" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
-								<!-- {{ (penznemek | filter:{value: profilom_adatok.penznem})[0].text }} -->
-								{{ (penznemek | filter: {value: profilom_adat[5]})[0].text }}	</span>
+								<span text="profilom_adat[5]" name="penznem2" id="penznem2">
+								{{ showPenznem() }} 
+								</span>
 							</div>
 							 
 							<div>
 								<!-- modosithato kiszallitasi napok -->
 								<span class="title"> Kiszállítási napok: </span>
-								<span editable-checklist="profilom_adatok.nap"  e-name="selected" e-ng-options="n.value as n.text for n in napok">
+								<span editable-checklist="profilom_adatok.napok" e-name="napok" e-ng-options="n.value as n.text for n in napok">
 								{{ showNapok() }}
 								</span>
 							</div> 
@@ -195,10 +201,11 @@
 							<div>
 								<!-- modosithato minimalis vasarloi kosar --> 
 								<span class="title"> Minimális vásárlói kosár értéke: </span>
-								<span editable-number="profilom_adat[3]" e-name="min_kosar" onbeforesave="vizsgalAr($data)" e-required>
+								<span editable-text="profilom_adat[3]" e-name="min_kosar" onbeforesave="vizsgalAr($data)" e-required>
 								{{ profilom_adat[3] || 'Nincs kiválasztva' }} </span>
-								<span editable-select="profilom_adat[5]" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
-								{{ (penznemek | filter:{value: profilom_adat[5]})[0].text }} </span>
+								<span text="profilom_adat[5]" name="penznem3" id="penznem3">
+								{{ showPenznem() }} 
+								</span>
 							</div>
 							
 							<div>
@@ -211,8 +218,13 @@
 							<div>
 								<!-- modosithato települések --> 
 								<span class="title"> Települések: </span>
-								<span editable-text="profilom_adatok.telepules" e-name="telepules" e-required>
-								{{ profilom_adatok.telepules || 'Nincs kiválasztva' }} </span>
+								<span editable-select="profilom_adatok.telepulesek" e-name="telepulesek" e-multiple e-ng-options="t.value as t.text for t in telepulesek">
+									{{ showTelepulesek() }}
+								</span>	
+								<!-- button to show form -->
+								<button type="button" class="btn btn-default" ng-click="telepules_form.$show()" ng-show="!telepules_form.$visible && profilom_form.$visible">
+								Új település hozzáadása
+								</button>
 							</div> 
 							
 							<div class="buttons">
@@ -221,7 +233,7 @@
 								Módosít  
 								</button>
 								<!-- buttons to submit / cancel form -->
-								<span ng-show="profilom_form.$visible">
+								<span ng-show="profilom_form.$visible && !telepules_form.$visible">
 									<button type="submit" class="btn btn-primary" ng-disabled="profilom_form.$waiting">
 									Mentés 
 									</button>
@@ -230,6 +242,25 @@
 									</button>
 								</span>
 							</div>
+						</form>
+						
+						<form editable-form name="telepules_form">
+							<!-- buttons to submit / cancel form -->
+							<span ng-show="telepules_form.$visible && profilom_form.$visible">
+								<div>
+									<span class="title"> Település neve: </span>
+									<input type="text" name="telepules" data-ng-model="adatok.telepules" data-ng-change="vizsgal_Telepules()" id="telepules" placeholder="Település"  required>
+									<span style="color:red" data-ng-show="telepules_form.telepules.$dirty && telepError && !telepules_form.telepules.$invalid">
+									*A megadott település már létezik! </span>
+								</div>
+			
+								<button type="submit" class="btn btn-primary" ng-disabled="telepules_form.$invalid || telepError " ng-click="telepulesMentes()">
+								Új település mentése 
+								</button>
+								<button type="button" class="btn btn-default" ng-disabled="telepules_form.$waiting" ng-click="telepules_form.$cancel()">
+								Mégse
+								</button>
+							</span> 
 						</form>
 						
 						<div>
@@ -394,7 +425,7 @@
 					<h1 class="opcioCim">Promóciós termékek</h1>
 					
 					<div ng-controller="termekPromFeltoltesController" ng-init="termekekPromBetolt()">
-					<form editable-form name="tableform" onbeforesave="vizsgalTermekek($data)" oncancel="cancel()"> 
+					<form editable-form name="tableform" onbeforesave="vizsgalTermekek($data)" > 
 					<!-- table -->
 					<table class="table table-bordered table-hover table-condensed">
 						<tr style="font-weight: bold">

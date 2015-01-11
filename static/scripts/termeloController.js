@@ -94,11 +94,6 @@ termeloApp.controller('termekFeltoltesController', [
 				$scope.mertekegysegek = data['mertekegysegek'];
 				$scope.kategoriak = data['kategoriak'];
 				$scope.penznem = data['penznem'][0];
-				console.log("-------------------------");
-				console.log($scope.termekek);
-				console.log($scope.mertekegysegek);
-				console.log($scope.kategoriak);
-				console.log($scope.penznem);
 			});
 		};
 		
@@ -108,7 +103,7 @@ termeloApp.controller('termekFeltoltesController', [
 			if($scope.ujtermek == 0) {
 				$http.post('/termekmodositas/', data)
 				.error(function(data, status, headers, config) {
-					alert("Hiba történt a módosítás során!");
+					showMyAlert("Hiba történt a módosítás során!");
 				});
 				if(document.getElementById('fileinput'+data['id']).value != "")
 					document.getElementById('click'+data['id']).click();
@@ -116,7 +111,7 @@ termeloApp.controller('termekFeltoltesController', [
 			if($scope.ujtermek == 1) {
 				$http.post('/termekfeltoltes/', data)
 				.error(function(data, status, headers, config) {
-					alert("Hiba történt a termék beszúrása során!");
+					showMyAlert("Hiba történt a termék beszúrása során!");
 				});
 				if(document.getElementById('fileinput').value != "")
 					document.getElementById('click').click();
@@ -140,11 +135,11 @@ termeloApp.controller('termekFeltoltesController', [
 
 				$http.post('/termektorles/', id)
 				.success(function(data, status, headers, config) {
-					alert("Sikeres törlés!");
+					showMyAlert("Sikeres törlés!");
 					$scope.termekekBetolt();
 				})
 				.error(function(data, status, headers, config) {
-					alert("Hiba történt a termék törlése során!");
+					showMyAlert("Hiba történt a termék törlése során!");
 				});
 			});
 			
@@ -190,27 +185,41 @@ termeloApp.controller('termekFeltoltesController', [
 termeloApp.controller('profilomController', [ '$http', '$scope', '$filter', 
 	function profilom_Controller($http, $scope, $filter) {
 	
-	$scope.profilom_adatok = { nap: []};
-	$scope.selected = [];
+	$scope.profilom_adatok = { telepulesek: [] , napok: [] };
 	
-	$scope.napok = [
-		{value:1, text: 'Hétfő'},
-		{value:2, text: 'Kedd'},
-		{value:3, text: 'Szerda'},
-		{value:4, text: 'Csütörtök'},
-		{value:5, text: 'Péntek'},
-		{value:6, text: 'Szombat'},
-		{value:7, text: 'Vasárnap'}
-	];
-	
+	// napokat kiir
 	$scope.showNapok = function() {
-		$scope.selected = [];
+		var selected = [];
 		angular.forEach($scope.napok, function(n) {
-			if ($scope.profilom_adatok.nap.indexOf(n.value) >= 0) {
-				$scope.selected.push(n.text);
+			if ($scope.profilom_adatok.napok.indexOf(n.value) >= 0) {
+				selected.push(n.text);
 			}
 		});
-		return $scope.selected.length ? $scope.selected.join(', ') : 'Nincs kiválasztva';
+		return selected.length ? selected.join(', ') : 'Nincs kiválasztva';
+	};
+	
+	// penznem aktualizal
+	penznem_aktualizal = function() {
+		data = document.getElementById('penznem').options[document.getElementById('penznem').selectedIndex].innerHTML;
+		document.getElementsByClassName('penznem')[0].innerHTML = data;
+	};
+	
+	// aktualizalt penznemet kiir
+	$scope.showPenznem = function() {
+		data = document.getElementsByClassName('penznem')[0].innerHTML;
+		document.getElementById('penznem2').innerHTML = data;
+		document.getElementById('penznem3').innerHTML = data;
+	};
+	
+	// telepuleseket kiir
+	$scope.showTelepulesek = function() {
+		var selected = [];
+		angular.forEach($scope.telepulesek, function(t) {
+			if ($scope.profilom_adatok.telepulesek.indexOf(t.value) >= 0) {
+				selected.push(t.text);
+			}
+		});
+		return selected.length ? selected.join(', ') : 'Nincs kiválasztva';
 	};
 	
 	// profilom eddig kitoltott adatainak betoltese
@@ -220,18 +229,24 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 			$scope.profilom = data['profilom'];
 			$scope.penznemek = data['penznemek'];
 			$scope.rendszeresseg = data['rendszeresseg'];
+			$scope.telepulesek = data['telepulesek'];
+			$scope.napok = data['napok'];
 			$scope.profilom_adat = data['profilom_adat'];
+			$scope.profilom_adatok.telepulesek = data['telepules_adat'];
+			$scope.profilom_adatok.napok= data['nap_adat'];
 		});
 	};
 	
 	// profilom lementese
 	$scope.profilomMentes = function(data) {
+		console.log("mentes adatok:");
+		console.log(data);
 		if(document.getElementById('fileinputProfil').value != "")
 			document.getElementById('clickProfil').click();
 		$http.post('/profilommodositas/', data)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
-			alert('Sikeres feltöltés.');
+			showMyAlert('Sikeres feltöltés.');
 			location.reload();
 		});	
 	}; 
@@ -257,11 +272,9 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 	$scope.vizsgal_regiPassword = function() {
 		regipass = angular.copy($scope.adatok.regipass);
 		regipass = md5(regipass);   // ebben taroljuk a felhasznalo altal beirt jelszot
-		// console.log(regipass);
 		$http.post('/jelszolekeres/', {})
 		.success(function(data, status, headers, config) {
 			$scope.pass = data['pass'];
-			// console.log($scope.pass[0]);
 		});	
 		$scope.regipassError = $scope.pass[0] !== regipass; 
 	};
@@ -278,41 +291,73 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 		$http.post('/jelszomodositas/', Adatok)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
-			alert('Sikeres jelszó módosítás.');
+			showMyAlert('Sikeres jelszó módosítás.');
 		});	
+	};
+	
+	$scope.telepError = false;
+	// megvizsgaljuk, hogy a beirni kivant telepules mar letezik-e
+	$scope.vizsgal_Telepules = function() {
+		telepules = angular.copy($scope.adatok.telepules);  // ebben taroljuk a felhasznalo altal beirt uj telepules nevet
+		
+		if (telepules == null) {
+			$scope.telepError = true;
+		}
+		else {
+			$http.post('/telepulesvizsgalat/', {'telep':telepules})
+			.success(function(data, status, headers, config) {
+				$scope.telepError = data.success;
+			});
+		}
+	};
+	
+	$scope.telepulesMentes = function() {
+		telepules = angular.copy($scope.adatok.telepules);
+		$http.post('/telepulesmentes/', {'telep':telepules})
+		.success(function(data, status, headers, config) {
+			$scope.success = data.success;
+			showMyAlert('Sikeres település beszúrás.');
+			$scope.profilomBetolt();
+		});
 	};
 	
 }]);
 
 termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$filter',
 	function promociostermek_Controller($http, $scope, $filter) {
-	
 		// eddig feltoltott promocios termekek betoltese
-		$scope.termekekPromBetolt = function() {  
+		$scope.termekekPromBetolt = function() { 
+			document.getElementById('termek_ismetlodes').style.opacity = 0;
 			$http.post('/promtermekekbetoltes/', {})
 			.success(function(data, status, headers, config) {
 				$scope.termekek = data['termekek'];
 				$scope.promtermekek = data['promtermekek'];
-				console.log($scope.promtermekek);
 				$scope.datumok = data['datumok'];
 				$scope.penznemek = data['penznemek'];
-				$scope.promtermekek_regiadatai = data['promtermekek_regiadatai']
+				$scope.promtermekek_regiadatai = data['promtermekek_regiadatai'];
 			});
 		};
 		
 		// a termek valtoztatasanal aktualizaljuk az adatokat
 		promtermek_aktualizal = function(szam) {
-			// console.log(szam);
+			console.log(szam);
 			data = document.getElementById('nev'+szam).options[document.getElementById('nev'+szam).selectedIndex].innerHTML;
-			// console.log(data);
+			console.log(data);
 			$http.post('/promtermek_aktualizal/', {'nev':data})
 			.success(function(data, status, headers, config) {
 				//$scope.promtermekek_regiadatai = data['promtermekek_regiadatai'];
 				promtermekek_lista = data['promtermekek_lista'];
 				// console.log(promtermekek_lista);
-				$scope.promtermekek[szam][0] = promtermekek_lista[0];
-				$scope.promtermekek_regiadatai[szam][2] = promtermekek_lista[2];
-				$scope.promtermekek_regiadatai[szam][4] = promtermekek_lista[4];
+				if (($scope.promtermekek[szam] == null) && ($scope.promtermekek_regiadatai[szam] == null) ) {
+					document.getElementById('id'+szam).innerHTML = promtermekek_lista[0];
+					document.getElementById('ar'+szam).innerHTML = promtermekek_lista[2];
+					document.getElementById('pid'+szam).innerHTML = promtermekek_lista[4];
+				}
+				else {
+					$scope.promtermekek[szam][0] = promtermekek_lista[0];
+					$scope.promtermekek_regiadatai[szam][2] = promtermekek_lista[2];
+					$scope.promtermekek_regiadatai[szam][4] = promtermekek_lista[4];
+				}
 			});
 		};
 		
@@ -322,9 +367,13 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 			termek1 = data['nev0'];
 			termek2 = data['nev1'];
 			termek3 = data['nev2'];
-			//console.log(termek1);
-			//console.log(termek2);
-			//console.log(termek3);
+			
+			if (termek1 == null) 
+				termek1 = "1";
+			if (termek2 == null) 
+				termek2 = "2";
+			if (termek3 == null) 
+				termek3 = "3";		
 			
 			if ((termek1 == termek2) || (termek1 == termek3) || (termek2 == termek3)) {
 				document.getElementById('termek_ismetlodes').style.opacity = 1;
@@ -333,6 +382,30 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 			else {
 				document.getElementById('termek_ismetlodes').style.opacity = 0;
 				$scope.promtermekMent(data);
+			}
+		};
+		
+		$scope.vizsgalKitoltes = function(szam) {
+			if (szam == 0) {
+				nev = angular.copy($scope.tableform.nev0.$viewValue);
+				ujar = angular.copy($scope.tableform.ar0.$viewValue);
+				kdatum = angular.copy($scope.tableform.kezdeti_d0.$viewValue);
+				vdatum = angular.copy($scope.tableform.vegso_d0.$viewValue);		
+			}
+			if (szam == 1) {
+				nev = angular.copy($scope.tableform.nev1.$viewValue);
+				ujar = angular.copy($scope.tableform.ar1.$viewValue);
+				kdatum = angular.copy($scope.tableform.kezdeti_d1.$viewValue);
+				vdatum = angular.copy($scope.tableform.vegso_d1.$viewValue);
+			}
+			if (szam == 2) {
+				nev = angular.copy($scope.tableform.nev2.$viewValue);
+				ujar = angular.copy($scope.tableform.ar2.$viewValue);
+				kdatum = angular.copy($scope.tableform.kezdeti_d2.$viewValue);
+				vdatum = angular.copy($scope.tableform.vegso_d2.$viewValue);
+			}
+			if (((nev == null) || (ujar == null) || (kdatum == null) || (vdatum == null)) && (!((nev == null) && (ujar == null) && (kdatum == null) && (vdatum == null)))) {
+				return "A termék neve, új ára és a dátumok kitöltése is kötelező!";	
 			}
 		};
 		
@@ -354,13 +427,33 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 			}
 		};
 		
+		$scope.vizsgalkezdetiDatum = function(data) {
+			// lekerem az aktualis datumot, mert a promocio maximum a mai nappal kezdodhet
+			var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth()+1; //January is 0!
+			var yyyy = today.getFullYear();
+
+			if(dd<10) {
+				dd='0'+dd
+			} 
+			if(mm<10) {
+				mm='0'+mm
+			} 
+			today = yyyy+'-'+mm+'-'+dd;
+			//console.log(today);
+			
+			if (data < today)
+				return "A promóció leghamarabb ma kezdődhet!";
+		};
+		
 		$scope.vizsgalUjAr = function(data,szam) {
 			// console.log(data);  // promocios ar 
 			// console.log(szam);
 			regiar = parseInt(document.getElementById('ar'+szam).innerHTML);
 			// console.log(regiar);
 			if (regiar <= data)
-				return "A promóciós ár kevesebb kell legyen, mint a régi ár!";
+				return "A promóciós ár kisebb kell legyen, mint a régi ár!";
 		};
 		
 		// promocios termekek mentese
@@ -368,16 +461,30 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 			$http.post('/promtermekekmodositas/', data)
 			.success(function(data, status, headers, config) {
 				$scope.success = data.success;
-				alert('Sikeres feltöltés.');
+				showMyAlert('Sikeres feltöltés.');
 			});
 			$scope.termekekPromBetolt();
 		};
+		
+		// promocios termekek torlese
+		$scope.torol = function(szam) {
+			termekid = parseInt(document.getElementById('id'+szam).innerHTML);
+			$http.post('/promtermektorol/', {'id':termekid})
+			.success(function(data, status, headers, config) {
+				$scope.success = data.success;
+				if ($scope.success == true)
+					showMyAlert('Sikeres törlés.');
+				else 
+					showMyAlert('Hiba a törlés közben.');	
+			});
+			$scope.termekekPromBetolt();
+		}
 		
 		/* $scope.showStatus = function(promtermekek_regiadatai[szam][1]) {
 			var selected = [];
 			selected = $filter('filter')($scope.termekek, {value: promtermekek_regiadatai[szam][1]});
 			return selected.length ? selected[0].text : 'Not set';
-		}; */ 
+		}; */  
 	}	
 ]);
 
@@ -427,7 +534,7 @@ termeloApp.controller('MegrendelesekController', function($scope, $filter, $http
 		console.log(data);
 		$http.post('/megrendelesMent/', data)
 		.error(function(data, status, headers, config) {
-			alert('Hiba történt a módosítás során.');
+			showMyAlert('Hiba történt a módosítás során.');
 		});
 		$scope.megrendelesekBetolt();
 	};

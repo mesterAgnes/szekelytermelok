@@ -18,7 +18,7 @@ megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter',
 		$http.post('/m_profilommodositas/', data)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
-			alert('Sikeres módosítás.');
+			showMyAlert('Sikeres módosítás.');
 		});	
 	}; 
 	
@@ -56,7 +56,7 @@ megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter',
 		$http.post('/jelszomodositas/', Adatok)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
-			alert('Sikeres jelszó módosítás.');
+			showMyAlert('Sikeres jelszó módosítás.');
 		});	
 	};
 	
