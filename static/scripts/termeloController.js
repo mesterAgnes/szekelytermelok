@@ -1,4 +1,4 @@
-var termeloApp = angular.module('termeloApp', ["xeditable", "checklist-model"]); 
+﻿var termeloApp = angular.module('termeloApp', ["xeditable", "checklist-model"]); 
 
 termeloApp.run(function(editableOptions) {
   editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
@@ -33,13 +33,7 @@ termeloApp.controller('loginSwitchDivController', [
 			});
 		}
 		
-<<<<<<< HEAD
-		$scope.aktualizalPromociok = function(){
-		;
-		}
-=======
 		$scope.aktualizalPromociok();
->>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 	}
 
 ]);
@@ -61,10 +55,10 @@ termeloApp.controller('termekFeltoltesController', [
 		$scope.kategoriak = { kategoria: [] };
 		$scope.penznemek = { penznemek: [] };
 
-	
-		$scope.vizsgalAr = function(data, id) {
-			var filter = /-/;
-			if (filter.test(data)) {
+		$scope.vizsgalAr = function(data) {
+			var filter = /^[0-9]+[\.]?[0-9]*$/;
+
+			if (!filter.test(data)) {
 				return "A beírt ár nem megfelelő.";
 			}
 		};
@@ -98,48 +92,71 @@ termeloApp.controller('termekFeltoltesController', [
 			.success(function(data, status, headers, config) {
 				$scope.termekek = data['termekek'];	
 				$scope.mertekegysegek = data['mertekegysegek'];
-				$scope.penznemek = data['penznemek'];
 				$scope.kategoriak = data['kategoriak'];
+				$scope.penznem = data['penznem'][0];
+				console.log("-------------------------");
+				console.log($scope.termekek);
+				console.log($scope.mertekegysegek);
+				console.log($scope.kategoriak);
+				console.log($scope.penznem);
 			});
 		};
 		
 		// termek lementese
 		$scope.termekMent = function(data) {
+			console.log(data);
 			if($scope.ujtermek == 0) {
 				$http.post('/termekmodositas/', data)
-				.success(function(data, status, headers, config) {
-					$scope.success = data.success;
-					alert('Sikeres feltöltés.');
-					location.reload();
+				.error(function(data, status, headers, config) {
+					alert("Hiba történt a módosítás során!");
 				});
 				if(document.getElementById('fileinput'+data['id']).value != "")
 					document.getElementById('click'+data['id']).click();
 			}
 			if($scope.ujtermek == 1) {
 				$http.post('/termekfeltoltes/', data)
-				.success(function(data, status, headers, config) {
-					$scope.success = data.success;
-					alert('Sikeres feltöltés.');
-					location.reload();
+				.error(function(data, status, headers, config) {
+					alert("Hiba történt a termék beszúrása során!");
 				});
 				if(document.getElementById('fileinput').value != "")
 					document.getElementById('click').click();
 				$scope.ujtermek == 0;
 			}
-			
 			$scope.termekekBetolt();
 		};
 
-		// termek torlese
-		$scope.termekTorol = function(data, index) {
-			$scope.termekek.splice(index, 1);
+		// termek torlese	
+		$scope.termekTorol = function(id){
+			console.log("ID:"+id);
+		
+			var $confirmBox=$("<div id='createdConfirmDiv' style='width:300px;max-width:95%'>");
+			var $closeImg=$("<img id='closeImg' class='miniImg' src='./kepek/closeW2.png' height=30 onclick='$(\"div#createdConfirmDiv, div#overlayForCustomBoxes\").remove()'>");
+			var $text=$("<span>CONFIRM?</span><br>");
+			var $yButton=$("<button class='myConfirmButton' id='yesButton'>YES</button>");
+			var $nButton=$("<button class='myConfirmButton' onclick='$(\"div#createdConfirmDiv, div#overlayForCustomBoxes\").remove()'>NO</button>");
 			
-			$http.post('/termektorles/', data)
-			.success(function(data, status, headers, config) {
-				$scope.success = data.success;
-				alert('Sikeres torles.');
+			$yButton.on("click", function(){
+				$("div#createdConfirmDiv, div#overlayForCustomBoxes").remove();	
+
+				$http.post('/termektorles/', id)
+				.success(function(data, status, headers, config) {
+					alert("Sikeres törlés!");
+					$scope.termekekBetolt();
+				})
+				.error(function(data, status, headers, config) {
+					alert("Hiba történt a termék törlése során!");
+				});
 			});
-		};
+			
+			$confirmBox.append( $closeImg );
+			$confirmBox.append( $text );
+			$confirmBox.append( $yButton );
+			$confirmBox.append( $nButton );
+			
+			$("body").prepend( $confirmBox );
+			$("body").prepend("<div id='overlayForCustomBoxes'></div>");
+			$("div#overlayForCustomBoxes").fadeTo(300,0.5);		
+		}
 
 		// termek hozzaadasa
 		$scope.termekHozzaad = function() {
@@ -147,7 +164,10 @@ termeloApp.controller('termekFeltoltesController', [
 				id: $scope.termekek.length+1,
 				nev: '',
 				leiras: '',
+				kategoria: '',
+				mertekegyseg: '',
 				ar: '',
+				penznem: '',
 				rend_menny: '',
 				kep: '',
 				keszlet_menny: ''
@@ -212,7 +232,7 @@ termeloApp.controller('profilomController', [ '$http', '$scope', '$filter',
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
 			alert('Sikeres feltöltés.');
-			
+			location.reload();
 		});	
 	}; 
 	
@@ -406,9 +426,8 @@ termeloApp.controller('MegrendelesekController', function($scope, $filter, $http
 	$scope.statuszMent = function(data) {
 		console.log(data);
 		$http.post('/megrendelesMent/', data)
-		.success(function(data, status, headers, config) {
-			$scope.success = data.success;
-			alert('Sikeres modositas.');
+		.error(function(data, status, headers, config) {
+			alert('Hiba történt a módosítás során.');
 		});
 		$scope.megrendelesekBetolt();
 	};

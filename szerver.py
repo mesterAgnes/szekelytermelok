@@ -122,36 +122,7 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)	
 
-							   
-@app.route('/termekfeltoltes/', methods = ['POST'])
-def termekfeltoltes():
-	adatok = json.loads(request.data)
-	# logging.warning(adatok)
-	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
-	cursor = cnx.cursor()
-	string = ("INSERT INTO Termekek "
-				   "(Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, SZ_ID)"
-				   "VALUES (%s, %s, %s, %s, %s, %s, %s)")
-
-	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], 'termek.jpg', adatok['keszlet_menny'], session['SZ_ID'])
-
-	# Insert new user
-	cursor.execute(string, datas)
-	emp_no = cursor.lastrowid
-	cnx.commit()
 	
-	add_termek_kep = ("UPDATE Termekek SET KEP=%s WHERE T_ID=%s")
-	termek_kep='termek'+str(emp_no)+'.jpg'
-	cursor.execute(add_termek_kep, (termek_kep, emp_no))
-	cnx.commit()
-	if os.path.exists('static/img/termekek/termek.jpg'):
-		os.rename('static/img/termekek/termek.jpg','static/img/termekek/' + termek_kep)
-	
-	# Make sure data is committed to the database
-	cursor.close()
-	cnx.close()
-	
-	return jsonify({'success': True})
 
 # This is the path to the upload directory
 app.config['UPLOAD_FOLDER2'] = 'static/img/termekek/'
@@ -209,7 +180,7 @@ def rendeleseim():
 		else:
 			dat[i]=dat[i][:-2][3:]
 		i=i+1
-		
+	
 	statuszid = ( "SELECT ST_ID FROM Megrendelesek "
 				"WHERE Rendelo_ID=%s")
 	cursor.execute(statuszid,[session['SZ_ID']])
@@ -225,7 +196,7 @@ def rendeleseim():
 	penznemek = []
 	mertekegysegek = []
 	statuszok = []
-
+	
 	j=0
 	for ids in idk:
 		i=int(str(ids).strip("(,), \,"))
@@ -297,8 +268,7 @@ def megrendeleseim():
 		else:
 			dat[i]=dat[i][:-2][3:]
 		i=i+1
-	
-	
+		
 	statuszid = ("SELECT m.ST_ID "
 			"FROM Termekek t, Szemelyek sz, Megrendelesek m "
 			"WHERE sz.SZ_ID=t.SZ_ID and m.T_ID=t.T_ID and t.SZ_ID = %s")
@@ -386,11 +356,7 @@ def megrendelesMent():
 	string = ("UPDATE Megrendelesek SET "
 				"ST_ID = %s"
 				"WHERE M_ID = %s")
-				
-	logging.warning(adatok['id'])
-	logging.warning(adatok['statusz'])
 	datas = (str(adatok['statusz']), adatok['id'])
-	
 	try:
 		cursor.execute(string, datas)
 		cnx.commit()
@@ -402,29 +368,21 @@ def megrendelesMent():
 	return jsonify({'success': True})	
 	
 	
-	
 @app.route('/termekbetoltes/', methods = ['POST'])	
 def termekbetoltes():
 	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
-	select_termekek = ("SELECT T_ID, Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny FROM Termekek WHERE SZ_ID = %s")
-	select_penznemek = ("SELECT * FROM Penznemek")
+	select_termekek = ("SELECT T_ID, t.Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, k.Nev, m.Nev FROM Termekek t, Kategoriak k, Mertekegysegek m WHERE t.K_ID=k.K_ID AND t.ME_ID=m.ME_ID AND SZ_ID = %s")
 	select_mertekegysegek = ("SELECT * FROM Mertekegysegek")
 	select_kategoriak = ("SELECT * FROM Kategoriak")
+	select_penznem = ("SELECT Penznem FROM Termelok t, Penznemek p WHERE t.P_ID=p.P_ID AND t.SZ_ID=%s")
 	
+	logging.warning("---------------------------------------")
 	cursor.execute(select_termekek, [session['SZ_ID']])
 	cnx.commit()
 	termekek = cursor.fetchall()
-	# logging.warning(termekek)
-	
-	cursor.execute(select_penznemek)
-	cnx.commit()
-	ertekek = cursor.fetchall()
-	penznemek = []
-	for x in ertekek:		
-		penznemek.append({'value':x[0], 'text':x[1]})
-	# logging.warning(penznemek)
+	logging.warning(termekek)
 	
 	cursor.execute(select_mertekegysegek)
 	cnx.commit()
@@ -432,7 +390,7 @@ def termekbetoltes():
 	mertekegysegek = []
 	for r in ertekek2:
 		mertekegysegek.append({'value':r[0], 'text':r[1]})
-	# logging.warning(mertekegysegek)
+	logging.warning(mertekegysegek)
 	
 	cursor.execute(select_kategoriak)
 	cnx.commit()
@@ -440,13 +398,16 @@ def termekbetoltes():
 	kategoriak = []
 	for r in ertekek3:
 		kategoriak.append({'value':r[0], 'text':r[1]})
-	# logging.warning(kategoriak)
+	logging.warning(kategoriak)
+	
+	cursor.execute(select_penznem, [session['SZ_ID']])
+	cnx.commit()
+	penznem = cursor.fetchone()
+	logging.warning(penznem)
 	
 	cursor.close()
 	cnx.close()
-	return jsonify({'termekek':termekek, 'penznemek':penznemek, 'mertekegysegek':mertekegysegek, 'kategoriak':kategoriak})
-
-	
+	return jsonify({'termekek':termekek, 'mertekegysegek':mertekegysegek, 'kategoriak':kategoriak, 'penznem': penznem})
 
 	
 @app.route('/mindentermek/', methods = ['POST'])	
@@ -455,17 +416,17 @@ def mindentermek():
 	cursor = cnx.cursor()
 
 	# a promocios termekek lekerdezese: 
-	select_promok = ("SELECT t.T_ID, t.Nev, pr.Ar, Kep, sz.Nev, Penznem, Keszlet_menny "
-					"FROM Termekek t, Szemelyek sz, Penznemek p, Promociok pr "
-					"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and pr.T_ID=t.T_ID and t.T_ID IN (SELECT T_ID FROM promociok)")
+	select_promok = ("SELECT t.T_ID, t.Nev, pr.Ar, t.Kep, sz.Nev, p.Penznem, Keszlet_menny "
+					"FROM Termekek t, Szemelyek sz, Termelok te, Penznemek p, Promociok pr "
+					"WHERE sz.SZ_ID=t.SZ_ID and sz.SZ_ID=te.SZ_ID AND p.P_ID=te.P_ID and pr.T_ID=t.T_ID and t.T_ID IN (SELECT T_ID FROM promociok)")
 	cursor.execute(select_promok)
 	cnx.commit()
 	promok = cursor.fetchall()
 		
 	# a NEM promocios termekek lekerdezese: 
-	select_nempromok =  ("SELECT T_ID, t.Nev, t.Ar, t.Kep, sz.Nev, Penznem, Keszlet_menny "
-						"FROM Termekek t, Szemelyek sz, Penznemek p "
-						"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and T_ID NOT IN (SELECT T_ID FROM Promociok)")
+	select_nempromok =  ("SELECT T_ID, t.Nev, t.Ar, t.Kep, sz.Nev, p.Penznem, Keszlet_menny "
+						"FROM Termekek t, Szemelyek sz, Termelok te, Penznemek p "
+						"WHERE sz.SZ_ID=t.SZ_ID and sz.SZ_ID=te.SZ_ID AND p.P_ID=te.P_ID and T_ID NOT IN (SELECT T_ID FROM Promociok)")
 	
 	cursor.execute(select_nempromok)
 	cnx.commit()
@@ -486,8 +447,8 @@ def mindenpromtermek():
 	cursor = cnx.cursor()
 
 	select_termekek = ( "SELECT t.T_ID, t.Nev, pr.Ar, t.Kep, sz.Nev, Penznem, Keszlet_menny "
-						"FROM Termekek t, Szemelyek sz, Penznemek p, Promociok pr "
-						"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and pr.T_ID=t.T_ID and t.T_ID in (SELECT T_ID FROM promociok)")
+						"FROM Termekek t, Szemelyek sz, Termelok te, Penznemek p, Promociok pr "
+						"WHERE sz.SZ_ID=t.SZ_ID and sz.SZ_ID=te.SZ_ID AND p.P_ID=te.P_ID and pr.T_ID=t.T_ID and t.T_ID in (SELECT T_ID FROM promociok)")
 	
 	cursor.execute(select_termekek)
 	cnx.commit()
@@ -505,7 +466,7 @@ def egytermek():
 	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
-	select_termek = ("SELECT t.Nev, t.Leiras, t.Ar, t.Kep, t.Min_rendelesi_menny, t.Keszlet_menny, sz.Nev, p.Penznem, k.Nev, m.Nev FROM Termekek t, Szemelyek sz, Penznemek p, Kategoriak k, Mertekegysegek m WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and k.K_ID=t.K_ID and m.ME_ID=t.ME_ID and T_ID = %s")
+	select_termek = ("SELECT t.Nev, t.Leiras, t.Ar, t.Kep, t.Min_rendelesi_menny, t.Keszlet_menny, sz.Nev, p.Penznem, k.Nev, m.Nev FROM Termekek t, Szemelyek sz, Termelok te, Penznemek p, Kategoriak k, Mertekegysegek m WHERE sz.SZ_ID=t.SZ_ID and te.SZ_ID=sz.SZ_ID and p.P_ID=te.P_ID and k.K_ID=t.K_ID and m.ME_ID=t.ME_ID and T_ID = %s")
 	cursor.execute(select_termek, [id])
 	cnx.commit()
 	termek = cursor.fetchall()
@@ -523,8 +484,8 @@ def egypromtermek():
 	cursor = cnx.cursor()
 
 	select_termek = ("SELECT t.Nev, t.Leiras, t.Ar, t.Kep, t.Min_rendelesi_menny, t.Keszlet_menny, sz.Nev, p.Penznem, k.Nev, m.Nev, pr.Ar, pr.Periodus_k, pr.Periodus_v "
-					 "FROM Termekek t, Szemelyek sz, Penznemek p, Kategoriak k, Mertekegysegek m,Promociok pr "
-					 "WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and k.K_ID=t.K_ID and m.ME_ID=t.ME_ID and pr.T_ID=t.T_ID and t.T_ID = %s")
+					 "FROM Termekek t, Szemelyek sz, Termelok te, Penznemek p, Kategoriak k, Mertekegysegek m,Promociok pr "
+					 "WHERE sz.SZ_ID=t.SZ_ID and sz.SZ_ID=te.SZ_ID AND p.P_ID=te.P_ID and k.K_ID=t.K_ID and m.ME_ID=t.ME_ID and pr.T_ID=t.T_ID and t.T_ID = %s")
 	cursor.execute(select_termek, [id])
 	cnx.commit()
 	
@@ -630,8 +591,8 @@ def lekerdezkosar():
 	
 	# promocios termekek lekerdezese:
 	select_termek = ("SELECT k.T_ID, t.Nev, sz.Nev, Mennyiseg, me.Nev, pr.Ar, Penznem "
-					" FROM Kosarak k, Termekek t, Szemelyek sz, Mertekegysegek me, Penznemek p, Promociok pr "
-					" WHERE t.T_ID = k.T_ID AND t.SZ_ID=sz.SZ_ID AND p.P_ID=t.P_ID AND k.SZ_ID = %s AND t.ME_ID=me.ME_ID AND pr.T_ID=k.T_ID "
+					" FROM Kosarak k, Termekek t, Szemelyek sz, Termelok te, Mertekegysegek me, Penznemek p, Promociok pr "
+					" WHERE t.T_ID = k.T_ID AND t.SZ_ID=sz.SZ_ID AND sz.SZ_ID=te.SZ_ID AND p.P_ID=te.P_ID AND k.SZ_ID = %s AND t.ME_ID=me.ME_ID AND pr.T_ID=k.T_ID "
 					" AND k.T_ID IN ( SELECT T_ID FROM Promociok )")	
 	try:
 		cursor.execute( select_termek, [session['SZ_ID']] )
@@ -645,8 +606,8 @@ def lekerdezkosar():
 	
 	# NEM promocios termekek lekerdezese:
 	select_termek = ("SELECT k.T_ID, t.Nev, sz.Nev, Mennyiseg, me.Nev, t.Ar, Penznem "
-					" FROM Kosarak k, Termekek t, Szemelyek sz, Mertekegysegek me, Penznemek p"
-					" WHERE t.T_ID = k.T_ID AND t.SZ_ID=sz.SZ_ID AND p.P_ID=t.P_ID AND t.ME_ID=me.ME_ID AND k.SZ_ID = %s "
+					" FROM Kosarak k, Termekek t, Szemelyek sz, Termelok te, Mertekegysegek me, Penznemek p"
+					" WHERE t.T_ID = k.T_ID AND t.SZ_ID=sz.SZ_ID AND sz.SZ_ID=te.SZ_ID AND p.P_ID=te.P_ID AND t.ME_ID=me.ME_ID AND k.SZ_ID = %s "
 					" AND k.T_ID NOT IN ( SELECT T_ID FROM Promociok )")	
 	try:
 		cursor.execute( select_termek, [session['SZ_ID']] )
@@ -729,8 +690,6 @@ def rendeles():
 	
 	for termek in termekek:
 		# berakjuk a termekeket a Megrendelesek tablaba
-<<<<<<< HEAD
-=======
 		add_rend = ("INSERT INTO Megrendelesek "
 					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
 				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
@@ -761,7 +720,6 @@ def rendeles():
 	
 	for termek in termekek:
 		# berakjuk a termekeket a Megrendelesek tablaba
->>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 		add_rend = ("INSERT INTO Megrendelesek "
 					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
 				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
@@ -775,39 +733,6 @@ def rendeles():
 			cnx.close()
 			return jsonify({'success': False})	
 
-<<<<<<< HEAD
-# 2. nem promocios termekek lekerdezese ( az ar miatt kell szetvalasztani oket):
-	select_termek = ("SELECT k.T_ID AS Id, Mennyiseg, Ar "
-					" FROM Kosarak k, Termekek t "
-					" WHERE k.T_ID = t.T_ID AND k.T_ID NOT IN ( SELECT T_ID FROM Promociok ) AND k.SZ_ID = %s")	
-	try:
-		cursor.execute( select_termek, [session['SZ_ID']] )
-	except:
-		cnx.rollback()
-		cursor.close()
-		cnx.close()
-		return jsonify({'success': False})	
-	
-	termekek = cursor.fetchall()
-	cnx.commit()
-	
-	for termek in termekek:
-		# berakjuk a termekeket a Megrendelesek tablaba
-		add_rend = ("INSERT INTO Megrendelesek "
-					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
-				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
-		data_rend = (termek[1], adatok['datum'], termek[2], termek[0], session['SZ_ID'])
-		try:
-			cursor.execute( add_rend, data_rend )
-			cnx.commit()
-		except:
-			cnx.rollback()
-			cursor.close()
-			cnx.close()
-			return jsonify({'success': False})	
-
-=======
->>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 			
 	# toroljuk a kosarbol az illeto szemely osszes termeket
 	delete_kosar = ("DELETE FROM Kosarak WHERE SZ_ID = %s ")
@@ -828,13 +753,14 @@ def rendeles():
 @app.route('/termekmodositas/', methods = ['POST'])
 def termekmodositas():
 	adatok = json.loads(request.data)
-	
+	logging.warning("===================================")
+	logging.warning(adatok)
 	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
 	cursor = cnx.cursor()
 	string = ("UPDATE Termekek SET "
-				"Nev = %s, Leiras = %s, Ar = %s, Min_rendelesi_menny = %s, Keszlet_menny = %s, SZ_ID = %s "
+				"Nev = %s, Leiras = %s, Ar = %s, Min_rendelesi_menny = %s, Keszlet_menny = %s, ME_ID = %s, K_ID = %s, SZ_ID = %s "
 				"WHERE T_ID = %s")
-	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], adatok['keszlet_menny'], session['SZ_ID'], adatok['id'])
+	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], adatok['keszlet_menny'], adatok['mertekegyseg'], adatok['kategoria'], session['SZ_ID'], adatok['id'])
 	termek_kep='termek'+str(adatok['id'])+'.jpg'
 	
 	if os.path.exists('static/img/termekek/termek.jpg'):
@@ -851,9 +777,42 @@ def termekmodositas():
 	
 	return jsonify({'success': True})
 	
+
+	
+@app.route('/termekfeltoltes/', methods = ['POST'])
+def termekfeltoltes():
+	adatok = json.loads(request.data)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
+	cursor = cnx.cursor()
+	string = ("INSERT INTO Termekek "
+				   "(Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, ME_ID, K_ID, SZ_ID)"
+				   "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+
+	datas = (adatok['nev'], adatok['leiras'], adatok['ar'], adatok['rend_menny'], 'termek.jpg', adatok['keszlet_menny'], adatok['ME_ID'], adatok['K_ID'], session['SZ_ID'])
+
+	# Insert new user
+	cursor.execute(string, datas)
+	emp_no = cursor.lastrowid
+	cnx.commit()
+	
+	add_termek_kep = ("UPDATE Termekek SET KEP=%s WHERE T_ID=%s")
+	termek_kep='termek'+str(emp_no)+'.jpg'
+	cursor.execute(add_termek_kep, (termek_kep, emp_no))
+	cnx.commit()
+	if os.path.exists('static/img/termekek/termek.jpg'):
+		os.rename('static/img/termekek/termek.jpg','static/img/termekek/' + termek_kep)
+	
+	# Make sure data is committed to the database
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({'success': True})
+	
+	
 @app.route('/termektorles/', methods = ['POST'])	
 def termektorles():
 	adatok = json.loads(request.data)
+	logging.warning("----------------------------")
 	logging.warning(adatok)
 	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
@@ -1182,6 +1141,7 @@ def logout():
 		session.pop('SZ_ID', None)
 	return redirect(url_for('index'))
 	
+
 @app.route('/termelo')
 def termelo():
 	if 'SZ_ID' in session:

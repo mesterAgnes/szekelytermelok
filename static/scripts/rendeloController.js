@@ -100,6 +100,15 @@ megrendeloApp.controller('termekekController', [
 		$scope.termeloOldal = function() {
 			$window.location.href = '/termelo';
 		}
+		
+		// promociok aktualizalasa:
+		$scope.aktualizalPromociok = function(){	// a mai datum szerint vizsgaljuk a promociokat, ha valamelyik promocio lejart, azt toroljuk
+			$http.post('/aktualizalPromociok/', {})
+			.success(function(data, status, headers, config) {
+			});
+		}
+		
+		$scope.aktualizalPromociok();
 
 		// tobb termek altalanos adatainak lekerese:
 		$scope.termekekBetoltes = function( opcio ) {
@@ -489,13 +498,14 @@ megrendeloApp.controller('termekekController', [
 						'0' : $scope.termeknevek[i],
 						'1' : $scope.rendeleseim[i][1],
 						'2' : $scope.statuszok[i],
-						'3' : $scope.datumok[i],
+						'3' : $scope.datumok[i].replace("-", ".").replace("-", "."),
 						'4' : $scope.rendeleseim[i][0],
 						'5' : $scope.rendeleseim[i][2],
 						'6' : $scope.penznemek[i],
 						'7' : $scope.mertekegysegek[i],
 						'8' : $scope.rendeleseim[i][2]*$scope.rendeleseim[i][1]
  					}
+					console.log($scope.rendelesek[i]);
 				}
 				
 					

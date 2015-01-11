@@ -24,6 +24,7 @@
 	<!-- Stylesheet -->
 	<link rel="stylesheet" type="text/css" href="css/altalanos.css">
 	<link rel="stylesheet" type="text/css" href="css/termelo.css">
+	<link rel="stylesheet" type="text/css" href="css/customBoxes.css">
 	
 	<!-- checklist-model -->
 	<script src="scripts/checklist-model.js"></script>
@@ -280,51 +281,66 @@
 					<div ng-controller="termekFeltoltesController" ng-init="termekekBetolt()">
 					<table class="table table-bordered table-hover table-condensed">
 						<tr style="font-weight: bold">
+							<td style="width:10%;display:none" >ID</td>
 							<td style="width:10%">Név</td>
 							<td style="width:10%">Leírás</td>
-							<td style="width:5%">Ár</td>
-						<!--	<td style="width:25%">Pénznem</td> -->
+							<td style="width:5%">Kategória</td> 
+							<td style="width:5%">Mértékegység</td> 
+							<td style="width:7%">Ár</td>
 							<td style="width:5%">Minimális <br /> rendelési <br /> mennyiség</td>
 							<td style="width:5%">   Fotó   </td>
 							<td style="width:5%">Készlet <br /> mennyiség</td>
-						<!--	<td style="width:5%">Mértékegység</td>  -->
-						<!--	<td style="width:25%">Kategória</td> -->
+							
 							<td style="width:10%">Módosítás</td>
 						</tr>
 						<tr ng-repeat="termek in termekek" >
-
-							<td style="display: none;">
-							<!-- modosithato nev (text with validation) -->
+	
+							<td style="display:none">
+							<!-- ID -->
 							<span editable-text="termek[0]" e-name="id" e-form="rowform" e-required>
-							  {{ termek[0]|| 'empty' }}
+							  {{ termek[0] }}
 							</span>
-							</td>
+							</td>	
 							
 							<td>
 							<!-- modosithato nev (text with validation) -->
 							<span editable-text="termek[1]" e-name="nev" e-form="rowform" onbeforesave="vizsgalNev($data, termek.id)" e-required>
-							  {{ termek[1]|| 'empty' }}
+							  {{ termek[1]|| '' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- modosithato leiras -->
 							<span editable-text="termek[2]" e-name="leiras" e-form="rowform" e-required>
-							  {{ termek[2] || 'empty' }}
+							  {{ termek[2] || '' }}
 							</span>
 							</td>
+							
+							<td>
+							<!-- kivalaszthato kategoria -->
+							<span editable-select="termek[7]" e-id="kategoria_{{termek[0]}}" e-name="kategoria" e-form="rowform"  e-onChange="" e-ng-options="k.value as k.text for k in kategoriak" e-required>
+								{{ termek[7] }}
+							</span>
+							</td>
+							
+							<td>
+							<!-- kivalaszthato mertekegyseg -->
+							<span editable-select="termek[8]" e-id="mertekegyseg_{{termek[0]}}" e-name="mertekegyseg" e-form="rowform"  e-onChange="" e-ng-options="m.value as m.text for m in mertekegysegek" e-required>
+								{{ termek[8] }}
+							</span>
+							</td>							
 							
 							<td>
 							<!-- modosithato ar -->
-							<span editable-number="termek[3]" e-name="ar" e-form="rowform" onbeforesave="vizsgalAr($data, termek.id)" e-required>
-							  {{ termek[3] || 'empty' }}
+							<span editable-text="termek[3]" e-name="ar" e-form="rowform" onbeforesave="vizsgalAr($data, termek.id)" e-required>
+							  {{ termek[3] || '' }} {{ penznem || '' }}
 							</span>
 							</td>
-							
+						
 							<td>
 							<!-- modosithato rendelesi mennyiseg -->
 							<span editable-number="termek[4]" e-name="rend_menny" e-form="rowform" onbeforesave="vizsgalRend_menny($data, termek.id)" e-required>
-							  {{ termek[4] || 'empty' }}
+							  {{ termek[4] || '' }}
 							</span>
 							</td>
 							
@@ -344,15 +360,9 @@
 							<td>
 							<!-- modosithato keszlet mennyiseg -->
 							<span editable-number="termek[6]" e-name="keszlet_menny" e-form="rowform" onbeforesave="vizsgalKeszlet_menny($data, termek.id)" e-required>
-							  {{ termek[6] || 'empty' }}
+							  {{ termek[6] || '0' }}
 							</span>
 							</td>
-							
-					<!--		<td>	 -->		
-							<!-- kivalaszthato mertekegyseg-->
-					<!--			<span editable-select="penznem" e-name="penznem" e-ng-options="p.value as p.text for p in penznemek">
-								{{ (penznemek)[0].text }} </span>
-							</td>-->
 							
 							<td style="white-space: nowrap">
 							<!-- form -->
@@ -361,15 +371,15 @@
 							  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
 								Mentés
 							  </button>
-							  <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default">
+							  <button type="button" ng-disabled="rowform.$waiting" data-ng-click="rowform.$cancel()" class="btn btn-default">
 								Mégse
 							  </button>
 								</div>
 							</form>
 							
 							<div class="buttons" ng-show="!rowform.$visible">
-							  <button class="btn btn-primary" ng-disabled="sorModosithato" ng-click="rowform.$show()">Módosít</button>
-							  <button class="btn btn-danger" ng-disabled="sorModosithato" ng-click="termekTorol($index)">Töröl</button>
+							  <button class="btn btn-primary" ng-disabled="sorModosithato" data-ng-click="rowform.$show()">Módosít</button>
+							  <button class="btn btn-danger" ng-disabled="sorModosithato" data-ng-click="termekTorol(termek[0]);" id="totolBtn">Töröl</button>
 							</div>  
 						  </td>
 						</tr>
@@ -388,25 +398,27 @@
 					<!-- table -->
 					<table class="table table-bordered table-hover table-condensed">
 						<tr style="font-weight: bold">
+							<td style="width:1%;opacity:0">ID</td> 
 							<td style="width:20%">Név</td>
 							<td style="width:10%">Régi ár</td>
 							<td style="width:10%">Promóciós ár</td>
 							<td style="width:5%">Pénznem</td>
 							<td style="width:10%">Promóció <br /> kezdeti dátuma </td>
 							<td style="width:10%">Promóció <br /> végső dátuma </td>
+							<td style="width:10%" ng-show="tableform.$visible"> </td>
 						</tr>
 						
 						<tr ng-repeat="szam in [0,1,2]" >
-							<td style="display: none;">   
+						    <td style="opacity:0">   
 							<!-- ID  -->
-							<span text="promtermekek[szam][0]" e-name="id{{szam}}" e-form="tableform">
-							  {{ promtermekek[szam][0]|| ' ' }}
+							<span text="promtermekek[szam][0]" name="id{{szam}}" id="id{{szam}}" e-form="tableform" >
+							  {{ promtermekek[szam][0] || ' ' }}
 							</span>
-							</td>
+							</td> 
 
 							<td>
 							<!-- termek neve -->
-							<span editable-select="promtermekek_regiadatai[szam][0]" e-id="nev{{szam}}" e-name="nev{{szam}}" e-form="tableform"  e-onChange="promtermek_aktualizal({{szam}})" e-ng-options="t.value as t.text for t in termekek" required>
+							<span editable-select="promtermekek_regiadatai[szam][1]" e-id="nev{{szam}}" e-name="nev{{szam}}" e-form="tableform"  e-onChange="promtermek_aktualizal({{szam}})" e-ng-options="t.value as t.text for t in termekek" >
 								{{ promtermekek_regiadatai[szam][1] }}
 								<!-- {{ showNev() }} -->
 							</span>
@@ -421,32 +433,38 @@
 							
 							<td>
 							<!-- modosithato uj ar -->
-							<span editable-text="promtermekek[szam][1]" e-name="ar{{szam}}" e-form="tableform"  onbeforesave="vizsgalUjAr($data, szam)" required> 
+							<span editable-text="promtermekek[szam][1]" e-name="ar{{szam}}" e-id="ar{{szam}}" e-form="tableform"  onbeforesave="vizsgalUjAr($data, szam)" > 
 							  {{ promtermekek[szam][1] || ' ' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- penznem (rogzitett) -->
-							<span text="promtermekek_regiadatai[szam][4]" name="penznem">
+							<span text="promtermekek_regiadatai[szam][4]" name="penznem" id="pid{{szam}}" >
 							  {{ promtermekek_regiadatai[szam][4] || ' ' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- modosithato kezdeti datum -->
-							<span editable-date="datumok[szam*2]" e-name="kezdeti_d{{szam}}" e-id="kezdeti_d{{szam}}" e-form="tableform"  required>
+							<span editable-date="datumok[szam*2]" e-name="kezdeti_d{{szam}}" e-id="kezdeti_d{{szam}}" e-form="tableform" onbeforesave="vizsgalkezdetiDatum($data,szam)" >
 							  {{ datumok[szam*2] || ' ' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- modosithato vegso datum -->
-							<span editable-date="datumok[szam*2+1]" e-name="vegso_d{{szam}}" e-form="tableform" onbeforesave="vizsgalDatum($data,szam)" required>
+							<span editable-date="datumok[szam*2+1]" e-name="vegso_d{{szam}}" e-form="tableform" onbeforesave="vizsgalDatum($data,szam);vizsgalKitoltes(szam)" >
 							  {{ datumok[szam*2+1] || ' ' }}
 							</span>
 							</td>
+							
+							<td ng-show="tableform.$visible">
+								<button type="button" id="torol_gomb{{szam}}" class="btn btn-primary" ng-click="torol(szam);tableform.$cancel()"> Töröl </button>	
+							</td>
 						</tr>
+						<div ng-show="tableform.$visible">						
+						</div>
 					</table>		
 
 					<div id="termek_ismetlodes" style="opacity:0">
@@ -461,7 +479,7 @@
 					</div>
 					<div class="btn-form" ng-show="tableform.$visible">
 						<button type="submit" ng-disabled="tableform.$waiting" class="btn btn-primary"> Mentés </button>
-						<button type="button" ng-disabled="tableform.$waiting" ng-click="tableform.$cancel() && termekekPromBetolt()" class="btn btn-default"> Mégse </button>
+						<button type="button" ng-disabled="tableform.$waiting" ng-click="tableform.$cancel();termekekPromBetolt()" class="btn btn-default"> Mégse </button>
 					</div>	
 							
 					</form> 
@@ -501,10 +519,9 @@
 								</span>
 							</td>
 							
-							
 							<td>
 								<span e-name="ar" e-form="megrendelesForm">
-								  {{ megrendeles[5] }} {{ megrendeles[6] }}\{{ megrendeles[7] }}
+								  {{ megrendeles[5] }} {{ megrendeles[6] }}/{{ megrendeles[7] }}
 								</span>
 							</td>
 							
