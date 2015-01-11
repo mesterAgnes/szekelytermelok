@@ -34,8 +34,13 @@
 			<button data-my-navigation data-ng-click="navigationStrip_Clicked('linkek')"    style="margin-top: 21px;" > Hasznos linkek </button>
 			<button data-my-navigation data-ng-click="navigationStrip_Clicked('regisztracio')"  style="margin-top: 21px;" > Regisztráció </button>
 			
+<<<<<<< HEAD
 			<div id="showLoginDiv" onmouseover="$('div#loginDiv').slideDown(0);$('button#loginButton').css('border-bottom-color', 'white');" onmouseout="$('div#loginDiv').slideUp(0)" >
 				<button data-my-navigation data-ng-click="navigationStrip_Clicked('bejelentkezes')"  style="float:right;margin-top:0" id="loginButton"> Bejelentkezés </button>
+=======
+			<div id="showLoginDiv" onmouseover="$('div#loginDiv').slideDown(10);$('button#loginButton').css('border-bottom-color', 'white');$('input#loginEmail').focus();" onmouseout="$('div#loginDiv').slideUp(0);" >
+				<button data-my-navigation data-ng-click="navigationStrip_Clicked('bejelentkezes')" id="loginButton" style="float:right;margin-top:0" > Bejelentkezés </button>
+>>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 				<div id="loginDiv" >
 					<div style="margin-top:20px" >
 						<div data-ng-controller="bejelentkezesController">
@@ -43,7 +48,11 @@
 						<table>
 							<tr>
 								<td>E-mail cím: </td>
+<<<<<<< HEAD
 								<td><input type="email" name="loginEmail" data-ng-model="log.loginEmail" id="loginEmail" placeholder="E-mail cím" required>
+=======
+								<td><input type="email" name="loginEmail" data-ng-model="log.loginEmail" id="loginEmail" placeholder="E-mail cím" autofocus required>
+>>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 								<span style="color:red" data-ng-show="bejelentkezesForm.loginEmail.$dirty && bejelentkezesForm.loginEmail.$invalid">
 								<span data-ng-show="bejelentkezesForm.loginEmail.$error.required"> *Az e-mail cím megadása kötelező.</span>
 								<span data-ng-show="bejelentkezesForm.loginEmail.$error.email"> *Érvénytelen e-mail cím!</span>
@@ -77,7 +86,7 @@
 				<h1>Hasznos linkek</h1>
 			</div>
 			
-			<div data-ng-show="navigationOptionSelected=='regisztracio'">
+			<div data-ng-show="navigationOptionSelected=='regisztracio'" >
 				
 				<h1>Regisztráció</h1>
 				

@@ -36,6 +36,26 @@ conf = config.Config()
 def index():
 	return app.send_static_file('login.html')
 
+@app.route('/aktualizalPromociok/', methods = ['POST'])
+def aktualizalPromociok():
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
+	cursor = cnx.cursor()
+	success = True
+	
+	torles = ("DELETE FROM Promociok WHERE Periodus_v < CURDATE()")
+	try:
+		cursor.execute(torles)
+		cnx.commit()
+	except:
+		cnx.rollback()
+		success = False
+		
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({ 'success': success })
+	
+	
 @app.route('/register/', methods = ['POST'])
 def register():
 	adatok = json.loads(request.data)
@@ -709,6 +729,8 @@ def rendeles():
 	
 	for termek in termekek:
 		# berakjuk a termekeket a Megrendelesek tablaba
+<<<<<<< HEAD
+=======
 		add_rend = ("INSERT INTO Megrendelesek "
 					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
 				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
@@ -739,6 +761,7 @@ def rendeles():
 	
 	for termek in termekek:
 		# berakjuk a termekeket a Megrendelesek tablaba
+>>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 		add_rend = ("INSERT INTO Megrendelesek "
 					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
 				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
@@ -752,6 +775,39 @@ def rendeles():
 			cnx.close()
 			return jsonify({'success': False})	
 
+<<<<<<< HEAD
+# 2. nem promocios termekek lekerdezese ( az ar miatt kell szetvalasztani oket):
+	select_termek = ("SELECT k.T_ID AS Id, Mennyiseg, Ar "
+					" FROM Kosarak k, Termekek t "
+					" WHERE k.T_ID = t.T_ID AND k.T_ID NOT IN ( SELECT T_ID FROM Promociok ) AND k.SZ_ID = %s")	
+	try:
+		cursor.execute( select_termek, [session['SZ_ID']] )
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})	
+	
+	termekek = cursor.fetchall()
+	cnx.commit()
+	
+	for termek in termekek:
+		# berakjuk a termekeket a Megrendelesek tablaba
+		add_rend = ("INSERT INTO Megrendelesek "
+					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
+				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
+		data_rend = (termek[1], adatok['datum'], termek[2], termek[0], session['SZ_ID'])
+		try:
+			cursor.execute( add_rend, data_rend )
+			cnx.commit()
+		except:
+			cnx.rollback()
+			cursor.close()
+			cnx.close()
+			return jsonify({'success': False})	
+
+=======
+>>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 			
 	# toroljuk a kosarbol az illeto szemely osszes termeket
 	delete_kosar = ("DELETE FROM Kosarak WHERE SZ_ID = %s ")

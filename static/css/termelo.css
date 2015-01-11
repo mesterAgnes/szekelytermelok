@@ -4,9 +4,3 @@ div#logoDiv {
 img#logo {
 	width: 100px;
 }
-input.clicks{
-	visibility: hidden;
-}
-input#clickProfil{
-	visibility: hidden;
-}

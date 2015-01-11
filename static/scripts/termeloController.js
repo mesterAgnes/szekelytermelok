@@ -26,11 +26,20 @@ termeloApp.controller('loginSwitchDivController', [
 		};
 		$scope.megrendeloOldal = function() {
 			$window.location.href = '/megrendelo';
+		}	
+		$scope.aktualizalPromociok = function(){	// a mai datum szerint vizsgaljuk a promociokat, ha valamelyik promocio lejart, azt toroljuk
+			$http.post('/aktualizalPromociok/', {})
+			.success(function(data, status, headers, config) {
+			});
 		}
 		
+<<<<<<< HEAD
 		$scope.aktualizalPromociok = function(){
 		;
 		}
+=======
+		$scope.aktualizalPromociok();
+>>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 	}
 
 ]);

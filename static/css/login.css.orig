@@ -10,4 +10,8 @@ div#showLoginDiv{
 	position:absolute;
 	top:21px;
 	right:50px;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
