@@ -23,7 +23,7 @@ nav#navigationStrip1{
 	position:fixed;
 	z-index:1;
 	
-	height:50px;	
+	height:60px;	
 	width:90%;
 	//text-align:center;
 	//box-shadow:0 5px 3px 1px #d3d3d3;
@@ -33,7 +33,7 @@ nav#navigationStrip1{
 nav#navigationStrip1 button{
 	width:130px;
 	height:40px;
-	margin-top:11px;
+	margin-top:20px;
 	background:white;
 	border:1px solid #696969;
 	//border-bottom-color:rgba(0,0,0,0);
@@ -55,14 +55,10 @@ nav#navigationStrip1 button#selected{
 	border:1px solid #696969;
 	border-bottom-color:white;
 }
-span#felhasznaloDiv{
-	display:block;
-	position:absolute;
-	right:10px;
-	top:50%;
+div#felhasznaloDiv{
+	text-align:center;	
 	letter-spacing:2px;
-	font:800 1em calibri;
-	
+	font:800 1em calibri;	
 }
 nav#navigationStrip2{
 	position:fixed;	
@@ -117,16 +113,98 @@ div#innerMainDiv{
 	height:100%;
 	border:1px solid white;
  }
- div#termekekContainer{
+div#termekekContainer{
 	width:100%;
 	height:100%;
 	//border:1px solid red;
  }
- 
  footer#footer1{
 	text-align:center;
  }
  h1.uzenetH1{
 	font:1.1em;
 	margin: 2% 2% 2% 5%;
+}
+
+div#logoutBtn{
+	background-image:url('../kepek/logout.png');	
+	background-repeat:no-repeat;
+	background-size:contain;
+	width:32px;
+	height:32px;	
+}
+div#logoutBtn div#logoutBtnOverlay{
+	width:100%;
+	height:100%;
+	border-radius:5px;
+	background:rgba(0,0,0,0.1);
+	transition:background 0.3s;
+}
+div#logoutBtn div#logoutLbl{
+	position:absolute;
+	right:0;
+	top:32px;
+	font-family:calibri;
+	font-weight:800;
+	font-size:0.8em;
+	color:red;
+	letter-spacing:1px;
+	
+	opacity:0;
+	transition:all 0.3s;
+}
+div#logoutBtn div#logoutBtnOverlay:hover{
+	background:rgba(0,0,0,0);
+	cursor:pointer;
+}
+div#logoutBtn div#logoutBtnOverlay:hover + div#logoutLbl{
+	opacity:1;
+}
+/*changePage radios*/
+input[type="radio"].changePage{
+	display:none;		
+}
+div.changePage{
+	display:table-cell;
+	vertical-align:middle;
+	cursor: pointer;      		
+    
+	width:130px;
+	height:30px;
+	margin:0;
+	padding:0px 10px;	
+	text-align:center;
+	    
+	font:500 1em calibri;			
+	letter-spacing:2px;
+	font-family:calibri;
+	font-weight:400;
+	color:black;			
+	
+	background:linear-gradient(to bottom right,rgb(200,200,200),white);	
+	border:1px solid #696969;		
+	
+	opacity:0.5;	
+	transition:all 0.3s;
+}
+div.changePage:hover{
+	background:linear-gradient(to bottom right,white,rgb(200,200,200));	
+}
+div#actualPage{
+	opacity:1;
+	color:rgb(0,255,0);
+    background:linear-gradient(to bottom right,rgb(80,80,80),black);	
+	color:white;
+	font-weight:800;
+	pointer-events:none;
+}
+div#actualPage:hover{
+	background:linear-gradient(to bottom right,black,rgb(80,80,80));	
+}
+div.pageLeft{
+	border-radius:5px 0 0 0px;
+	border-right:none;
+}
+div.pageRight{
+	border-radius:0 5px 0px 0;
 }

@@ -43,25 +43,57 @@
 		<nav id="navigationStrip1">   <!-- menu -->
 			<div style="float:left;width:16.666%;height:10px"></div>
 			<div style="float:left">
-				<button id="kezdolap" data-my-navigaton data-ng-click="navigationStrip1_Clicked('kezdolap')" > Kezdőlap </button>
-				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('projekt')" > A projektről </button>
-				<button data-my-navigaton data-ng-click="navigationStrip1_Clicked('linkek')"> Hasznos linkek </button>
-				<button data-my-navigaton data-ng-click="logout()"> Kijelentkezés </button>
-				<button data-my-navigaton data-ng-click="kiirKosar()"> Kosár </button>
-				<button data-my-navigaton data-ng-show="termelo == 1" data-ng-click="termeloOldal()">Termelő oldal</button>		
-				
-				<span id = "felhasznaloDiv"> Üdv, {{nev}}! </span>
+				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('kezdolap')" id="kezdolap"  > Kezdőlap </button>
+				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('projekt')" > A projektről </button>
+				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('linkek')"> Hasznos linkek </button>
+				<button data-my-navigation data-ng-click="kiirKosar()"> Kosár </button>
 			</div>
-			<div style="clear:both"></div>
+			
+			<div data-ng-show="termelo == 1" > <!-- Ha a felhasznalo termelo is, azaz 2 szerepkore van, akkor hozzaferese van a radiogombokhoz, amivel szerepet valthat -->
+				<div style="float:right;position:relative;top:28px;">
+					<div data-ng-click="logout()" id="logoutBtn">
+						<div id="logoutBtnOverlay"></div>
+						<div id="logoutLbl">Kijelentkezés</div>
+					</div>
+				</div>
+				<div style="position:absolute;bottom:-1px;right:35px;">
+					<div style="width:100%;height:50%;position:relative;">
+						<div id = "felhasznaloDiv"> {{ nev }} </div>																
+					</div>
+					<div style="width:100%;height:50%">		
+						<div style="float:left">		<!-- Gomb a termelo oldalra -->
+							<div class='changePage pageLeft' data-ng-click="termeloOldal()" >Termelő</div>					
+						</div>
+						<div style="float:left">		<!-- A megrendelo oldal az aktualis oldal -->
+							<div class='changePage pageRight' id="actualPage"  >Megrendelő</div>
+						</div>						
+						<div style="clear:both"></div>
+					</div>
+				</div>												
+				<div style="clear:both"></div>
+			</div>
+			
+			<div data-ng-show="termelo != 1" >	<!-- Ha a felhasznalonak 1 szerepkore van, akkor csak a neve es a Kijelentkezes gomb lathato -->
+				<div style="float:right;position:relative;top:28px;">
+					<div data-ng-click="logout()" id="logoutBtn">
+						<div id="logoutBtnOverlay"></div>
+						<div id="logoutLbl">Kijelentkezés</div>
+					</div>
+				</div>
+				<div style="position:absolute;bottom:5px;right:35px;">
+					<div id = "felhasznaloDiv"> {{ nev }} </div>						
+				</div>												
+				<div style="clear:both"></div>
+			</div>
 		</nav>
 
 		
 		<div id="mainDiv">
 			<nav id="navigationStrip2">   <!-- oldalso menu -->
-				<button data-my-navigaton data-ng-click="setRendelesProfil(false); navigationStrip2_Clicked('m_profilom');"> Profilom </button> 
-				<button data-my-navigaton data-ng-click="termekekBetoltes('alt')"> Termékek </button> <br>
-				<button data-my-navigaton data-ng-click="termekekBetoltes('promo')" > Promóciós termékek </button> <br>
-				<button data-my-navigaton data-ng-click="rendeleseimBetoltes()" > Rendeléseim </button> <br>
+				<button data-my-navigation data-ng-click="setRendelesProfil(false); navigationStrip2_Clicked('m_profilom');"> Profilom </button> 
+				<button data-my-navigation data-ng-click="termekekBetoltes('alt')"> Termékek </button> <br>
+				<button data-my-navigation data-ng-click="termekekBetoltes('promo')" > Promóciós termékek </button> <br>
+				<button data-my-navigation data-ng-click="rendeleseimBetoltes()" > Rendeléseim </button> <br>
 			</nav>
 		
 			<div id="innerMainDiv" >
@@ -238,7 +270,7 @@
 				<div id='termekReszletek'>	<!-- Egy termek reszletes megjelenitese -->										
 					<div style="position:absolute;top:5px;right:5px">
 						<img class="miniImg" src="kepek/closeW2.png" width=30
-						onclick="$(this).parents('#termekReszletek').hide(300);" />
+						onclick="$('body div#overlay').remove();$(this).parents('#termekReszletek').hide(300);" />
 					</div>
 					<div class="leftArr">
 						<img class="miniImg" src='./kepek/left.png' width=50 height=50 data-ng-click="(navigationOptionSelected == 'termekek')?showPrevTermek('alt'):showPrevTermek('prom')" />
@@ -250,20 +282,11 @@
 						<div id="termekReszletekInnerKep" ></div>
 						<div style="float:left;margin-left:50px">
 							<h2 id="termekNev" > </h2><!-- Termek neve -->
+							<div class="termekReszletekInnerSzoveg" id="termekKategoria"></div>
 							<div class="termekReszletekInnerSzoveg" id="termekLeirasID"></div>
-							
-							<div class="termekReszletekInnerKosarba">
-								<input type="number" class="kosarba" min="1" name="darab" value="1" /><p id="mertekegyseg"></p>
-								<button type="submit" data-ng-click="(navigationOptionSelected == 'termekek')?kosarba('alt'):kosarba('promo');" class="kosarba">
-									KOSÁRBA
-								</button>
-							</div>
+
 							<div class="termekReszletekInnerTablazat">
 								<table class="termekAdat">								
-									<tr>
-										<th>Kategória:</th>
-										<td id="termekKategoriaTd"></td>
-									</tr>
 									<tr>
 										<th>Termelő:</th>
 										<td id="termekTermeloTd"></td>
@@ -281,7 +304,13 @@
 										<td id="termekArTd"></td>
 									</tr>
 								</table>
-							</div>															
+							</div>	
+							<div class="termekReszletekInnerKosarba">
+								<input type="number" class="kosarba" min="1" name="darab" value="1" /><p id="mertekegyseg"></p>
+								<button type="submit" data-ng-click="(navigationOptionSelected == 'termekek')?kosarba('alt'):kosarba('promo');" class="kosarba">
+									KOSÁRBA
+								</button>
+							</div>							
 						</div>											
 					</div>						
 				</div>
@@ -302,8 +331,8 @@
 									Ár: {{termek["2"] + " " + termek["5"]}}
 								</div>
 							</div>
-							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'], 'alt')"></img>
-							<img class="imgOnImg" src="./kepek/ribbonProm.png" data-ng-show="termek['7'] && termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'], 'alt')"></img>
+							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="termek['6'] == 0" data-ng-click="showTermekReszletImgClick(termek['0'], 'alt')"></img>
+							<img class="imgOnImg" src="./kepek/ribbonProm.png" data-ng-show="termek['7'] && (termek['6']!=0)" data-ng-click="showTermekReszletImgClick(termek['0'], 'alt')"></img>
 						</div>
 					</div>				
 				</div>
@@ -323,11 +352,11 @@
 									Termelő: {{termek["4"]}}
 								</div>
 								<div class="termekAr">
-									Ár: {{termek["2"] + " " + termek["5"]}}
+									Ár: {{termek["2"] + " " + termek["5"] }}
 								</div>
 							</div>
-							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="!termek['6']" data-ng-click="showTermekReszletImgClick(termek['0'], 'promo')"></img>
-							<img class="imgOnImg" src="./kepek/ribbonProm.png"  data-ng-click="showTermekReszletImgClick(termek['0'], 'promo')"></img>
+							<img class="imgOnImg" src="./kepek/ribbonNone.png" data-ng-show="termek['6'] == 0" data-ng-click="showTermekReszletImgClick(termek['0'], 'promo')"></img>
+							<img class="imgOnImg" src="./kepek/ribbonProm.png" data-ng-show="termek['6'] != 0" data-ng-click="showTermekReszletImgClick(termek['0'], 'promo')"></img>
 						</div>
 					</div>				
 				</div>

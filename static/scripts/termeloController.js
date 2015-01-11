@@ -8,9 +8,10 @@ termeloApp.controller('loginSwitchDivController', [
     '$scope', '$http', '$window',                             
 	function loginSwitchDivController($scope, $http, $window) {
 	
+		$scope.megrendelo =  localStorage.getItem('Megrendelo');	// lekerjuk a felhasznalo termeloi statuszat(0 vagy 1), hogy tudjuk, megrendelokent is van-e szerepe	
 		$scope.logoid = localStorage.getItem('ID');
 		$scope.nev = localStorage.getItem('Nev');
-		$scope.megrendelo = localStorage.getItem('Megrendelo');
+
 		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
 		jQuery( "button#kezdolap" ).attr("id","selected");
 		
@@ -25,7 +26,14 @@ termeloApp.controller('loginSwitchDivController', [
 		};
 		$scope.megrendeloOldal = function() {
 			$window.location.href = '/megrendelo';
+		}	
+		$scope.aktualizalPromociok = function(){	// a mai datum szerint vizsgaljuk a promociokat, ha valamelyik promocio lejart, azt toroljuk
+			$http.post('/aktualizalPromociok/', {})
+			.success(function(data, status, headers, config) {
+			});
 		}
+		
+		$scope.aktualizalPromociok();
 	}
 
 ]);
@@ -259,6 +267,7 @@ termeloApp.controller('termekPromFeltoltesController', [ '$http', '$scope', '$fi
 			.success(function(data, status, headers, config) {
 				$scope.termekek = data['termekek'];
 				$scope.promtermekek = data['promtermekek'];
+				console.log($scope.promtermekek);
 				$scope.datumok = data['datumok'];
 				$scope.penznemek = data['penznemek'];
 				$scope.promtermekek_regiadatai = data['promtermekek_regiadatai']
@@ -413,12 +422,11 @@ termeloApp.controller('UzenetKuldesCtrl', function($scope, $filter, $http) {
 });
 
 
-termeloApp.directive('myNavigaton', function() {
+termeloApp.directive('myNavigation', function() {
     return {
         restrict: 'A',
         link: function(scope, elm, attrs) {            
 			elm.bind("click", function () {
-			alert("szia");
 				jQuery("nav#navigationStrip1 button").attr("id","");
 				jQuery("nav#navigationStrip2 button").attr("id","");
 				

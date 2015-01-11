@@ -38,21 +38,54 @@
 	<header>
 	</header>
 
-	<div id="bodyDiv1" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
+	<div id="bodyDiv1" data-ng-controller="loginSwitchDivController" >  <!-- dontes -->
 		
 		<nav id="navigationStrip1">   <!-- menu -->
 			<div style="float:left;width:16.666%;height:10px"></div>
 			<div style="float:left">
-				<button data-my-navigation id="kezdolap" data-ng-click="navigationStrip1_Clicked('kezdolap')" > Kezdőlap </button>
+				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('kezdolap')" id="kezdolap"  > Kezdőlap </button>
 				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('projekt')"> A projektről </button>
 				<button data-my-navigation data-ng-click="navigationStrip1_Clicked('linkek')"> Hasznos linkek </button>
-				<button data-my-navigation data-ng-click="logout()"> Kijelentkezés </button>
-				<button data-my-navigation data-ng-show="megrendelo == 1" data-ng-click="megrendeloOldal()">Megrendelő oldal</button>
+			</div>	
 			
-				<span id = "felhasznaloDiv"> Üdv, {{nev}}! </span>
+			<div data-ng-show="megrendelo == 1" > <!-- Ha a felhasznalo megrendelo is, azaz 2 szerepkore van, akkor hozzaferese van a radiogombokhoz, amivel szerepet valthat -->
+				<div style="float:right;position:relative;top:28px;">
+					<div data-ng-click="logout()" id="logoutBtn">
+						<div id="logoutBtnOverlay"></div>
+						<div id="logoutLbl">Kijelentkezés</div>
+					</div>
+				</div>
+				<div style="position:absolute;bottom:-1px;right:35px;">
+					<div style="width:100%;height:50%;position:relative;">
+						<div id = "felhasznaloDiv"> {{ nev }} </div>																
+					</div>
+					<div style="width:100%;height:50%">
+						<div style="float:left">		<!-- Az aktualis oldal a termelo oldal -->
+							<div class='changePage pageLeft' id="actualPage"   >Termelő</div>					
+						</div>
+						<div style="float:left">		<!-- Gomb a megrendelo oldalra -->
+							<div class='changePage pageRight' data-ng-click="megrendeloOldal()" >Megrendelő</div>
+						</div>						
+						<div style="clear:both"></div>
+					</div>
+				</div>												
+				<div style="clear:both"></div>
 			</div>
-			<div style="clear:both"></div>
+			
+			<div data-ng-show="megrendelo != 1" >	<!-- Ha a felhasznalonak 1 szerepkore van, akkor csak a neve es a Kijelentkezes gomb lathato -->
+				<div style="float:right;position:relative;top:28px;">
+					<div data-ng-click="logout()" id="logoutBtn">
+						<div id="logoutBtnOverlay"></div>
+						<div id="logoutLbl">Kijelentkezés</div>
+					</div>
+				</div>
+				<div style="position:absolute;bottom:5px;right:35px;">
+					<div id = "felhasznaloDiv"> {{ nev }} </div>						
+				</div>												
+				<div style="clear:both"></div>
+			</div>
 		</nav>
+		
 		
 		<div id="mainDiv">
 			<nav id="navigationStrip2">   <!-- oldalso menu -->

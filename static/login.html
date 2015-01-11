@@ -16,6 +16,7 @@
 	
 	<!-- Stylesheet -->
 	<link rel="stylesheet" type="text/css" href="css/altalanos.css">
+	<link rel="stylesheet" type="text/css" href="css/login.css">
 	
 	<script src="lib/md5.js"></script>
 </head>
@@ -28,11 +29,39 @@
 	<div id="bodyDiv1" data-ng-controller="loginSwitchDivController">  <!-- dontes -->
 
 		<nav id="navigationStrip1">   <!-- menu -->
-			<button data-my-navigation data-ng-click="navigationStrip_Clicked('kezdolap')" id="kezdolap"> Kezdőlap </button>
-			<button data-my-navigation data-ng-click="navigationStrip_Clicked('projekt')" id="projekt"> A projektről </button>
-			<button data-my-navigation data-ng-click="navigationStrip_Clicked('linkek')"  id="linkek"> Hasznos linkek </button>
-			<button data-my-navigation data-ng-click="navigationStrip_Clicked('regisztracio')" id="regisztracio"> Regisztráció </button>
-			<button data-my-navigation data-ng-click="navigationStrip_Clicked('bejelentkezes')" id="bejelentkezes" > Bejelentkezés </button>
+			<button data-my-navigation  data-ng-click="navigationStrip_Clicked('kezdolap')" id="kezdolap" style="margin-top: 21px;" > Kezdőlap </button>
+			<button data-my-navigation  data-ng-click="navigationStrip_Clicked('projekt')"  style="margin-top: 21px;" > A projektről </button>
+			<button data-my-navigation data-ng-click="navigationStrip_Clicked('linkek')"    style="margin-top: 21px;" > Hasznos linkek </button>
+			<button data-my-navigation data-ng-click="navigationStrip_Clicked('regisztracio')"  style="margin-top: 21px;" > Regisztráció </button>
+			
+			<div id="showLoginDiv" onmouseover="$('div#loginDiv').slideDown(10);$('button#loginButton').css('border-bottom-color', 'white');$('input#loginEmail').focus();" onmouseout="$('div#loginDiv').slideUp(0);" >
+				<button data-my-navigation data-ng-click="navigationStrip_Clicked('bejelentkezes')" id="loginButton" style="float:right;margin-top:0" > Bejelentkezés </button>
+				<div id="loginDiv" >
+					<div style="margin-top:20px" >
+						<div data-ng-controller="bejelentkezesController">
+						<form method="POST" id="bejelentkezesForm" >
+						<table>
+							<tr>
+								<td>E-mail cím: </td>
+								<td><input type="email" name="loginEmail" data-ng-model="log.loginEmail" id="loginEmail" placeholder="E-mail cím" autofocus required>
+								<span style="color:red" data-ng-show="bejelentkezesForm.loginEmail.$dirty && bejelentkezesForm.loginEmail.$invalid">
+								<span data-ng-show="bejelentkezesForm.loginEmail.$error.required"> *Az e-mail cím megadása kötelező.</span>
+								<span data-ng-show="bejelentkezesForm.loginEmail.$error.email"> *Érvénytelen e-mail cím!</span>
+							</tr>
+							<tr> 
+								<td>Jelszó: </td>
+								<td><input type="password" name="loginPass" data-ng-model="log.loginPass" id="loginPass" placeholder="Jelszó"  required>
+								<span style="color:red" data-ng-show="bejelentkezesForm.loginPass.$dirty && bejelentkezesForm.loginPass.$invalid">
+								<span data-ng-show="bejelentkezesForm.loginPass.$error.required"> *A jelszó megadása kötelező.</span>
+								</span></td>
+							</tr>
+						</table>
+						<div style="text-align:center;" ><button ng-click="login()">Bejelentkezés</button></div>
+						</form>
+						</div> 
+					</div>
+				</div>		
+			</div>
 		</nav>
 
 		<div id="mainDiv">
@@ -48,7 +77,7 @@
 				<h1>Hasznos linkek</h1>
 			</div>
 			
-			<div data-ng-show="navigationOptionSelected=='regisztracio'">
+			<div data-ng-show="navigationOptionSelected=='regisztracio'" >
 				
 				<h1>Regisztráció</h1>
 				
@@ -123,32 +152,7 @@
 			<div data-ng-show="navigationOptionSelected=='regisztracioSuccess'">
 				<h1>Sikeres regisztráció. A bejelentkezéshez kattintson a Bejelentkezés menüpontra.</h1>
 			</div>
-			
-			<div data-ng-show="navigationOptionSelected=='bejelentkezes'">
-				<h1>Bejelentkezés</h1>
-				
-				<div data-ng-controller="bejelentkezesController">
-				<form method="POST" id="bejelentkezesForm" >
-				<table>
-						<tr>
-							<td>E-mail cím: </td>
-							<td><input type="email" name="loginEmail" data-ng-model="log.loginEmail" id="loginEmail" placeholder="E-mail cím" required>
-							<span style="color:red" data-ng-show="bejelentkezesForm.loginEmail.$dirty && bejelentkezesForm.loginEmail.$invalid">
-							<span data-ng-show="bejelentkezesForm.loginEmail.$error.required"> *Az e-mail cím megadása kötelező.</span>
-							<span data-ng-show="bejelentkezesForm.loginEmail.$error.email"> *Érvénytelen e-mail cím!</span>
-						</tr>
-						<tr> 
-							<td>Jelszó: </td>
-							<td><input type="password" name="loginPass" data-ng-model="log.loginPass" id="loginPass" placeholder="Jelszó"  required>
-							<span style="color:red" data-ng-show="bejelentkezesForm.loginPass.$dirty && bejelentkezesForm.loginPass.$invalid">
-							<span data-ng-show="bejelentkezesForm.loginPass.$error.required"> *A jelszó megadása kötelező.</span>
-							</span></td>
-						</tr>
-				</table>
-				<button ng-click="login()">Bejelentkezés</button>
-				</form>
-				</div> 
-			</div>
+						
 			
 		</div>
 			

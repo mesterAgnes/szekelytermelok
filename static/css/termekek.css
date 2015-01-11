@@ -109,7 +109,7 @@ div#termekReszletek{
 	display:none;	
 	
 	position:fixed;				
-	z-index:1;
+	z-index:3;
 	margin-top:auto;
 	margin-bottom:auto;
 	top:0;
@@ -202,7 +202,7 @@ h2#termekNev{
 	font-family:"Arial Black", Gadget, sans-serif;
 }
 div.termekReszletekInnerTablazat{
-	margin-top: 10%;
+	margin-top: 5%;
 }
 table.termekAdat{
 	border-collapse:collapse;	
@@ -229,11 +229,16 @@ table.termekAdat td#ujAr, table.termekAdat th#ujAr{
 	font-size:1.1em;
 	font-weight:800;
 }
+table.termekAdat td#promDatum, table.termekAdat th#promDatum{
+	font-style:italic;
+	font-size:1.1em;
+	font-weight:800;
+}
 div.termekReszletekInnerSzoveg{	
 	font-size:1em;
 	color:white;
 	font-family:calibri;
-	line-height:40px;
+	line-height:25px;
 }
 div.termekReszletekInnerKosarba{
 	font-size:1em;

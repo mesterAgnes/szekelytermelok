@@ -7,9 +7,12 @@ from datetime import datetime
 	 
 import os
 import logging
-import mysql.connector
 import smtplib
 #from smtplib import SMTP_SSL
+
+import config
+import mysql.connector
+
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = 'development key'
@@ -24,16 +27,40 @@ app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-		
+
+
+conf = config.Config()
+
+		   
 @app.route('/')
 def index():
 	return app.send_static_file('login.html')
 
+@app.route('/aktualizalPromociok/', methods = ['POST'])
+def aktualizalPromociok():
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
+	cursor = cnx.cursor()
+	success = True
+	
+	torles = ("DELETE FROM Promociok WHERE Periodus_v < CURDATE()")
+	try:
+		cursor.execute(torles)
+		cnx.commit()
+	except:
+		cnx.rollback()
+		success = False
+		
+	cursor.close()
+	cnx.close()
+	
+	return jsonify({ 'success': success })
+	
+	
 @app.route('/register/', methods = ['POST'])
 def register():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
 	cursor = cnx.cursor()
 	table = ''
 	
@@ -100,7 +127,7 @@ def uploaded_file(filename):
 def termekfeltoltes():
 	adatok = json.loads(request.data)
 	# logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
 	cursor = cnx.cursor()
 	string = ("INSERT INTO Termekek "
 				   "(Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, SZ_ID)"
@@ -153,106 +180,13 @@ def termek_upload():
 def uploaded_logo_file(t_filename):
     return send_from_directory(app.config['UPLOAD_FOLDER2'],
                                t_filename)
-							   
-@app.route('/termekbetoltes/', methods = ['POST'])	
-def termekbetoltes():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
-	cursor = cnx.cursor()
-
-	select_termekek = ("SELECT T_ID, Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny FROM Termekek WHERE SZ_ID = %s")
-	select_penznemek = ("SELECT * FROM Penznemek")
-	select_mertekegysegek = ("SELECT * FROM Mertekegysegek")
-	select_kategoriak = ("SELECT * FROM Kategoriak")
-	
-	cursor.execute(select_termekek, [session['SZ_ID']])
-	cnx.commit()
-	termekek = cursor.fetchall()
-	# logging.warning(termekek)
-	
-	cursor.execute(select_penznemek)
-	cnx.commit()
-	ertekek = cursor.fetchall()
-	penznemek = []
-	for x in ertekek:		
-		penznemek.append({'value':x[0], 'text':x[1]})
-	# logging.warning(penznemek)
-	
-	cursor.execute(select_mertekegysegek)
-	cnx.commit()
-	ertekek2 = cursor.fetchall()
-	mertekegysegek = []
-	for r in ertekek2:
-		mertekegysegek.append({'value':r[0], 'text':r[1]})
-	# logging.warning(mertekegysegek)
-	
-	cursor.execute(select_kategoriak)
-	cnx.commit()
-	ertekek3 = cursor.fetchall()
-	kategoriak = []
-	for r in ertekek3:
-		kategoriak.append({'value':r[0], 'text':r[1]})
-	# logging.warning(kategoriak)
-	
-	cursor.close()
-	cnx.close()
-	return jsonify({'termekek':termekek, 'penznemek':penznemek, 'mertekegysegek':mertekegysegek, 'kategoriak':kategoriak})
-	
-
-@app.route('/mindentermek/', methods = ['POST'])	
-def mindentermek():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
-	cursor = cnx.cursor()
-
-	# a promocios termekek lekerdezese: 
-	select_promok = ("SELECT t.T_ID, t.Nev, pr.Ar, Kep, sz.Nev, Penznem, Keszlet_menny "
-					"FROM Termekek t, Szemelyek sz, Penznemek p, Promociok pr "
-					"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and pr.T_ID=t.T_ID and t.T_ID IN (SELECT T_ID FROM promociok)")
-	cursor.execute(select_promok)
-	cnx.commit()
-	promok = cursor.fetchall()	
-		
-	# a NEM promocios termekek lekerdezese: 
-	select_nempromok =  ("SELECT T_ID, t.Nev, t.Ar, t.Kep, sz.Nev, Penznem, Keszlet_menny "
-						"FROM Termekek t, Szemelyek sz, Penznemek p "
-						"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and T_ID NOT IN (SELECT T_ID FROM Promociok)")
-	
-	cursor.execute(select_nempromok)
-	cnx.commit()
-	termekek = cursor.fetchall()
-	
-	logging.warning(promok)
-	logging.warning(termekek)
-	
-	cursor.close()
-	cnx.close()
-		
-	return jsonify({'termekek':termekek, 'promok':promok}) # minden termek, promociosak es nem promociosak
-
-	
-@app.route('/mindenpromtermek/', methods = ['POST'])	
-def mindenpromtermek():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
-	cursor = cnx.cursor()
-
-	select_termekek = ( "SELECT t.T_ID, t.Nev, pr.Ar, t.Kep, sz.Nev, Penznem, Keszlet_menny "
-						"FROM Termekek t, Szemelyek sz, Penznemek p, Promociok pr "
-						"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and pr.T_ID=t.T_ID and t.T_ID in (SELECT T_ID FROM promociok)")
-	
-	cursor.execute(select_termekek)
-	cnx.commit()
-	termekek = cursor.fetchall()
-	logging.warning(termekek)
-	cursor.close()
-	cnx.close()
-	return jsonify({'termekek':termekek})	
-	
 	
 def date_handler(obj):
     return obj.isoformat() if hasattr(obj, 'isoformat') else obj
 	
 @app.route('/rendeleseim/', methods = ['POST'])	
 def rendeleseim():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	rendelesek = ( "SELECT T_ID, Mennyiseg, Statusz, Ar FROM Megrendelesek "
@@ -317,7 +251,7 @@ def rendeleseim():
 
 @app.route('/megrendeleseim/', methods = ['POST'])	
 def megrendeleseim():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	logging.warning(session['SZ_ID'])
 	rendelesek = ("SELECT m.M_ID, m.Mennyiseg, m.Statusz,m.Ar "
@@ -396,7 +330,7 @@ def megrendeleseim():
 def megrendelesMent():
 	adatok = json.loads(request.data)
 	
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
 	cursor = cnx.cursor()
 	
 	if (adatok['statusz']==0):
@@ -419,11 +353,108 @@ def megrendelesMent():
 	
 	return jsonify({'success': True})	
 	
+	
+	
+@app.route('/termekbetoltes/', methods = ['POST'])	
+def termekbetoltes():
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
+	cursor = cnx.cursor()
+
+	select_termekek = ("SELECT T_ID, Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny FROM Termekek WHERE SZ_ID = %s")
+	select_penznemek = ("SELECT * FROM Penznemek")
+	select_mertekegysegek = ("SELECT * FROM Mertekegysegek")
+	select_kategoriak = ("SELECT * FROM Kategoriak")
+	
+	cursor.execute(select_termekek, [session['SZ_ID']])
+	cnx.commit()
+	termekek = cursor.fetchall()
+	# logging.warning(termekek)
+	
+	cursor.execute(select_penznemek)
+	cnx.commit()
+	ertekek = cursor.fetchall()
+	penznemek = []
+	for x in ertekek:		
+		penznemek.append({'value':x[0], 'text':x[1]})
+	# logging.warning(penznemek)
+	
+	cursor.execute(select_mertekegysegek)
+	cnx.commit()
+	ertekek2 = cursor.fetchall()
+	mertekegysegek = []
+	for r in ertekek2:
+		mertekegysegek.append({'value':r[0], 'text':r[1]})
+	# logging.warning(mertekegysegek)
+	
+	cursor.execute(select_kategoriak)
+	cnx.commit()
+	ertekek3 = cursor.fetchall()
+	kategoriak = []
+	for r in ertekek3:
+		kategoriak.append({'value':r[0], 'text':r[1]})
+	# logging.warning(kategoriak)
+	
+	cursor.close()
+	cnx.close()
+	return jsonify({'termekek':termekek, 'penznemek':penznemek, 'mertekegysegek':mertekegysegek, 'kategoriak':kategoriak})
+
+	
+
+	
+@app.route('/mindentermek/', methods = ['POST'])	
+def mindentermek():
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
+	cursor = cnx.cursor()
+
+	# a promocios termekek lekerdezese: 
+	select_promok = ("SELECT t.T_ID, t.Nev, pr.Ar, Kep, sz.Nev, Penznem, Keszlet_menny "
+					"FROM Termekek t, Szemelyek sz, Penznemek p, Promociok pr "
+					"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and pr.T_ID=t.T_ID and t.T_ID IN (SELECT T_ID FROM promociok)")
+	cursor.execute(select_promok)
+	cnx.commit()
+	promok = cursor.fetchall()
+		
+	# a NEM promocios termekek lekerdezese: 
+	select_nempromok =  ("SELECT T_ID, t.Nev, t.Ar, t.Kep, sz.Nev, Penznem, Keszlet_menny "
+						"FROM Termekek t, Szemelyek sz, Penznemek p "
+						"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and T_ID NOT IN (SELECT T_ID FROM Promociok)")
+	
+	cursor.execute(select_nempromok)
+	cnx.commit()
+	termekek = cursor.fetchall()
+	
+	logging.warning(promok)
+	logging.warning(termekek)
+	
+	cursor.close()
+	cnx.close()
+
+	return jsonify({'termekek':termekek, 'promok':promok})	 # minden termek, promociosak es nem promociosak
+
+	
+@app.route('/mindenpromtermek/', methods = ['POST'])	
+def mindenpromtermek():
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
+	cursor = cnx.cursor()
+
+	select_termekek = ( "SELECT t.T_ID, t.Nev, pr.Ar, t.Kep, sz.Nev, Penznem, Keszlet_menny "
+						"FROM Termekek t, Szemelyek sz, Penznemek p, Promociok pr "
+						"WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and pr.T_ID=t.T_ID and t.T_ID in (SELECT T_ID FROM promociok)")
+	
+	cursor.execute(select_termekek)
+	cnx.commit()
+	termekek = cursor.fetchall()
+	logging.warning(termekek)
+	cursor.close()
+	cnx.close()
+	return jsonify({'termekek':termekek})	
+		
+	
 @app.route('/egytermek/', methods = ['POST'])	
 def egytermek():
 	id = json.loads(request.data)
 	logging.warning(id)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	select_termek = ("SELECT t.Nev, t.Leiras, t.Ar, t.Kep, t.Min_rendelesi_menny, t.Keszlet_menny, sz.Nev, p.Penznem, k.Nev, m.Nev FROM Termekek t, Szemelyek sz, Penznemek p, Kategoriak k, Mertekegysegek m WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and k.K_ID=t.K_ID and m.ME_ID=t.ME_ID and T_ID = %s")
@@ -440,15 +471,26 @@ def egytermek():
 def egypromtermek():
 	id = json.loads(request.data)
 	logging.warning(id)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
-	select_termek = ("SELECT t.Nev, t.Leiras, t.Ar, t.Kep, t.Min_rendelesi_menny, t.Keszlet_menny, sz.Nev, p.Penznem, k.Nev, m.Nev, pr.Ar "
+	select_termek = ("SELECT t.Nev, t.Leiras, t.Ar, t.Kep, t.Min_rendelesi_menny, t.Keszlet_menny, sz.Nev, p.Penznem, k.Nev, m.Nev, pr.Ar, pr.Periodus_k, pr.Periodus_v "
 					 "FROM Termekek t, Szemelyek sz, Penznemek p, Kategoriak k, Mertekegysegek m,Promociok pr "
 					 "WHERE sz.SZ_ID=t.SZ_ID and p.P_ID=t.P_ID and k.K_ID=t.K_ID and m.ME_ID=t.ME_ID and pr.T_ID=t.T_ID and t.T_ID = %s")
 	cursor.execute(select_termek, [id])
 	cnx.commit()
-	termek = cursor.fetchall()
+	
+	termek = [] 
+	i=0
+	row = cursor.fetchone()
+	while row is not None:
+		row = list(row)
+		termek.append(row)
+		termek[i][11] = json.dumps(termek[i][11], default=date_handler)
+		termek[i][12] = json.dumps(termek[i][12], default=date_handler)
+		i = i+1
+		row = cursor.fetchone()
+		
 	logging.warning(termek)
 	cursor.close()
 	cnx.close()
@@ -458,7 +500,7 @@ def egypromtermek():
 def vizsgaltermek():		# a mennyisegek lekerdezese a kosarba-teves elott
 	id = json.loads(request.data)
 	logging.warning(id)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	select_termek = ("SELECT Min_rendelesi_menny, Keszlet_menny	"
@@ -477,7 +519,7 @@ def vizsgaltermek():		# a mennyisegek lekerdezese a kosarba-teves elott
 def kosarbatermek():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	# csokkentjuk a keszleten levo termekmennyiseget
@@ -533,7 +575,7 @@ def kosarbatermek():
 	
 @app.route('/lekerdezkosar/', methods = ['POST'])	
 def lekerdezkosar():	
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	# vizsgaljuk, hogy mar van-e ennek a szemelynek a kosaraban termek
@@ -585,7 +627,7 @@ def lekerdezkosar():
 def torleskosarbol():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	result = True
 	
@@ -617,7 +659,7 @@ def torleskosarbol():
 def rendeles():
 	adatok = json.loads(request.data)
 	logging.warning(adatok['datum'])
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
 	cursor = cnx.cursor()
 	
 	# lekerdezzuk a termekeket a kosarbol
@@ -703,7 +745,7 @@ def rendeles():
 def termekmodositas():
 	adatok = json.loads(request.data)
 	
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok')
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
 	cursor = cnx.cursor()
 	string = ("UPDATE Termekek SET "
 				"Nev = %s, Leiras = %s, Ar = %s, Min_rendelesi_menny = %s, Keszlet_menny = %s, SZ_ID = %s "
@@ -729,7 +771,7 @@ def termekmodositas():
 def termektorles():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	string = ("DELETE FROM Termekek WHERE T_ID = %s")
@@ -743,7 +785,7 @@ def termektorles():
 
 @app.route('/profilombetoltes/', methods = ['POST'])	
 def profilombetoltes():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	select_profilom = ("SELECT SZ_ID, Nev, Cim, Tel, Email FROM Szemelyek WHERE SZ_ID = %s")
@@ -785,7 +827,7 @@ def profilombetoltes():
 def profilommodositas():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	# vegzunk egy update-et a szemelyek tablaban, ha esetlegesen modosultak olyan adatok, amelyek ott szerepeltek
@@ -858,7 +900,7 @@ def profilommodositas():
 def jelszolekeres():
 	#adatok = json.loads(request.data)
 	#logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	jelszo = ("SELECT Jelszo FROM Szemelyek WHERE SZ_ID = %s")
@@ -878,7 +920,7 @@ def jelszolekeres():
 def jelszomodositas():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	update_jelszo = ("UPDATE Szemelyek SET Jelszo = %s WHERE SZ_ID = %s")
@@ -922,7 +964,7 @@ def uploaded_logo_file(l_filename):
 							   
 @app.route('/promtermekekbetoltes/', methods = ['POST'])	
 def promtermekekbetoltes():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	select_termekek = ("SELECT T_ID, Nev FROM Termekek WHERE SZ_ID = %s")
@@ -976,7 +1018,7 @@ def promtermekekbetoltes():
 def promtermekekmodositas():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	# itt elobb kitorlom a promocios termekeket, mert mindig csak max 3 lehet egy szemelynek
@@ -1004,7 +1046,7 @@ def promtermekekmodositas():
 def promtermek_aktualizal():
 	adatok = json.loads(request.data) 
 	logging.warning(adatok['nev'])
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	select_promtermekek_regiadatai = ("SELECT T_ID, Nev, Ar, Penznemek.P_ID, Penznem FROM Termekek, Penznemek WHERE Penznemek.P_ID = Termekek.P_ID AND Nev = %s ")
@@ -1023,7 +1065,7 @@ def login():
 	adat = json.loads(request.data)
 	logging.warning(adat)
 	
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	cursor.execute("SELECT SZ_ID, Nev, Jelszo, Termelo, Megrendelo FROM Szemelyek WHERE Email = %s", [adat['loginEmail']])
@@ -1060,7 +1102,7 @@ def logout():
 @app.route('/termelo')
 def termelo():
 	if 'SZ_ID' in session:
-		cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+		cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 		cursor = cnx.cursor()
 		cursor.execute("SELECT Termelo FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
 		result = cursor.fetchone()
@@ -1077,7 +1119,7 @@ def termelo():
 @app.route('/megrendelo')
 def megrendelo():
 	if 'SZ_ID' in session:
-		cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+		cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 		cursor = cnx.cursor()
 		cursor.execute("SELECT Megrendelo FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
 		result = cursor.fetchone()
@@ -1097,7 +1139,7 @@ def uzenetkuldes():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
 	
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	cursor.execute("SELECT Email FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
 
@@ -1152,7 +1194,7 @@ def uzenetkuldes():
 
 @app.route('/m_profilombetoltes/', methods = ['POST'])	
 def m_profilombetoltes():
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
 	select_profilom = ("SELECT SZ_ID, Nev, Cim, Tel, Email FROM Szemelyek WHERE SZ_ID = %s")
@@ -1170,7 +1212,7 @@ def m_profilombetoltes():
 def m_profilommodositas():
 	adatok = json.loads(request.data)
 	logging.warning(adatok)
-	cnx = mysql.connector.connect(user='root', password='', host='localhost', database='szekelytermelok', buffered=True)
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 	
 	update_regisztracional_megadott_adatok = ("UPDATE Szemelyek SET Nev = %s, Cim = %s, Tel = %s, Email = %s WHERE SZ_ID = %s")
