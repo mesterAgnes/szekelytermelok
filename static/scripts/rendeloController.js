@@ -74,10 +74,25 @@ megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter',
 megrendeloApp.controller('termekekController', [              
     '$scope', '$http', '$window', 'kozosProfil',                      
 	function termekekController($scope, $http, $window, kozosProfil) {
-
-		$scope.nev = localStorage.getItem('Nev');
-		$scope.termelo =  localStorage.getItem('Termelo');		// lekerjuk a felhasznalo termeloi statuszat(0 vagy 1), hogy tudjuk, termelokent is van-e szerepe	
-
+		$scope.nev = null;				// a felhasznalo neve
+		$scope.termelo = null;			// a felhasznalo termeloi statusza
+	
+		$scope.initFelhasznalo = function() {		// lekerjuk a felhasznalo adatait, vizsgaljuk, hogy a felhasznalo maradhat-e ezen az oldalon 
+			$http.post('/lekerRendeloAdatok/', {})
+			.success(function(data, status, headers, config) {
+				if(data['Nev'] == 'nincsID')	// ha nincs beallitva a felhasznalo sessionje, visszalepunk a login oldalra
+					$window.location.href = '/logout';
+				else{ 
+					$scope.nev = data['Nev'];				// a felhasznalo neve
+					$scope.termelo =  data['Termelo'];		// a felhasznalo termeloi statusza(0 vagy 1), hogy tudjuk, termelokent is van-e szerepe	
+				}	
+			})
+			.error(function(data, status, headers, config) {
+				$window.location.href = '/logout';
+			});
+		}
+		$scope.initFelhasznalo(); ;
+		
 		// a termekek adatai:	
 		$scope.termekadatok = {};		// termekek altalanos adatai
 		$scope.termekIDk = [];			// termekek IDjai

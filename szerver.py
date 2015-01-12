@@ -1295,6 +1295,58 @@ def logout():
 	if 'SZ_ID' in session:
 		session.pop('SZ_ID', None)
 	return redirect(url_for('index'))
+
+	
+
+@app.route('/lekerTermeloAdatok/', methods = ['POST'])	
+def lekerTermeloAdatok():
+	logging.warning("____________________________")
+	if 'SZ_ID' not in session:	# nincs ilyen user, vagy ki van lepve ( => nem letezik a session['SZ_ID'])
+		logging.warning("nincsID")
+		return jsonify( {'ID': 'nincsID' } )	
+		
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
+	cursor = cnx.cursor()
+	cursor.execute("SELECT SZ_ID, Nev, Megrendelo FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
+	user = cursor.fetchone()	
+	logging.warning(user)
+	if not user:
+		# nincs ilyen user, vagy ki van lepve ( => nem letezik a session['SZ_ID'])
+		cnx.commit()
+		cursor.close()
+		cnx.close()
+		return jsonify( {'ID': 'nincsID' } )	
+
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+	return jsonify( {'ID':user[0], 'Nev':user[1], 'Megrendelo':user[2] } )
+
+	
+@app.route('/lekerRendeloAdatok/', methods = ['POST'])	
+def lekerRendeloAdatok():
+	logging.warning("____________________________")
+	if 'SZ_ID' not in session:	# nincs ilyen user, vagy ki van lepve ( => nem letezik a session['SZ_ID'])
+		logging.warning("nincsID")
+		return jsonify( {'Nev': 'nincsID' } )	
+	
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
+	cursor = cnx.cursor()
+	cursor.execute("SELECT Nev, Termelo FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
+	user = cursor.fetchone()	
+	logging.warning(user)
+	if not user:
+		# nincs ilyen user, vagy ki van lepve ( => nem letezik a session['SZ_ID'])
+		cnx.commit()
+		cursor.close()
+		cnx.close()
+		return jsonify( {'Nev': 'nincsID '} )	
+
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+	return jsonify( {'Nev':user[0], 'Termelo':user[1] } )
+	
 	
 
 @app.route('/termelo')

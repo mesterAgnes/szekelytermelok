@@ -63,19 +63,6 @@ loginApp.controller('regisztracioController', [
 ]);  
 
 
-function writeOutUserName( pID ){
-	document.getElementById(pID).innerHTML =
-	"Udv, " + localStorage.Nev;
-}
-
-function loginStoreSession( user ) {
-	localStorage.setItem('ID', user[0]);
-	localStorage.setItem('Nev', user[1]);
-	localStorage.setItem('Jelszo', user[2]);
-	localStorage.setItem('Termelo', user[3]);
-	localStorage.setItem('Megrendelo', user[4]);
-}
-
 loginApp.controller('bejelentkezesController', [              
 	'$http','$scope', '$window',
 	function bejelentkezesController($http, $scope, $window) {
@@ -96,9 +83,7 @@ loginApp.controller('bejelentkezesController', [
 				else {
 					document.getElementById('helytelen').style.opacity = 0;
 					$scope.bejelentkezes.loggedinUser = data.user;
-					console.log($scope.bejelentkezes.loggedinUser);
 					$scope.log = {};
-					loginStoreSession( $scope.bejelentkezes.loggedinUser );
 					if($scope.bejelentkezes.loggedinUser[3] == 1)
 						$window.location.href = '/termelo';
 					else if($scope.bejelentkezes.loggedinUser[4] == 1)

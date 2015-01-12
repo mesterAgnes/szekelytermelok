@@ -317,7 +317,8 @@
 							<td style="width:10%">Leírás</td>
 							<td style="width:5%">Kategória</td> 
 							<td style="width:5%">Mértékegység</td> 
-							<td style="width:7%">Ár</td>
+							<td style="width:3%">Egyégár</td>
+							<td style="width:7%">Pénznem</td>
 							<td style="width:5%">Minimális <br /> rendelési <br /> mennyiség</td>
 							<td style="width:5%">   Fotó   </td>
 							<td style="width:5%">Készlet <br /> mennyiség</td>
@@ -335,47 +336,54 @@
 							
 							<td>
 							<!-- modosithato nev (text with validation) -->
-							<span editable-text="termek[1]" e-name="nev" e-form="rowform" onbeforesave="vizsgalNev($data, termek.id)" e-required>
+							<span editable-text="termek[1]" e-class="nev" e-form="rowform" onbeforesave="vizsgalNev($data, termek.id)" e-required>
 							  {{ termek[1]|| '' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- modosithato leiras -->
-							<span editable-text="termek[2]" e-name="leiras" e-form="rowform" e-required>
+							<span editable-text="termek[2]" e-class="leiras" e-form="rowform" e-required>
 							  {{ termek[2] || '' }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- kivalaszthato kategoria -->
-							<span editable-select="termek[7]" e-id="kategoria_{{termek[0]}}" e-name="kategoria" e-form="rowform"  e-onChange="" e-ng-options="k.value as k.text for k in kategoriak" e-required>
+							<span editable-select="termek[7]" e-id="kategoria_{{termek[0]}}" e-class="kategoria" e-form="rowform"  e-onChange="" e-ng-options="k.value as k.text for k in kategoriak" e-required>
 								{{ termek[7] }}
 							</span>
 							</td>
 							
 							<td>
 							<!-- kivalaszthato mertekegyseg -->
-							<span editable-select="termek[8]" e-id="mertekegyseg_{{termek[0]}}" e-name="mertekegyseg" e-form="rowform"  e-onChange="" e-ng-options="m.value as m.text for m in mertekegysegek" e-required>
+							<span editable-select="termek[8]" e-id="mertekegyseg_{{termek[0]}}" e-class="mertekegyseg" e-form="rowform"  e-onChange="" e-ng-options="m.value as m.text for m in mertekegysegek" e-required>
 								{{ termek[8] }}
 							</span>
 							</td>							
 							
 							<td>
 							<!-- modosithato ar -->
-							<span editable-text="termek[3]" e-name="ar" e-form="rowform" onbeforesave="vizsgalAr($data, termek.id)" e-required>
-							  {{ termek[3] || '' }} {{ penznem || '' }}
-							</span>
-							</td>
-						
-							<td>
-							<!-- modosithato rendelesi mennyiseg -->
-							<span editable-number="termek[4]" e-name="rend_menny" e-form="rowform" onbeforesave="vizsgalRend_menny($data, termek.id)" e-required>
-							  {{ termek[4] || '' }}
+							<span editable-text="termek[3]" e-class="ar" e-form="rowform" onbeforesave="vizsgalAr($data, termek.id)" e-required>
+							  {{ termek[3] || '' }} 
 							</span>
 							</td>
 							
 							<td>
+							<!-- rogzitett penznem -->
+							<span name="penznem" form="rowform" required>
+							  {{ penznem || '' }}
+							</span>
+							</td>
+						
+							<td class='rendMennyTd'>
+							<!-- modosithato rendelesi mennyiseg -->
+							<span editable-number="termek[4]" e-class="rend_menny" e-form="rowform" onbeforesave="vizsgalRend_menny($data, termek.id)" e-required>
+							  {{ termek[4] || '' }}
+							</span>
+							</td>
+							
+							<td class='fotoTd'>
 							<!-- modosithato fotó -->
 							<span id="visible_span" ng-show="rowform.$visible" >
 								<form name="termek_upload" action="/termek_upload" method="post" enctype="multipart/form-data" >
@@ -388,9 +396,9 @@
 							</span>
 							</td>
 							
-							<td>
+							<td class='keszletMennyTd' >
 							<!-- modosithato keszlet mennyiseg -->
-							<span editable-number="termek[6]" e-name="keszlet_menny" e-form="rowform" onbeforesave="vizsgalKeszlet_menny($data, termek.id)" e-required>
+							<span editable-number="termek[6]" e-class="keszlet_menny" e-form="rowform" onbeforesave="vizsgalKeszlet_menny($data, termek.id)" e-required>
 							  {{ termek[6] || '0' }}
 							</span>
 							</td>
@@ -409,7 +417,7 @@
 							</form>
 							
 							<div class="buttons" ng-show="!rowform.$visible">
-							  <button class="btn btn-primary" ng-disabled="sorModosithato" data-ng-click="rowform.$show()">Módosít</button>
+							  <button class="btn btn-primary" ng-disabled="sorModosithato" data-ng-click="tablazatNagyit();rowform.$show();">Módosít</button>
 							  <button class="btn btn-danger" ng-disabled="sorModosithato" data-ng-click="termekTorol(termek[0]);" id="totolBtn">Töröl</button>
 							</div>  
 						  </td>

@@ -7,13 +7,28 @@ termeloApp.run(function(editableOptions) {
 termeloApp.controller('loginSwitchDivController', [              
     '$scope', '$http', '$window',                             
 	function loginSwitchDivController($scope, $http, $window) {
-	
-		$scope.megrendelo =  localStorage.getItem('Megrendelo');	// lekerjuk a felhasznalo termeloi statuszat(0 vagy 1), hogy tudjuk, megrendelokent is van-e szerepe	
-		$scope.logoid = localStorage.getItem('ID');
-		$scope.nev = localStorage.getItem('Nev');
-
-		$scope.navigationOptionSelected = 'kezdolap';	// Kezdolap
-		jQuery( "button#kezdolap" ).attr("id","selected");
+		$scope.logoid = null;		   // a felhasznalo logoIDja
+		$scope.nev = null;			   // a felhasznalo neve
+		$scope.megrendelo = null;      // a felhasznalo termeloi statusza
+		
+		$scope.initFelhasznalo = function() {		// lekerjuk a felhasznalo adatait, vizsgaljuk, hogy a felhasznalo maradhat-e ezen az oldalon 
+			$http.post('/lekerTermeloAdatok/', {})
+			.success(function(data, status, headers, config) {
+				
+				if(data['ID'] == 'nincsID'){	// ha nincs beallitva a felhasznalo sessionje, visszalepunk a login oldalra
+					$window.location.href = '/logout';
+				}
+				else {
+					$scope.logoid = data['ID'];			   // logo IDja
+					$scope.nev = data['Nev'];			   // a felhasznalo neve
+					$scope.megrendelo = data['Megrendelo'] // a felhasznalo termeloi statusza(0 vagy 1), hogy tudjuk, megrendelokent is van-e szerepe
+				}
+			})
+			.error(function(data, status, headers, config) {
+				$window.location.href = '/logout';
+			});
+		}
+		$scope.initFelhasznalo();	// user Session vizsgalat
 		
 		$scope.navigationStrip1_Clicked = function(option) {
 			$scope.navigationOptionSelected = option;
@@ -33,7 +48,10 @@ termeloApp.controller('loginSwitchDivController', [
 			});
 		}
 		
-		$scope.aktualizalPromociok();
+		$scope.aktualizalPromociok();	// frissitjuk a Promociok tablat
+		
+		$scope.navigationOptionSelected = 'kezdolap';	// a Kezdolap a default
+		jQuery( "button#kezdolap" ).attr("id","selected");
 	}
 
 ]);
@@ -85,6 +103,16 @@ termeloApp.controller('termekFeltoltesController', [
 				return "A beírt név nem megfelelő.";
 			}
 		};
+		
+		$scope.tablazatNagyit = function(){
+			$(":input.nev").css("width", "200px");
+			$(":input.leiras").css("width", "200px");
+			$(":input.kategoria").css("width", "100px");
+			$(":input.mertekegyseg").css("width", "80px");
+			$(":input.ar").css("width", "50px");
+			$(":input.rend_menny").css("width", "100px");
+			$(":input.keszlet_menny").css("width", "100px");
+		}
 		
 		// termekek betoltese
 		$scope.termekekBetolt = function() {
@@ -571,6 +599,7 @@ termeloApp.directive('myNavigation', function() {
 		}
     };
 });
+
 
 
 
