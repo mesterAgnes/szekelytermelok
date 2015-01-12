@@ -374,7 +374,11 @@ def termekbetoltes():
 	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
 	cursor = cnx.cursor()
 
+<<<<<<< HEAD
 	select_termekek = ("SELECT T_ID, t.Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, k.Nev, m.Nev, k.K_ID, m.ME_ID FROM Termekek t, Kategoriak k, Mertekegysegek m WHERE t.K_ID=k.K_ID AND t.ME_ID=m.ME_ID AND SZ_ID = %s")
+=======
+	select_termekek = ("SELECT T_ID, t.Nev, Leiras, Ar, Min_rendelesi_menny, Kep, Keszlet_menny, k.Nev, m.Nev FROM Termekek t, Kategoriak k, Mertekegysegek m WHERE t.K_ID=k.K_ID AND t.ME_ID=m.ME_ID AND SZ_ID = %s")
+>>>>>>> a231f5660aa5af8cb1abc6e333e7636cbe256aca
 	select_mertekegysegek = ("SELECT * FROM Mertekegysegek")
 	select_kategoriak = ("SELECT * FROM Kategoriak")
 	select_penznem = ("SELECT Penznem FROM Termelok t, Penznemek p WHERE t.P_ID=p.P_ID AND t.SZ_ID=%s")
@@ -691,6 +695,7 @@ def rendeles():
 	
 	for termek in termekek:
 		# berakjuk a termekeket a Megrendelesek tablaba
+<<<<<<< HEAD
 		add_rend = ("INSERT INTO Megrendelesek "
 					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
 				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
@@ -721,6 +726,8 @@ def rendeles():
 	
 	for termek in termekek:
 		# berakjuk a termekeket a Megrendelesek tablaba
+=======
+>>>>>>> a231f5660aa5af8cb1abc6e333e7636cbe256aca
 		add_rend = ("INSERT INTO Megrendelesek "
 					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
 				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
@@ -734,6 +741,39 @@ def rendeles():
 			cnx.close()
 			return jsonify({'success': False})	
 
+<<<<<<< HEAD
+=======
+# 2. nem promocios termekek lekerdezese ( az ar miatt kell szetvalasztani oket):
+	select_termek = ("SELECT k.T_ID AS Id, Mennyiseg, Ar "
+					" FROM Kosarak k, Termekek t "
+					" WHERE k.T_ID = t.T_ID AND k.T_ID NOT IN ( SELECT T_ID FROM Promociok ) AND k.SZ_ID = %s")	
+	try:
+		cursor.execute( select_termek, [session['SZ_ID']] )
+	except:
+		cnx.rollback()
+		cursor.close()
+		cnx.close()
+		return jsonify({'success': False})	
+	
+	termekek = cursor.fetchall()
+	cnx.commit()
+	
+	for termek in termekek:
+		# berakjuk a termekeket a Megrendelesek tablaba
+		add_rend = ("INSERT INTO Megrendelesek "
+					"(Mennyiseg, Statusz, Datum, Ar, T_ID, Rendelo_ID)"
+				    "VALUES (%s, 'Új rendelés', %s, %s, %s, %s)")
+		data_rend = (termek[1], adatok['datum'], termek[2], termek[0], session['SZ_ID'])
+		try:
+			cursor.execute( add_rend, data_rend )
+			cnx.commit()
+		except:
+			cnx.rollback()
+			cursor.close()
+			cnx.close()
+			return jsonify({'success': False})	
+
+>>>>>>> a231f5660aa5af8cb1abc6e333e7636cbe256aca
 			
 	# toroljuk a kosarbol az illeto szemely osszes termeket
 	delete_kosar = ("DELETE FROM Kosarak WHERE SZ_ID = %s ")
@@ -755,7 +795,11 @@ def rendeles():
 def termekmodositas():
 	adatok = json.loads(request.data)
 	logging.warning("===================================")
+<<<<<<< HEAD
 	logging.warning(adatok['nev'])
+=======
+	logging.warning(adatok)
+>>>>>>> a231f5660aa5af8cb1abc6e333e7636cbe256aca
 	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database)
 	cursor = cnx.cursor()
 	string = ("UPDATE Termekek SET "
@@ -1297,6 +1341,7 @@ def logout():
 		session.pop('SZ_ID', None)
 	return redirect(url_for('index'))
 
+<<<<<<< HEAD
 	
 
 @app.route('/lekerTermeloAdatok/', methods = ['POST'])	
@@ -1324,6 +1369,35 @@ def lekerTermeloAdatok():
 	return jsonify( {'ID':user[0], 'Nev':user[1], 'Megrendelo':user[2] } )
 
 	
+=======
+	
+
+@app.route('/lekerTermeloAdatok/', methods = ['POST'])	
+def lekerTermeloAdatok():
+	logging.warning("____________________________")
+	if 'SZ_ID' not in session:	# nincs ilyen user, vagy ki van lepve ( => nem letezik a session['SZ_ID'])
+		logging.warning("nincsID")
+		return jsonify( {'ID': 'nincsID' } )	
+		
+	cnx = mysql.connector.connect(user=conf.user, password=conf.password, host=conf.host, database=conf.database, buffered=True)
+	cursor = cnx.cursor()
+	cursor.execute("SELECT SZ_ID, Nev, Megrendelo FROM Szemelyek WHERE SZ_ID = %s", [session['SZ_ID']])
+	user = cursor.fetchone()	
+	logging.warning(user)
+	if not user:
+		# nincs ilyen user, vagy ki van lepve ( => nem letezik a session['SZ_ID'])
+		cnx.commit()
+		cursor.close()
+		cnx.close()
+		return jsonify( {'ID': 'nincsID' } )	
+
+	cnx.commit()
+	cursor.close()
+	cnx.close()
+	return jsonify( {'ID':user[0], 'Nev':user[1], 'Megrendelo':user[2] } )
+
+	
+>>>>>>> a231f5660aa5af8cb1abc6e333e7636cbe256aca
 @app.route('/lekerRendeloAdatok/', methods = ['POST'])	
 def lekerRendeloAdatok():
 	logging.warning("____________________________")
