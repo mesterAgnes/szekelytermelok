@@ -34,25 +34,16 @@
 			<button data-my-navigation data-ng-click="navigationStrip_Clicked('linkek')"    style="margin-top: 21px;" > Hasznos linkek </button>
 			<button data-my-navigation data-ng-click="navigationStrip_Clicked('regisztracio')"  style="margin-top: 21px;" > Regisztráció </button>
 			
-<<<<<<< HEAD
-			<div id="showLoginDiv" onmouseover="$('div#loginDiv').slideDown(0);$('button#loginButton').css('border-bottom-color', 'white');" onmouseout="$('div#loginDiv').slideUp(0)" >
-				<button data-my-navigation data-ng-click="navigationStrip_Clicked('bejelentkezes')"  style="float:right;margin-top:0" id="loginButton"> Bejelentkezés </button>
-=======
 			<div id="showLoginDiv" onmouseover="$('div#loginDiv').slideDown(10);$('button#loginButton').css('border-bottom-color', 'white');$('input#loginEmail').focus();" onmouseout="$('div#loginDiv').slideUp(0);" >
 				<button data-my-navigation data-ng-click="navigationStrip_Clicked('bejelentkezes')" id="loginButton" style="float:right;margin-top:0" > Bejelentkezés </button>
->>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
-				<div id="loginDiv" >
+				<div id="loginDiv" onmouseover="$('div#loginDiv').slideDown(10);" onmouseout="$('div#loginDiv').slideUp(0);"  >
 					<div style="margin-top:20px" >
 						<div data-ng-controller="bejelentkezesController">
 						<form method="POST" id="bejelentkezesForm" >
 						<table>
 							<tr>
 								<td>E-mail cím: </td>
-<<<<<<< HEAD
-								<td><input type="email" name="loginEmail" data-ng-model="log.loginEmail" id="loginEmail" placeholder="E-mail cím" required>
-=======
 								<td><input type="email" name="loginEmail" data-ng-model="log.loginEmail" id="loginEmail" placeholder="E-mail cím" autofocus required>
->>>>>>> d4e31f0dfc03846e8baf3eee61e2571c583b2dbe
 								<span style="color:red" data-ng-show="bejelentkezesForm.loginEmail.$dirty && bejelentkezesForm.loginEmail.$invalid">
 								<span data-ng-show="bejelentkezesForm.loginEmail.$error.required"> *Az e-mail cím megadása kötelező.</span>
 								<span data-ng-show="bejelentkezesForm.loginEmail.$error.email"> *Érvénytelen e-mail cím!</span>
@@ -66,6 +57,9 @@
 							</tr>
 						</table>
 						<div style="text-align:center;" ><button ng-click="login()">Bejelentkezés</button></div>
+						<div id="helytelen">
+							<span style="color:red">Hibás e-mail cím vagy jelszó! </span>
+						</div>
 						</form>
 						</div> 
 					</div>
@@ -75,15 +69,32 @@
 
 		<div id="mainDiv">
 			<div data-ng-show="navigationOptionSelected=='kezdolap'">
-				<h1>Kezdőlap</h1>
+				<h3>Üdvözöljük a Székelytermelők honlapján!</h3>
+				<img src="kepek/szekelykapu.jpg" alt="Szekelykapu">
 			</div>
 			
 			<div data-ng-show="navigationOptionSelected=='projekt'">
 				<h1>A projektről</h1>
+				<br><br><br>
+				<div>
+					<p>Székelyföldön sok olyan helyi termelő létezik, aki különböző helyi termékeket állít elő, de nincs lehetősége eljuttatni egy szélesebb vásárlói körbe.
+					   A városon élőknek ritkán adódik lehetősége ezen termékek megszerzésére, főleg azok mindennapi fogyasztására.
+					</p>
+					<p>Tapasztalva, hogy mekkora sikernek örvendenek a különböző székelyföldi városokban megrendezésre kerülő hagyományos vásárok, 
+					   arra az elhatározásra jutottunk, hogy tovább kellene fejleszteni ezt a kezdeményezést, ugyanis ezek a termelők többnyire nagy termelői kapacitással rendelkeznek, 
+					   és a vásárlók részéről is nagyobb igény lenne, ha könnyebben beszerezhetnék az árucikkeket.
+					</p>
+					<p>Célunk megteremteni a lehetőséget a termelőnek, hogy értékesíthesse árucikkeit, és a vásárlónak, hogy kedvére válogathasson a számára kedvelt és előszeretettel fogyasztott élelmiszerek között, 
+					   és akár naponta beszerezhesse azokat. 
+					</p>
+				</div>
 			</div>
 			
 			<div data-ng-show="navigationOptionSelected=='linkek'">
 				<h1>Hasznos linkek</h1>
+				<br><br><br>
+				<a href="http://www.szekelytermek.ro/">A székelytermék </a> <br>
+				<a href="http://www.varoshaza.ro/hirek/hagyomanyos-helyi-termekek-vasara/">Székelyudvarhely - hagyományos termékek vására</a> <br>
 			</div>
 			
 			<div data-ng-show="navigationOptionSelected=='regisztracio'" >

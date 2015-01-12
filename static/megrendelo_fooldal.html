@@ -99,9 +99,8 @@
 			<div id="innerMainDiv" >
 			
 				<div data-ng-show="navigationOptionSelected == 'kezdolap'">
-					<h1 class="opcioCim">Kezdőlap</h1>
-					<p>Üdvözöljük a Székelytermelők honlapján!</p>
-					<img src="szekelykapu.jpg" alt="Szekelykapu">
+					<h3>Üdvözöljük a Székelytermelők honlapján!</h3>
+					<img src="kepek/szekelykapu.jpg" alt="Szekelykapu">
 				</div>
 				
 				<div data-ng-show="navigationOptionSelected == 'projekt'">
@@ -243,7 +242,7 @@
 					<div id='kosarTartalma'>
 						<table class='termekekKosara'>
 							<tr data-ng-repeat="termek in kosar" >
-								<td> <img data-ng-show="kosar.length > 0" class='imgKosarban' src="{{'./img/termekek/termek' + termek[0] + '.jpg'}}" ></img> </td>
+								<td> <img data-ng-show="kosar.length > 0" class='imgKosarban' data-ng-src="{{'./img/termekek/termek' + termek[0] + '.jpg'}}" ></img> </td>
 								<td> {{ termek[1] }} </td>
 								<td> ({{ termek[2] }}) </td>
 								<td> {{ termek[3] }}  {{ termek[4] }} </td>
@@ -379,7 +378,7 @@
 						<table class='termekekKosara'>
 							<tr ng-repeat="termek in kosar" >
 								
-								<td> <img class='imgKosarban' src="{{'./img/termekek/termek' + termek[0] + '.jpg'}}" ></img> </td>
+								<td> <img class='imgKosarban' data-ng-src="{{'./img/termekek/termek' + termek[0] + '.jpg'}}" ></img> </td>
 								<td> {{ termek[1] }} </td>
 								<td> ({{ termek[2] }}) </td>
 								<td> {{ termek[3] }}  {{ termek[4] }} </td>

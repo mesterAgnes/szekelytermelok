@@ -11,6 +11,11 @@ loginApp.controller('loginSwitchDivController', [
 		$scope.navigationStrip_Clicked = function(option) {
 			$scope.navigationOptionSelected = option;
 		};		
+		$scope.bejelentkezes_Hover = function(){
+			$("button#loginButton").mouseenter(function(){
+				$("div#loginDiv").slideDown(300);
+			});
+		};
 	}
 
 ]);  
@@ -63,6 +68,19 @@ loginApp.controller('regisztracioController', [
 ]);  
 
 
+function writeOutUserName( pID ){
+	document.getElementById(pID).innerHTML =
+	"Udv, " + localStorage.Nev;
+}
+
+function loginStoreSession( user ) {
+	localStorage.setItem('ID', user[0]);
+	localStorage.setItem('Nev', user[1]);
+	localStorage.setItem('Jelszo', user[2]);
+	localStorage.setItem('Termelo', user[3]);
+	localStorage.setItem('Megrendelo', user[4]);
+}
+
 loginApp.controller('bejelentkezesController', [              
 	'$http','$scope', '$window',
 	function bejelentkezesController($http, $scope, $window) {
@@ -70,27 +88,23 @@ loginApp.controller('bejelentkezesController', [
 		$scope.log = {};
 		$scope.bejelentkezes = {};
 		$scope.login = function() {
-			loginAdatok = angular.copy($scope.log);  // ebben taroljuk a felhasznalo altal beirt adatokat
+			loginAdatok = angular.copy($scope.log);
 			loginAdatok.loginPass = md5(loginAdatok.loginPass);
-			
 			$http.post('/login/', loginAdatok)
-			.success(function(data, status, headers, config) {
-				$scope.bejelentkezes.loginSuccess = data.loginSuccess;
-				// console.log($scope.bejelentkezes.loginSuccess);
-				if ($scope.bejelentkezes.loginSuccess == false) {
-					document.getElementById('helytelen').style.opacity = 1;
-				}
-				else {
-					document.getElementById('helytelen').style.opacity = 0;
+				.success(function(data, status, headers, config) {
+					$scope.bejelentkezes.loginSuccess = data.loginSuccess;
 					$scope.bejelentkezes.loggedinUser = data.user;
+					console.log($scope.bejelentkezes.loggedinUser);
 					$scope.log = {};
+					loginStoreSession( $scope.bejelentkezes.loggedinUser );
 					if($scope.bejelentkezes.loggedinUser[3] == 1)
 						$window.location.href = '/termelo';
 					else if($scope.bejelentkezes.loggedinUser[4] == 1)
 						$window.location.href = '/megrendelo';
-				} 	
-			});
+				});
+		
 		};
+
 	}
 ]);  
 

@@ -1,24 +1,42 @@
 /*myAlert*/
 img#closeImg{
 	position:absolute;
-	top:0;
-	right:0;
+	top:0px;
+	right:0px;
 }
 img#closeImg:hover{
 	cursor:pointer;
 }
+img.miniImg{
+	opacity:0.5;
+	transition:opacity .2s ease-out;
+}
+img.miniImg:hover{
+	opacity:1;	
+}
+
 div#overlay{
 	position:fixed;
 	left:0;
 	top:0;
 	width:100%;
 	height:100%;
-	background:rgba(0,0,0,0.5);
+	background:rgba(0,0,0,1);
 	z-index:2;		
 	opacity:0;		
 }
+div#overlayForCustomBoxes{
+	position:fixed;
+	left:0;
+	top:0;
+	width:100%;
+	height:100%;
+	background:rgba(0,0,0,1);
+	z-index:4;		
+	opacity:0;		
+}
 div#createdAlertDiv{		
-	white-space:nowrap;
+	//white-space:nowrap;
 	position: fixed;
 	margin-left: auto;
 	margin-right: auto;
@@ -29,15 +47,15 @@ div#createdAlertDiv{
 	top:0;
 	bottom:0;
 	
-	z-index:3;		
+	z-index:5;		
 	
 	min-width:350px;		
 	max-width:550px;	
-	height:35px;		
+	height:50px;		
 	border:1px solid black;
 	border-radius:5px;
-	box-shadow:2px 2px 5px 1px black;
-	background-color:#911111;
+	//box-shadow:2px 2px 5px 1px black;
+	background-color:#1E5157;
 	
 	font-size:1em;
 	font-weight:800;
@@ -45,7 +63,7 @@ div#createdAlertDiv{
 	color:white;
 	letter-spacing:2px;
 	text-align:center;
-	line-height:35px;				
+	line-height:50px;				
 	
 	transition:all 0.2s;
 }
@@ -60,7 +78,7 @@ div#createdConfirmDiv{
 	top:0;
 	bottom:0;
 	
-	z-index:3;	
+	z-index:5;	
 		
 	min-width:350px;	
 	max-width:450px;	
@@ -68,8 +86,8 @@ div#createdConfirmDiv{
 
 	border:1px solid black;
 	border-radius:5px;
-	box-shadow:2px 2px 5px 1px black;
-	background-color:#911111;
+	//box-shadow:2px 2px 5px 1px black;
+	background-color:#1E5157;
 	
 	font-size:1em;
 	font-weight:800;
@@ -81,20 +99,20 @@ div#createdConfirmDiv{
 	
 	transition:all 0.2s;
 }
-button#myConfirmButton{	
+button.myConfirmButton{	
 	width:70px;
 	height:60%;	
 	line-height:100%;
 	text-align:center;
 	color:white;
-	font-size:0.7em;
+	font-size:1.1em;
 	font-weight:800;
 	letter-spacing:6px;		
-	background:#2E2A33;	
+	background:none;	
 	border:none;
 	transition:all 0.2s;	
 }
-button#myConfirmButton:hover{
-	color:#911111;		
+button.myConfirmButton:hover{
+	color:black;		
 	cursor:pointer;
 }

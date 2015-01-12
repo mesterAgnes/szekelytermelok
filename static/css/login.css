@@ -11,3 +11,7 @@ div#showLoginDiv{
 	top:21px;
 	right:50px;
 }
+div#helytelen{
+	opacity:0;
+	text-align:center;
+}

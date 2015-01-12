@@ -19,35 +19,37 @@ function changeImg(obj,name1,name2){
 		obj.src="./kepek/"+name1;
 
 }
+
 function showMyAlert(string){
-	var div= document.createElement("div");
-		div.setAttribute("id", "createdAlertDiv")
-	//
-	/**/
 	var l=string.length*13;
-		//alert(l);
-		div.style.width=l+"px";
-		div.style.minWidth=l+"px";
-		div.style.maxWidth=l+"px";		
-	//*/
-	var text= document.createTextNode(string);
-		div.appendChild(text);
-	var img= document.createElement("img");
-		img.setAttribute("id","closeImg");
-		img.setAttribute("src","kepek/close.png");
-		img.setAttribute("height","30");
-		img.setAttribute("onmouseover","changeImg(this,'close.png','close2.png')");
-		img.setAttribute("onmouseout","changeImg(this,'close.png','close2.png')");		
-		//img.setAttribute("onclick","document.getElementById('createdAlertDiv').remove();document.getElementById('overlay').remove();document.location.href='"+url+"'");		
-		img.setAttribute("onclick","document.getElementById('createdAlertDiv').remove();document.getElementById('overlay').remove()");		
-		div.appendChild(img);		
+	$("body").prepend("<div id='createdAlertDiv' style='width:"+l+"px;max-width:95%'><img id='closeImg' class='miniImg' src='../kepek/closeW2.png' height=30 onclick='$(\"div#createdAlertDiv, div#overlayForCustomBoxes\").remove()'>"+string+"</div>");
+	$("body").prepend("<div id='overlayForCustomBoxes'></div>");
+	$("div#overlayForCustomBoxes").fadeTo(300,0.5);
+}
+
+function executeAfterConfirmed( functionToExecute , otherArgsArray , elementId ){
+	var $confirmBox=$("<div id='createdConfirmDiv' style='width:300px;max-width:95%'>");
+	var $closeImg=$("<img id='closeImg' class='miniImg' src='./kepek/closeW2.png' height=30 onclick='$(\"div#createdConfirmDiv, div#overlayForCustomBoxes\").remove()'>");
+	var $text=$("<span>CONFIRM?</span><br>");
+	var $yButton=$("<button class='myConfirmButton' id='yesButton'>YES</button>");
+	var $nButton=$("<button class='myConfirmButton' onclick='$(\"div#createdConfirmDiv, div#overlayForCustomBoxes\").remove()'>NO</button>");
+	
+	$yButton.on("click", function(){
+		$("div#createdConfirmDiv, div#overlayForCustomBoxes").remove();	
 		
-	var currentDiv = document.getElementById("container"); 
-	document.body.insertBefore(div,currentDiv); 
-		
-	var overlay=document.createElement("div");
-		overlay.setAttribute("id", "overlay");
-		document.body.insertBefore(overlay, document.body.firstChild);		
-		$("div#overlay").fadeTo(300,0.5);						
+		var scope = angular.element($(elementId)).scope();
+		scope.$apply(function(){
+			scope.functionToExecute(otherArgsArray);
+		})
+	});
+	
+	$confirmBox.append( $closeImg );
+	$confirmBox.append( $text );
+	$confirmBox.append( $yButton );
+	$confirmBox.append( $nButton );
+	
+	$("body").prepend( $confirmBox );
+	$("body").prepend("<div id='overlayForCustomBoxes'></div>");
+	$("div#overlayForCustomBoxes").fadeTo(300,0.7);		
 }
 

@@ -18,7 +18,7 @@ megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter',
 		$http.post('/m_profilommodositas/', data)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
-			alert('Sikeres módosítás.');
+			showMyAlert('Sikeres módosítás.');
 		});	
 	}; 
 	
@@ -56,7 +56,7 @@ megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter',
 		$http.post('/jelszomodositas/', Adatok)
 		.success(function(data, status, headers, config) {
 			$scope.success = data.success;
-			alert('Sikeres jelszó módosítás.');
+			showMyAlert('Sikeres jelszó módosítás.');
 		});	
 	};
 	
@@ -74,10 +74,25 @@ megrendeloApp.controller('m_profilomController', [ '$http', '$scope', '$filter',
 megrendeloApp.controller('termekekController', [              
     '$scope', '$http', '$window', 'kozosProfil',                      
 	function termekekController($scope, $http, $window, kozosProfil) {
-
-		$scope.nev = localStorage.getItem('Nev');
-		$scope.termelo =  localStorage.getItem('Termelo');		// lekerjuk a felhasznalo termeloi statuszat(0 vagy 1), hogy tudjuk, termelokent is van-e szerepe	
-
+		$scope.nev = null;				// a felhasznalo neve
+		$scope.termelo = null;			// a felhasznalo termeloi statusza
+	
+		$scope.initFelhasznalo = function() {		// lekerjuk a felhasznalo adatait, vizsgaljuk, hogy a felhasznalo maradhat-e ezen az oldalon 
+			$http.post('/lekerRendeloAdatok/', {})
+			.success(function(data, status, headers, config) {
+				if(data['Nev'] == 'nincsID')	// ha nincs beallitva a felhasznalo sessionje, visszalepunk a login oldalra
+					$window.location.href = '/logout';
+				else{ 
+					$scope.nev = data['Nev'];				// a felhasznalo neve
+					$scope.termelo =  data['Termelo'];		// a felhasznalo termeloi statusza(0 vagy 1), hogy tudjuk, termelokent is van-e szerepe	
+				}	
+			})
+			.error(function(data, status, headers, config) {
+				$window.location.href = '/logout';
+			});
+		}
+		$scope.initFelhasznalo(); ;
+		
 		// a termekek adatai:	
 		$scope.termekadatok = {};		// termekek altalanos adatai
 		$scope.termekIDk = [];			// termekek IDjai
@@ -100,6 +115,15 @@ megrendeloApp.controller('termekekController', [
 		$scope.termeloOldal = function() {
 			$window.location.href = '/termelo';
 		}
+		
+		// promociok aktualizalasa:
+		$scope.aktualizalPromociok = function(){	// a mai datum szerint vizsgaljuk a promociokat, ha valamelyik promocio lejart, azt toroljuk
+			$http.post('/aktualizalPromociok/', {})
+			.success(function(data, status, headers, config) {
+			});
+		}
+		
+		$scope.aktualizalPromociok();
 
 		// tobb termek altalanos adatainak lekerese:
 		$scope.termekekBetoltes = function( opcio ) {
@@ -489,13 +513,14 @@ megrendeloApp.controller('termekekController', [
 						'0' : $scope.termeknevek[i],
 						'1' : $scope.rendeleseim[i][1],
 						'2' : $scope.statuszok[i],
-						'3' : $scope.datumok[i],
+						'3' : $scope.datumok[i].replace("-", ".").replace("-", "."),
 						'4' : $scope.rendeleseim[i][0],
 						'5' : $scope.rendeleseim[i][2],
 						'6' : $scope.penznemek[i],
 						'7' : $scope.mertekegysegek[i],
 						'8' : $scope.rendeleseim[i][2]*$scope.rendeleseim[i][1]
  					}
+					console.log($scope.rendelesek[i]);
 				}
 				
 					
